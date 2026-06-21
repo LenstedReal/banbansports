@@ -12,8 +12,8 @@ declare global {
 
 const SPONSORS = [
   { id: 'redbull',    href: 'https://www.redbull.com/tr-tr/',                klass: 'sp-redbull',     img: '/logos/redbull_ref.png?v=20260620c',         alt: 'Red Bull' },
-  { id: 'samsung',    href: 'https://www.samsung.com/tr/smartphones/galaxy/', klass: 'sp-samsung',     img: '/logos/samsung_galaxy.png?v=20260620c',     alt: 'Samsung Galaxy' },
-  { id: 'meritking',  href: 'https://www.meritsabit.com/',                   klass: 'sp-meritking',   img: '/logos/meritking.png?v=20260620c',          alt: 'MeritKing' },
+  { id: 'samsung',    href: 'https://v3.account.samsung.com/dashboard/intro', klass: 'sp-samsung',     img: '/logos/samsung_galaxy.png?v=20260620c',     alt: 'Samsung Galaxy' },
+  { id: 'meritking',  href: 'https://www.mrtkng22xclusive.vip/',                   klass: 'sp-meritking',   img: '/logos/meritking.png?v=20260620c',          alt: 'MeritKing' },
   { id: 'adidas',     href: 'https://www.adidas.com.tr/',                    klass: 'sp-adidas',      img: '/logos/adidas_ref.png?v=20260620c',         alt: 'adidas' },
   { id: 'heineken',   href: 'https://www.heineken.com/tr/',                  klass: 'sp-heineken',    img: '/logos/heineken_ref.png?v=20260620c',       alt: 'Heineken' },
   { id: 'vodafone',   href: 'https://www.vodafone.com.tr/freezone',          klass: 'sp-vodafone',    img: '/logos/vodafone_fz.png?v=20260620c',        alt: 'Vodafone FreeZone' },
