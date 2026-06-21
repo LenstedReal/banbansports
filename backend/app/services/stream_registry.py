@@ -259,12 +259,12 @@ def _bootstrap():
         ssport_mgr.current_token = os.environ.get("STREAM_TOKEN", "").strip()
         ssport_mgr.current_tms = os.environ.get("STREAM_TMS", "").strip()
 
-    # === Tivibu Spor (st15.lol /t1 — TRT 1 origin reject ediyor, st15 üzerinden veriyoruz) ===
+    # === Tivibu Spor (st15.lol /ss11 — kullanıcı tarafından doğrulanan stream_id) ===
     register(StreamManager(
         channel_id="tivibuspor",
         live_host="live.st15.lol",
         embed_host="st15.lol",
-        stream_id="t1",
+        stream_id="ss11",
         env_prefix="TIVIBUSPOR",
     ))
 
