@@ -13,7 +13,7 @@ export default function SponsorBanner() {
       aria-label="Sponsor"
     >
       <a
-        href="https://example.com/sponsor"
+        href="https://shortzit.co/proseogp3"
         target="_blank"
         rel="noopener noreferrer sponsored"
         data-testid="sponsor-link"
