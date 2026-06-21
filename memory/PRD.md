@@ -29,6 +29,12 @@
 - ✅ Vercel slim simülasyon (JWT_SECRET unset) → 33 route hatasız yüklendi
 - ✅ Frontend SSR → HTTP 200, Peaky splash + neon UI + scoreboard + matchcenter + 14 filtre + 5 maç kartı + FPS counter görsel doğrulandı
 
+## Stream tokens (kullanıcı tarafından sağlandı, backend/.env'de)
+- TRT1, TV8, SSport, TRT Spor, TRT Haber → CONFIGURED + token valid (health: ok:true)
+- m3u8 master proxy 200 dönüyor, segment'ler /api/stream/{ch}/seg.ts üzerinden CORS-safe akıyor
+- Tivibu Spor → TIVIBUSPOR_TOKEN verilmedi, maintenance görünür (kullanıcı isterse sonra ekler)
+- beIN 1 → ST11_TOKEN verilmedi, maintenance
+
 ## VERCEL DEPLOY için TODO (kullanıcı tarafında)
 1. **Vercel Dashboard → Settings → Environment Variables** ekle:
    - `JWT_SECRET` = (rastgele 32-byte hex)
