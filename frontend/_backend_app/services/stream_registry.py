@@ -245,7 +245,7 @@ async def refresh_all() -> Dict[str, dict]:
 #       env_prefix="<PREFIX>",             # ENV: <PREFIX>_TOKEN
 #   ))
 def _bootstrap():
-    # === S Sport (st15.lol — ss11) ===
+    # === S Sport (st15.lol — ss11 stream_id, kullanıcı SSPORT_TOKEN ile yetki sağlandı) ===
     register(StreamManager(
         channel_id="ssport",
         live_host="live.st15.lol",
@@ -259,7 +259,8 @@ def _bootstrap():
         ssport_mgr.current_token = os.environ.get("STREAM_TOKEN", "").strip()
         ssport_mgr.current_tms = os.environ.get("STREAM_TMS", "").strip()
 
-    # === Tivibu Spor (st15.lol /ss11 — kullanıcı tarafından doğrulanan stream_id) ===
+    # === Tivibu Spor (st15.lol /ss11 — kullanıcı doğrulaması; daha önce yanlışlıkla
+    # ssport'a atanmıştı, gerçek owner Tivibu Spor) ===
     register(StreamManager(
         channel_id="tivibuspor",
         live_host="live.st15.lol",

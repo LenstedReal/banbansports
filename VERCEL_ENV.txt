@@ -1,0 +1,31 @@
+# Vercel Environment Variables — copy-paste ready
+# Vercel Dashboard → Settings → Environment Variables → "Add New"
+# Her satırı KEY=VALUE olarak ekle, hepsinde Production+Preview+Development işaretle
+
+# === ZORUNLU — Auth & Security ===
+JWT_SECRET=08bf1e5bc82e9c59314b119e7525f0fb69c506917d0e3dd0f1faffe53071258e
+ADMIN_EMAIL=admin@banbansports.com
+ADMIN_PASSWORD=200cf39563dc85abb595c284
+CRON_SECRET=A7x9kL2pQ5wR1
+
+# === ZORUNLU — Stream Tokens (5 kanal canlı) ===
+TRT1_TOKEN=4sJOTs4K06OLkPMRbvjDqQ
+TRT1_TMS=1782000501
+TV8_TOKEN=4nDa9Z0QT0SYTCZ3ovrC2A
+TV8_TMS=1781989091
+TRTHABER_TOKEN=GjT6W3E7spp0ia7bu5d9Q
+TRTHABER_TMS=1781988953
+SSPORT_TOKEN=4V5w3wF7HPfduGkpIYBJgw
+SSPORT_TMS=1781999900
+TIVIBUSPOR_TOKEN=uw-5sbMgY_g-N2Ai0x4gfQ
+TIVIBUSPOR_TMS=1781974677
+
+# === İSTEĞE BAĞLI — TRT Spor (token yenisini al, eski expire) ===
+# TRTSPOR_TOKEN=yeni_token_buraya
+# TRTSPOR_TMS=yeni_timestamp
+# TRTSPOR_SID=8ij5iv0on221
+
+# === İSTEĞE BAĞLI — Database (yoksa DB feature'lar kapalı kalır, app yine çalışır) ===
+# MONGO_URL=mongodb+srv://user:pass@cluster.mongodb.net/banbansports
+# DB_NAME=banbansports
+# CORS_ORIGINS=https://banbansports.vercel.app

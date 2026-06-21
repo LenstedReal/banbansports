@@ -15,9 +15,6 @@
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/index" }
   ],
-  "crons": [
-    { "path": "/api/internal/refresh-all", "schedule": "0 0 * * *" }
-  ],
   "headers": [
     {
       "source": "/icons/(.*)",

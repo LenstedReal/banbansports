@@ -39,10 +39,10 @@ const CHANNEL_SOURCES: Record<string, string[]> = {
 // teyit etti) → bu 8 kanal otorite kabul edilir.
 // Sıralama: Tivibu → TRT ailesi → ulusal (TV 8) → premium (beIN, S Sport) → ATV.
 const CHANNELS: Channel[] = [
-  { id: 'tivibuspor', name: 'TİVİBU SPOR',     short: 'TİVİBU\nSPOR', status: 'online',    src: CHANNEL_SOURCES.tivibuspor[0], logo: '/logos/channels/tivibuspor.png', accent: '#00a0e3' },
+  { id: 'tivibuspor', name: 'TİVİBU SPOR',     short: 'TİVİBU\nSPOR', status: 'online',       src: CHANNEL_SOURCES.tivibuspor[0], logo: '/logos/channels/tivibuspor.png', accent: '#00a0e3' },
   { id: 'trt1',      name: 'TRT 1',              short: 'TRT 1',     status: 'online',       src: CHANNEL_SOURCES.trt1[0],        logo: '/logos/channels/trt1.png',       accent: '#e30a17' },
-  { id: 'trtspor',   name: 'TRT SPOR',           short: 'TRT SPOR',  status: 'online',       src: CHANNEL_SOURCES.trtspor[0],     logo: '/logos/channels/trtspor.png',    accent: '#7cd400' },
-  { id: 'trthaber',  name: 'TRT HABER',          short: 'TRT HABER', status: 'maintenance',  src: CHANNEL_SOURCES.trthaber[0],    logo: '/logos/channels/trthaber.png',   accent: '#1f6feb' },
+  { id: 'trtspor',   name: 'TRT SPOR',           short: 'TRT SPOR',  status: 'maintenance',  src: CHANNEL_SOURCES.trtspor[0],     logo: '/logos/channels/trtspor.png',    accent: '#7cd400' },
+  { id: 'trthaber',  name: 'TRT HABER',          short: 'TRT HABER', status: 'online',       src: CHANNEL_SOURCES.trthaber[0],    logo: '/logos/channels/trthaber.png',   accent: '#1f6feb' },
   { id: 'tv8',       name: 'TV 8',               short: 'TV 8',      status: 'online',       src: CHANNEL_SOURCES.tv8[0],         logo: '/logos/channels/tv8.png',        accent: '#cfcfcf' },
   { id: 'bein1',     name: 'beIN SPORTS 1',      short: 'beIN 1',    status: 'maintenance',  premium: true,                       logo: '/logos/channels/bein1.png',      accent: '#8b4d9e' },
   { id: 'ssport',    name: 'S SPORT',            short: 'S SPORT',   status: 'online',       premium: true, src: CHANNEL_SOURCES.ssport[0], logo: '/logos/channels/ssport.png', accent: '#c0223a' },
@@ -370,13 +370,16 @@ export default function VideoPlayer() {
     if (!v) return;
     fpsFrameCountRef.current = 0;
     fpsLastSampleRef.current = performance.now();
+    // PERF: FPS sample 1s yerine 2s — re-render yarı yarıya, CPU yiyim azalır.
+    // Kullanıcı FPS değerinin hızla güncellenmesine ihtiyaç duymaz, smooth indikatör yeter.
+    const SAMPLE_MS = 2000;
     // @ts-ignore
     if (typeof v.requestVideoFrameCallback === 'function') {
       const cb = () => {
         fpsFrameCountRef.current += 1;
         const now = performance.now();
         const dt = now - fpsLastSampleRef.current;
-        if (dt >= 1000) {
+        if (dt >= SAMPLE_MS) {
           setFps(Math.round((fpsFrameCountRef.current * 1000) / dt));
           fpsFrameCountRef.current = 0;
           fpsLastSampleRef.current = now;
@@ -388,20 +391,25 @@ export default function VideoPlayer() {
       v.requestVideoFrameCallback(cb);
       return;
     }
-    // Fallback rAF (kesinlik düşük ama çalışır)
-    const loop = () => {
-      fpsFrameCountRef.current += 1;
+    // Fallback rAF (kesinlik düşük ama çalışır) — düşük güçlü cihazda CPU yutmasın
+    // diye setInterval'a düşürdük (her 200ms tick + frame counter window 2sn).
+    const tickId = setInterval(() => {
       const now = performance.now();
       const dt = now - fpsLastSampleRef.current;
-      if (dt >= 1000) {
-        setFps(Math.round((fpsFrameCountRef.current * 1000) / dt));
+      if (dt >= SAMPLE_MS) {
+        // Best-effort: dt boyunca v.currentTime'in ilerlemesi varsa fps tahmin et
+        setFps(Math.round((fpsFrameCountRef.current * 1000) / dt) || 0);
         fpsFrameCountRef.current = 0;
         fpsLastSampleRef.current = now;
       }
-      fpsRafIdRef.current = requestAnimationFrame(loop);
+    }, 200);
+    const rafLoop = () => {
+      fpsFrameCountRef.current += 1;
+      fpsRafIdRef.current = requestAnimationFrame(rafLoop);
     };
-    fpsRafIdRef.current = requestAnimationFrame(loop);
+    fpsRafIdRef.current = requestAnimationFrame(rafLoop);
     return () => {
+      clearInterval(tickId);
       if (fpsRafIdRef.current) cancelAnimationFrame(fpsRafIdRef.current);
       fpsRafIdRef.current = null;
     };
@@ -465,7 +473,13 @@ export default function VideoPlayer() {
           const h = new Hls({
             // En yüksek kalite & dayanıklılık (4K destekli)
             enableWorker: true,
-            lowLatencyMode: true,
+            // FIX: lowLatencyMode=true st15.lol gibi standart HLS CDN'lerde
+            // live-edge'in ÖNÜNDEKİ (henüz oluşmamış) segment'leri talep edip
+            // 404 patlatıyordu. Standart HLS için kapatıyoruz; LL-HLS desteği
+            // olan kaynaklarda manuel override edilebilir.
+            lowLatencyMode: false,
+            liveSyncDurationCount: 3,   // canlı edge'den 3 segment geride başla (güvenli buffer)
+            liveMaxLatencyDurationCount: 10,
             backBufferLength: 30,
             // Bug #9: HQ (Geniş Bant) modu agresif değerler kullanır
             maxBufferLength: hqMode ? 120 : 60,
@@ -475,6 +489,11 @@ export default function VideoPlayer() {
             manifestLoadingMaxRetry: 4,
             levelLoadingTimeOut: 15_000,
             fragLoadingTimeOut: 20_000,
+            // FIX: Segment 404 olursa hls.js otomatik retry yapsın (eski segment
+            // expire olduysa yeni manifest fetch ile güncel segment'lere geç).
+            fragLoadingMaxRetry: 4,
+            fragLoadingRetryDelay: 500,
+            levelLoadingMaxRetry: 4,
             startLevel: hqMode ? 0 : -1,     // HQ: en yüksek seviyeden başla
             capLevelToPlayerSize: false,
             abrEwmaDefaultEstimate: hqMode ? 5_000_000 : 1_000_000,

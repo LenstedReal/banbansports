@@ -16,6 +16,6 @@ async def get_channels():
         "trthaber":   {"name": "TRT HABER",     "status": "online",      "logo": "/logos/channels/trthaber.png"},
         "tv8":        {"name": "TV 8",          "status": "online",      "logo": "/logos/channels/tv8.png"},
         "bein1":      {"name": "beIN SPORTS 1", "status": "maintenance", "logo": "/logos/channels/bein1.png", "premium": True},
-        "ssport":     {"name": "S SPORT",       "status": "online",      "logo": "/logos/channels/ssport.png", "premium": True},
+        "ssport":     {"name": "S SPORT",       "status": "maintenance", "logo": "/logos/channels/ssport.png", "premium": True},
         "atv":        {"name": "ATV",           "status": "maintenance", "logo": "/logos/channels/atv.png"},
     }
