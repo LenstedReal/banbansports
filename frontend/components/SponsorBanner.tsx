@@ -91,7 +91,7 @@ export default function SponsorBanner() {
               marginTop: 2,
             }}
           >
-            18+ • Sorumlu oyna • Yüksek oranlar + canlı bahis
+            18+ • Sorumluluk reddi • Yüksek oranlar + canlı bahis
           </div>
         </div>
 
