@@ -30,11 +30,11 @@ const SPONSORS = [
   { id: 'terra',      href: 'https://www.terrapizza.com/',                   klass: 'sp-terra',       img: '/logos/terrapizza.png?v=20260620c',         alt: 'Terra Pizza' },
   { id: 'hdi',        href: 'https://www.hdisigorta.com.tr/',                klass: 'sp-hdi',         img: '/logos/hdisigorta.png?v=20260620c',         alt: 'HDI Sigorta' },
   { id: 'trendyol',   href: 'https://www.trendyol.com/',                     klass: 'sp-trendyol',    img: '/logos/trendyol.png?v=20260620c',           alt: 'Trendyol' },
-  { id: 'getir',      href: 'https://getir.com/',                            klass: 'sp-getir',       img: '/logos/getir.png?v=20260620c',              alt: 'Getir' },
+  { id: 'getir',      href: 'https://www.getirfinans.com/',                            klass: 'sp-getir',       img: '/logos/getir.png?v=20260620c',              alt: 'Getir' },
   { id: 'hepsiburada',href: 'https://www.hepsiburada.com/',                  klass: 'sp-hepsiburada', img: '/logos/hepsiburada.png?v=20260620c',        alt: 'Hepsiburada' },
-  { id: 'digiturk',   href: 'https://www.digiturk.com.tr/',                  klass: 'sp-digiturk',    img: '/logos/digiturk.png?v=20260620c',           alt: 'DigiTürk' },
+  { id: 'digiturk',   href: 'https://www.todtv.com.tr/kullanici/kayit#',                  klass: 'sp-digiturk',    img: '/logos/digiturk.png?v=20260620c',           alt: 'DigiTürk' },
   { id: 'migros-hemen',href:'https://www.migros.com.tr/hemen',               klass: 'sp-migros',      img: '/logos/migros_hemen.png?v=20260620c',       alt: 'Migros Hemen' },
-  { id: 'turknet',    href: 'https://www.turk.net/',                         klass: 'sp-turknet',     img: '/logos/turknet.png?v=20260620c',             alt: 'TurkNet' },
+  { id: 'turknet',    href: 'https://www.turk.net/online-islemler/login',                         klass: 'sp-turknet',     img: '/logos/turknet.png?v=20260620c',             alt: 'TurkNet' },
 ];
 
 export default function SponsorsFooter() {
