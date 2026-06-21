@@ -12,6 +12,7 @@ router = APIRouter(prefix="/api", tags=["channels"])
 async def get_channels():
     return {
         "tivibuspor": {"name": "TİVİBU SPOR",   "status": "online",      "logo": "/logos/channels/tivibuspor.png"},
+        "trt1":       {"name": "TRT 1",         "status": "maintenance", "logo": "/logos/channels/trt1.png"},
         "trtspor":    {"name": "TRT SPOR",      "status": "maintenance", "logo": "/logos/channels/trtspor.png"},
         "trthaber":   {"name": "TRT HABER",     "status": "online",      "logo": "/logos/channels/trthaber.png"},
         "tv8":        {"name": "TV 8",          "status": "online",      "logo": "/logos/channels/tv8.png"},

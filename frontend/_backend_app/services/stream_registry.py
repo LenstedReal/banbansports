@@ -245,13 +245,14 @@ async def refresh_all() -> Dict[str, dict]:
 #       env_prefix="<PREFIX>",             # ENV: <PREFIX>_TOKEN
 #   ))
 def _bootstrap():
-    # === S Sport (st15.lol — ss11 stream_id, kullanıcı SSPORT_TOKEN ile yetki sağlandı) ===
+    # === S Sport (st15.lol /ss11 — kullanıcı doğrulaması: ss11 stream'i S SPORT içeriği,
+    # TIVIBUSPOR_TOKEN bu stream için yetkili. env_prefix swap edildi.) ===
     register(StreamManager(
         channel_id="ssport",
         live_host="live.st15.lol",
         embed_host="st15.lol",
         stream_id="ss11",
-        env_prefix="SSPORT",
+        env_prefix="TIVIBUSPOR",
     ))
     # SSPORT alias: STREAM_TOKEN/STREAM_TMS de destekleniyor (backward compat)
     ssport_mgr = get("ssport")
@@ -259,23 +260,24 @@ def _bootstrap():
         ssport_mgr.current_token = os.environ.get("STREAM_TOKEN", "").strip()
         ssport_mgr.current_tms = os.environ.get("STREAM_TMS", "").strip()
 
-    # === Tivibu Spor (st15.lol /ss11 — kullanıcı doğrulaması; daha önce yanlışlıkla
-    # ssport'a atanmıştı, gerçek owner Tivibu Spor) ===
+    # === Tivibu Spor (st15.lol /t1 — kullanıcı doğrulaması: t1 stream'i TİVİBU içeriği,
+    # TRT1_TOKEN bu stream için yetkili. env_prefix swap edildi.) ===
     register(StreamManager(
         channel_id="tivibuspor",
         live_host="live.st15.lol",
         embed_host="st15.lol",
-        stream_id="ss11",
-        env_prefix="TIVIBUSPOR",
+        stream_id="t1",
+        env_prefix="TRT1",
     ))
 
-    # === TRT 1 (st15.lol /t1 — ayrı token slot'u; tivibuspor ile aynı host) ===
+    # === TRT 1 (stream_id ve token kullanıcı tarafından sağlanacak; şimdilik
+    # placeholder — UI'da maintenance gösterilir, registry'de durur.) ===
     register(StreamManager(
         channel_id="trt1",
         live_host="live.st15.lol",
         embed_host="st15.lol",
-        stream_id="t1",
-        env_prefix="TRT1",
+        stream_id="trt1_pending",   # geçersiz → maintenance fallback
+        env_prefix="TRT1_REAL",      # gerçek token gelene kadar env yok
     ))
 
     # === TV 8 (st15.lol /tv8) ===
