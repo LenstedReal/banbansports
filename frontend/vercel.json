@@ -1,0 +1,35 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "yarn build",
+  "installCommand": "yarn install --frozen-lockfile",
+  "outputDirectory": ".next",
+  "devCommand": "yarn dev",
+  "regions": ["fra1"],
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 30,
+      "includeFiles": "_backend_app/**"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/index" }
+  ],
+  "crons": [
+    { "path": "/api/internal/refresh-all", "schedule": "0 0 * * *" }
+  ],
+  "headers": [
+    {
+      "source": "/icons/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/logos/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/ad_(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }]
+    }
+  ]
+}
