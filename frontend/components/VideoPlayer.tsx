@@ -1111,40 +1111,31 @@ export default function VideoPlayer() {
           )}
 
           {/* MANUEL PLAY — Reklam bitti, kullanıcı yayını başlatmak için butona basmalı.
-              Shelby splash ile AYNI .shelby-scene yapısı → button & text doğru absolute-merkezde konumlanır,
-              sadece arka plan görsel farklı: noir_splash.jpg (siyah letterbox + ortalanmış contain) */}
+              FIX: noir_splash.jpg kız görseli KALDIRILDI. Sade siyah arka plan + büyük
+              play butonu + "YAYINI BAŞLATMAK İÇİN TIKLA" CTA. */}
           {!adActive && awaitingResume && hasStarted && (
             <div className="overlay start-overlay" data-testid="resume-overlay">
               <div className="shelby-scene">
-                {/* Arka plan: tam siyah BG + ortalanmış contain görsel (aspect korunur, kırpılmaz) */}
+                {/* Sade siyah arka plan — kız görseli yok */}
                 <div style={{
-                  position: 'absolute', inset: 0, background: '#000', zIndex: 0,
+                  position: 'absolute', inset: 0,
+                  background: 'radial-gradient(ellipse at center, rgba(20,8,30,0.95), #000 75%)',
+                  zIndex: 0,
                 }} />
-                <img
-                  src="/noir_splash.jpg?v=1"
-                  alt=""
-                  aria-hidden="true"
-                  style={{
-                    position: 'absolute', inset: 0,
-                    width: '100%', height: '100%',
-                    objectFit: 'contain', objectPosition: 'center center',
-                    opacity: 0.92, pointerEvents: 'none', zIndex: 1,
-                  }}
-                />
-                <div className="shelby-overlay" style={{ zIndex: 2 }} />
-                <div className="shelby-grain" style={{ zIndex: 2 }} />
+                <div className="shelby-grain" style={{ zIndex: 1, opacity: 0.35 }} />
                 <button
                   className="shelby-play-btn"
                   onClick={handleResume}
                   data-testid="resume-play-btn"
                   aria-label="Yayını başlat"
+                  style={{ zIndex: 2 }}
                 >
                   <svg width="44" height="44" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: 4 }}>
                     <path d="M8 5v14l11-7z" />
                   </svg>
                 </button>
-                <div className="shelby-cta">YAYINI BAŞLATMAK İÇİN TIKLA</div>
-                <div className="shelby-quote" style={{ fontSize: 'clamp(12px, 1vw, 14px)' }}>
+                <div className="shelby-cta" style={{ zIndex: 2 }}>YAYINI BAŞLATMAK İÇİN TIKLA</div>
+                <div className="shelby-quote" style={{ fontSize: 'clamp(12px, 1vw, 14px)', zIndex: 2 }}>
                   Reklam tamamlandı · {selected.name}
                 </div>
               </div>
