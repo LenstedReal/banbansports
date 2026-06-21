@@ -133,6 +133,11 @@ export default function VideoPlayer() {
   const [hqMode, setHqMode] = useState(false);
   const [batteryLow, setBatteryLow] = useState(false);
   const [casting, setCasting] = useState(false);
+  // FIX: Hover/mouse-move ile controls bar görünürlüğü — eskiden opacity:0 olduğu
+  // için kullanıcı bar'ı göremiyor → mouseEnter tetiklenmiyor → HD/PiP butonları
+  // tıklanamıyordu. controlsVisible state'i hem mouse move hem hover ile yönetilir.
+  const [controlsVisible, setControlsVisible] = useState(true);
+  const controlsHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -938,6 +943,31 @@ export default function VideoPlayer() {
     ? TR.AUTO
     : (qualityLabel(levels.find((l) => l.index === currentLevel)?.height || 0));
 
+  // FIX: Mouse hareket / hover ile controls bar görünürlüğü.
+  // Yayın pause iken → DAİMA görünür. Playing iken → mouse move'da 3sn boyunca göster.
+  const showControls = useCallback(() => {
+    setControlsVisible(true);
+    if (controlsHideTimerRef.current) clearTimeout(controlsHideTimerRef.current);
+    if (isPlaying) {
+      controlsHideTimerRef.current = setTimeout(() => setControlsVisible(false), 3000);
+    }
+  }, [isPlaying]);
+
+  // pause olursa hide timer iptal + görünür yap; play başlarsa 3sn sonra gizle
+  useEffect(() => {
+    if (!isPlaying) {
+      if (controlsHideTimerRef.current) { clearTimeout(controlsHideTimerRef.current); controlsHideTimerRef.current = null; }
+      setControlsVisible(true);
+      return;
+    }
+    // play başladı → 3sn sonra gizle
+    if (controlsHideTimerRef.current) clearTimeout(controlsHideTimerRef.current);
+    controlsHideTimerRef.current = setTimeout(() => setControlsVisible(false), 3000);
+    return () => {
+      if (controlsHideTimerRef.current) { clearTimeout(controlsHideTimerRef.current); controlsHideTimerRef.current = null; }
+    };
+  }, [isPlaying]);
+
   return (
     <main className="main-content">
       <div className="player-layout">
@@ -945,6 +975,9 @@ export default function VideoPlayer() {
           ref={wrapperRef}
           className={`video-wrapper ${isFullscreen ? 'fullscreen-active' : ''}`}
           data-testid="video-wrapper"
+          onMouseMove={showControls}
+          onMouseEnter={showControls}
+          onTouchStart={showControls}
         >
           <video
             ref={videoRef}
@@ -1195,7 +1228,12 @@ export default function VideoPlayer() {
             </button>
           )}
 
-          {/* CUSTOM CONTROLS BAR (eski repo tarzı — hover-show; pause'da daima görünür; mobil-dostu) */}
+          {/* CUSTOM CONTROLS BAR — controlsVisible state ile yönetilir.
+             FIX: Eskiden opacity:0 olduğu için kullanıcı bar'ı GÖREMİYORDU →
+             mouseEnter tetiklenmiyor → HD/PiP butonları tıklanamıyordu.
+             Şimdi video-wrapper'da onMouseMove ile controlsVisible açılır,
+             playing iken 3sn sonra otomatik kapanır. pointerEvents bar görünmüyorken
+             none → alt video onClick'i bloklamaz. */}
           {hasStarted && !adActive && !streamError && (
             <div
               className="video-controls"
@@ -1204,11 +1242,11 @@ export default function VideoPlayer() {
                 background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent)',
                 padding: '12px 14px', zIndex: 30,
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
-                opacity: !isPlaying ? 1 : 0, transition: 'opacity 0.25s',
+                opacity: controlsVisible ? 1 : 0,
+                pointerEvents: controlsVisible ? 'auto' : 'none',
+                transition: 'opacity 0.25s',
                 flexWrap: 'wrap',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = !isPlaying ? '1' : '0')}
               data-testid="video-controls"
             >
               <div className="controls-left" style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
