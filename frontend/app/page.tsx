@@ -66,10 +66,14 @@ export default function HomePage() {
         {/* Carousel tarzı tek scoreboard — en büyük maçlar */}
         <MatchBanner initialMatches={topScores.matches} />
 
-        {/* Erişim/tarayıcı bilgi notu — skorbordun hemen altında (hafif neon) */}
-        <div className="access-notice neon-note" data-testid="access-notice">
-          <p>Bir sonraki alan adımız bir artacaktır; erişim engellendiğinde yeni adresten devam edilir.</p>
-          <p>En iyi izleme deneyimi için <strong>Opera</strong> tarayıcısı kullanmanız önerilir.</p>
+        {/* Erişim notu — sağdan sola akan marquee + altında Opera önerisi */}
+        <div className="access-notice" data-testid="access-notice">
+          <div className="access-marquee-wrap">
+            <div className="access-marquee neon-note">
+              <span>★ Bir sonraki alan adımız bir artacaktır; erişim engellendiğinde yeni adresten devam edilir.&nbsp;&nbsp;&nbsp;&nbsp;</span>
+              <span aria-hidden="true">★ Bir sonraki alan adımız bir artacaktır; erişim engellendiğinde yeni adresten devam edilir.&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            </div>
+          </div>
         </div>
 
         {/* Maç merkezi — tüm günün maçları */}
