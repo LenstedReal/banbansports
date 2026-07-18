@@ -80,8 +80,6 @@ export default function SponsorsFooter() {
           ))}
         </div>
       </div>
-      <div className="sponsor">by <span className="sponsor-name">lenstedreal</span> ❤️‍🩹</div>
-
       {/* Instagram + Telegram — alt alta, aralarında boşluk */}
       <div className="footer-socials" data-testid="footer-socials">
         <a href="https://www.instagram.com/lenstedreal.exe?igsh=ZWFta2F5MWJ3dzg5" target="_blank" rel="noopener noreferrer" className="footer-ig" data-testid="ig-link">
@@ -108,7 +106,7 @@ export default function SponsorsFooter() {
         <p>Bu sitenin altyapısı <strong>lenstedreal Stremradar</strong> tarafından yapılmıştır.</p>
       </div>
 
-      <div className="footer-copyright" data-testid="footer-copyright">® 2026 banbansports UNDERGROUND HD · TÜM HAKLARI SAKLIDIR</div>
+      <div className="footer-copyright" data-testid="footer-copyright">® 2026 banbansports UNDERGROUND HD · TÜM HAKLARI SAKLIDIR · by <span className="sponsor-name">lenstedreal</span> ❤️‍🩹</div>
 
       <div className="server-selector" style={{marginTop:20}} data-testid="server-selector">
         <div className="server-title">SUNUCULAR</div>
