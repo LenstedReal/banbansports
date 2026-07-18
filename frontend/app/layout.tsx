@@ -52,6 +52,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="tr" suppressHydrationWarning>
       <head>
+        {/* Telefonda da masaüstü düzeni: viewport'u scale'siz sabit 1280'e zorla.
+            Tarayıcı içeriği otomatik ekrana sığdırır (Chrome "masaüstü modu" ile aynı davranış). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{document.querySelectorAll('meta[name=viewport]').forEach(function(m){m.remove()});var m=document.createElement('meta');m.name='viewport';m.setAttribute('content','width=1280');document.head.appendChild(m);}catch(e){}})();",
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://api.sofascore.com" />
