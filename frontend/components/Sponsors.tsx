@@ -140,6 +140,8 @@ export default function SponsorsFooter() {
           })}
         </div>
       </div>
+
+      <div className="footer-copyright" data-testid="footer-copyright">® 2026 banbansports UNDERGROUND HD · TÜM HAKLARI SAKLIDIR</div>
     </footer>
   );
 }

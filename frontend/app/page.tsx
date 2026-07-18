@@ -70,8 +70,8 @@ export default function HomePage() {
         <div className="access-notice" data-testid="access-notice">
           <div className="access-marquee-wrap">
             <div className="access-marquee neon-note">
-              <span>★ Bir sonraki alan adımız bir artacaktır; erişim engellendiğinde yeni adresten devam edilir.&nbsp;&nbsp;&nbsp;&nbsp;</span>
-              <span aria-hidden="true">★ Bir sonraki alan adımız bir artacaktır; erişim engellendiğinde yeni adresten devam edilir.&nbsp;&nbsp;&nbsp;&nbsp;</span>
+              <span>👉 Bir sonraki alan adımız bir artacaktır; erişim engellendiğinde yeni adresten devam edilir.&nbsp;&nbsp;&nbsp;&nbsp;</span>
+              <span aria-hidden="true">👉 Bir sonraki alan adımız bir artacaktır; erişim engellendiğinde yeni adresten devam edilir.&nbsp;&nbsp;&nbsp;&nbsp;</span>
             </div>
           </div>
         </div>
