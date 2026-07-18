@@ -67,7 +67,12 @@ export default function HomePage() {
         {/* Carousel tarzı tek scoreboard — en büyük maçlar */}
         <MatchBanner initialMatches={topScores.matches} />
 
-        {/* Erişim notu — sağdan sola akan marquee + altında Opera önerisi */}
+        {/* Maç merkezi — tüm günün maçları */}
+        <MatchCenter initialStages={todayMatches.Stages} />
+
+        <VideoPlayer />
+
+        {/* Erişim notu — sağdan sola akan marquee (sponsordan boşalan alana taşındı) */}
         <div className="access-notice" data-testid="access-notice">
           <div className="access-marquee-wrap">
             <div className="access-marquee neon-note">
@@ -77,12 +82,12 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Maç merkezi — tüm günün maçları */}
-        <MatchCenter initialStages={todayMatches.Stages} />
+        {/* Sponsor + model yan yana */}
+        <div className="sponsor-girl-row" data-testid="sponsor-girl-row">
+          <SponsorBanner />
+          <ModelShowcase />
+        </div>
 
-        <VideoPlayer />
-        <SponsorBanner />
-        <ModelShowcase />
         <Sponsors />
 
         {!initialFetchDone && (
