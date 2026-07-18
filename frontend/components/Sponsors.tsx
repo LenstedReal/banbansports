@@ -104,7 +104,7 @@ export default function SponsorsFooter() {
 
       <div className="footer-infra neon-note" data-testid="footer-infra">
         <p className="access-opera" data-testid="opera-recommend">En iyi izleme deneyimi için <strong>Opera</strong> tarayıcısı kullanmanız önerilir.</p>
-        <p>Bu sitenin altyapısı <strong>lenstedreal Stremradar</strong> tarafından yapılmıştır.</p>
+        <p>Bu sitenin altyapısı <strong>lenstedreal StreamRadar</strong> tarafından yapılmıştır.</p>
       </div>
 
       <div className="server-selector" style={{marginTop:20}} data-testid="server-selector">
