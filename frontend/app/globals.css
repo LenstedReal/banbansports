@@ -238,86 +238,112 @@
         .footer-infra p { margin: 2px 0; }
         .footer-infra strong { color: var(--cyan); font-weight: 400; }
 
-        /* ===== HAREKETLİ MODEL REKLAMI — video altı, sponsor yanı ===== */
-        .ad-row {
-            display: flex; gap: 14px; align-items: stretch;
-            width: 100%; max-width: 80rem; margin: 6px auto 4px; padding: 0 1rem;
-            flex-wrap: wrap;
-        }
-        .ad-row > * { flex: 1 1 340px; min-width: 0; }
-        .ad-sponsor-cell { display: flex; }
-        .ad-sponsor-cell > a { flex: 1; min-height: 150px; }
-        .ad-model {
-            position: relative; display: block; overflow: hidden;
-            height: 150px; border-radius: 12px; text-decoration: none;
-            border: 1.5px solid rgba(255,0,170,0.55);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 24px rgba(255,0,170,0.28);
-            background: #0a0510;
-            animation: ad-border-pulse 2.4s ease-in-out infinite;
+        /* ===== GRANDPASHABET SPONSOR BANNER — video altı, tam yatay, hareketli ===== */
+        .gpb-banner {
+            position: relative; display: flex; align-items: center; gap: 20px;
+            width: 100%; min-height: 108px; padding: 16px 24px; overflow: hidden;
+            border-radius: 14px; text-decoration: none; color: #fff;
+            background-image:
+                linear-gradient(90deg, rgba(20,4,14,0.78) 0%, rgba(30,6,20,0.55) 45%, rgba(20,4,14,0.82) 100%),
+                url('/gpb_bg.png');
+            background-size: cover; background-position: center;
+            border: 1.5px solid rgba(240,180,60,0.55);
+            box-shadow: 0 10px 34px rgba(0,0,0,0.6), 0 0 26px rgba(240,180,60,0.22);
+            animation: gpb-border 2.6s ease-in-out infinite;
             will-change: box-shadow;
         }
-        @keyframes ad-border-pulse {
-            0%,100% { box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 20px rgba(255,0,170,0.25); border-color: rgba(255,0,170,0.5); }
-            50%     { box-shadow: 0 8px 36px rgba(0,0,0,0.6), 0 0 34px rgba(0,240,255,0.45); border-color: rgba(0,240,255,0.7); }
+        @keyframes gpb-border {
+            0%,100% { box-shadow: 0 10px 34px rgba(0,0,0,0.6), 0 0 20px rgba(240,180,60,0.22); border-color: rgba(240,180,60,0.5); }
+            50%     { box-shadow: 0 10px 40px rgba(0,0,0,0.65), 0 0 40px rgba(240,180,60,0.55); border-color: rgba(255,215,110,0.85); }
         }
-        .ad-model-img {
-            position: absolute; inset: 0; width: 100%; height: 100%;
-            object-fit: cover; object-position: center 16%;
-            animation: ad-ken-burns 7s ease-in-out infinite alternate;
+        /* Parıltı süpürmesi */
+        .gpb-shine {
+            position: absolute; top: 0; left: -60%; width: 45%; height: 100%; z-index: 1; pointer-events: none;
+            background: linear-gradient(105deg, transparent 0%, rgba(255,230,150,0.28) 45%, rgba(255,255,255,0.42) 50%, rgba(255,230,150,0.28) 55%, transparent 100%);
+            transform: skewX(-18deg);
+            animation: gpb-shine-move 3.6s ease-in-out infinite;
+        }
+        @keyframes gpb-shine-move {
+            0% { left: -60%; } 55% { left: 130%; } 100% { left: 130%; }
+        }
+        /* Yüzen altın parçacıklar */
+        .gpb-coin {
+            position: absolute; z-index: 1; pointer-events: none; font-size: 18px;
+            filter: drop-shadow(0 0 6px rgba(255,200,80,0.7)); opacity: 0.85;
+        }
+        .gpb-coin-1 { left: 30%; bottom: -8px; animation: gpb-float 3.2s ease-in-out infinite; }
+        .gpb-coin-2 { left: 46%; top: -6px; font-size: 15px; animation: gpb-float 4s ease-in-out 0.4s infinite; }
+        .gpb-coin-3 { left: 62%; bottom: -6px; font-size: 14px; animation: gpb-float 3.6s ease-in-out 0.8s infinite; }
+        .gpb-coin-4 { left: 38%; top: 20%; font-size: 13px; color: #ffd76a; animation: gpb-twinkle 2s ease-in-out infinite; }
+        @keyframes gpb-float {
+            0%,100% { transform: translateY(0) rotate(0deg); opacity: 0.5; }
+            50%     { transform: translateY(-18px) rotate(14deg); opacity: 1; }
+        }
+        @keyframes gpb-twinkle {
+            0%,100% { transform: scale(0.7); opacity: 0.3; }
+            50%     { transform: scale(1.2); opacity: 1; }
+        }
+        /* Marka */
+        .gpb-brand { position: relative; z-index: 2; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        .gpb-crown { font-size: 26px; color: #ffd76a; text-shadow: 0 0 12px rgba(255,200,80,0.8); animation: gpb-crown-glow 2.4s ease-in-out infinite; }
+        @keyframes gpb-crown-glow { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+        .gpb-logo {
+            font-family: 'Orbitron', sans-serif; font-size: 22px; font-weight: 900; letter-spacing: 1px;
+            background: linear-gradient(180deg, #ffe9a8 0%, #f4b942 55%, #c8862a 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8)); white-space: nowrap;
+        }
+        .gpb-logo-accent {
+            -webkit-text-fill-color: initial; color: #fff;
+            text-shadow: 0 0 10px rgba(255,215,110,0.7);
+        }
+        /* Orta yazı */
+        .gpb-text { position: relative; z-index: 2; flex: 1; min-width: 0; text-align: center; }
+        .gpb-title {
+            font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 800; letter-spacing: 2.5px;
+            color: #fff; text-transform: uppercase; text-shadow: 0 0 10px rgba(240,180,60,0.6), 0 2px 4px rgba(0,0,0,0.9);
+        }
+        .gpb-sub {
+            font-family: 'VT323', monospace; font-size: 15px; letter-spacing: 0.6px; margin-top: 3px;
+            color: rgba(255,240,210,0.9); text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+        }
+        /* CTA */
+        .gpb-cta {
+            position: relative; z-index: 2; flex-shrink: 0;
+            display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 999px;
+            font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 900; letter-spacing: 1px;
+            color: #2a1400; text-transform: uppercase; white-space: nowrap;
+            background: linear-gradient(180deg, #ffe08a 0%, #f4b942 50%, #e09a1e 100%);
+            box-shadow: 0 4px 16px rgba(240,160,40,0.6), 0 0 22px rgba(255,215,110,0.5);
+            animation: gpb-cta-pulse 1.4s ease-in-out infinite;
             will-change: transform;
         }
-        @keyframes ad-ken-burns {
-            0%   { transform: scale(1.02) translate(0, 0); }
-            50%  { transform: scale(1.14) translate(-2%, -3%); }
-            100% { transform: scale(1.08) translate(2%, -1%); }
+        @keyframes gpb-cta-pulse {
+            0%,100% { transform: scale(1); box-shadow: 0 4px 16px rgba(240,160,40,0.6), 0 0 18px rgba(255,215,110,0.45); }
+            50%     { transform: scale(1.06); box-shadow: 0 6px 22px rgba(240,160,40,0.8), 0 0 34px rgba(255,215,110,0.75); }
         }
-        .ad-model-shade {
-            position: absolute; inset: 0; pointer-events: none;
-            background: linear-gradient(90deg, rgba(10,5,16,0.15) 0%, rgba(10,5,16,0.35) 45%, rgba(10,5,16,0.85) 100%);
-        }
-        .ad-model-content {
-            position: absolute; inset: 0; z-index: 2;
-            display: flex; flex-direction: column; align-items: flex-end; justify-content: center;
-            gap: 8px; padding: 14px 18px; text-align: right;
-        }
-        .ad-model-cta {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 10px 18px; border-radius: 999px;
-            font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 900; letter-spacing: 1.5px;
-            color: #0a0510; text-transform: uppercase; white-space: nowrap;
-            background: linear-gradient(90deg, var(--pink) 0%, var(--cyan) 100%);
-            box-shadow: 0 4px 16px rgba(255,0,170,0.55), 0 0 20px rgba(0,240,255,0.4);
-            animation: ad-cta-bounce 1.3s ease-in-out infinite;
-            will-change: transform;
-        }
-        @keyframes ad-cta-bounce {
-            0%,100% { transform: translateY(0) scale(1); }
-            50%     { transform: translateY(-4px) scale(1.06); }
-        }
-        .ad-model-hand { display: inline-block; animation: ad-hand-tap 1.3s ease-in-out infinite; }
-        @keyframes ad-hand-tap {
-            0%,100% { transform: translateX(0) rotate(0deg); }
-            50%     { transform: translateX(4px) rotate(-12deg); }
-        }
-        .ad-model-sub {
-            font-family: 'VT323', monospace; font-size: 13px; letter-spacing: 0.6px;
-            color: rgba(255,255,255,0.85); text-shadow: 0 1px 3px rgba(0,0,0,0.9);
-        }
-        .ad-model-badge {
-            position: absolute; top: 8px; left: 8px; z-index: 3;
+        .gpb-cta-sep { opacity: 0.5; font-weight: 400; }
+        .gpb-cta-hand { display: inline-block; animation: gpb-hand 1.4s ease-in-out infinite; }
+        @keyframes gpb-hand { 0%,100% { transform: translateX(0) rotate(0deg); } 50% { transform: translateX(4px) rotate(-14deg); } }
+        .gpb-adbadge {
+            position: absolute; top: 8px; right: 10px; z-index: 3;
             font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 700; letter-spacing: 1.5px;
-            color: rgba(255,255,255,0.75); background: rgba(0,0,0,0.55);
-            border: 1px solid rgba(255,255,255,0.25); padding: 2px 7px; border-radius: 4px;
-            text-transform: uppercase;
+            color: rgba(255,255,255,0.65); background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.2); padding: 2px 7px; border-radius: 4px; text-transform: uppercase;
         }
-        .ad-model:hover .ad-model-img { animation-play-state: paused; }
+        .gpb-banner:hover { transform: translateY(-2px); }
+        .gpb-banner { transition: transform 0.2s; }
         @media (prefers-reduced-motion: reduce) {
-            .ad-model, .ad-model-img, .ad-model-cta, .ad-model-hand { animation: none !important; }
+            .gpb-banner, .gpb-shine, .gpb-coin, .gpb-cta, .gpb-cta-hand, .gpb-crown { animation: none !important; }
         }
-        @media (max-width: 640px) {
-            .ad-model { height: 130px; }
-            .ad-model-cta { font-size: 12px; padding: 8px 14px; }
+        @media (max-width: 760px) {
+            .gpb-banner { flex-direction: column; gap: 10px; padding: 16px; text-align: center; min-height: auto; }
+            .gpb-logo { font-size: 19px; }
+            .gpb-title { font-size: 13px; letter-spacing: 1.5px; }
+            .gpb-sub { font-size: 13px; }
+            .gpb-cta { font-size: 12px; padding: 10px 18px; }
         }
+
 
 
 
