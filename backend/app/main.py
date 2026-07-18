@@ -117,7 +117,7 @@ app.include_router(streams.router)
 app.include_router(bein.router)
 app.include_router(ssport.router)            # backward-compat redirect
 app.include_router(stream_generic.router)    # generic /api/stream/{ch}/*
-app.include_router(featured.router)           # öne çıkan yayın (mono kaynak proxy)
+app.include_router(featured.router)           # öne çıkan yayın (tünel kaynak proxy)
 app.include_router(channels.router)
 app.include_router(auth_router.router)
 app.include_router(predictions.router)

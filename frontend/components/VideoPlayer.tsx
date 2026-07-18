@@ -108,7 +108,7 @@ const qualityLabel = (h: number): string => {
 export default function VideoPlayer() {
   const [selected, setSelected] = useState<Channel>(CHANNELS[2]); // TRT 1 default
   const [serverIndex, setServerIndex] = useState(0);
-  // ===== Öne çıkan yayın (mono kaynak) — hangi kanala map'lendiği + canlı mı =====
+  // ===== Öne çıkan yayın (tünel kaynak) — hangi kanala map'li + canlı mı =====
   const [featured, setFeatured] = useState<{ live: boolean; channel: string }>({ live: false, channel: '' });
   // ===== Canlı kanal sağlığı — backend /api/stream/status polling (30sn) =====
   // Backend cache TTL 60sn — yani gerçek segment check maksimum 60sn'de bir çalışır,
@@ -436,9 +436,7 @@ export default function VideoPlayer() {
   }, [hasStarted, adActive, awaitingResume, streamError, selected.id, serverIndex]);
 
   // ===== Mevcut yayın URL'i — server failover destekli =====
-  // Öne çıkan yayın canlıysa ve seçili kanal ona map'liyse → featured proxy'yi kaynak yap
-  const featuredActiveForSelected = featured.live && featured.channel === selected.id;
-  const sources = featuredActiveForSelected
+  const sources = (featured.live && featured.channel === selected.id)
     ? ['/api/featured/stream.m3u8']
     : (CHANNEL_SOURCES[selected.id] || (selected.src ? [selected.src] : []));
   const activeSrc = sources[serverIndex] || sources[0] || selected.src || '';
@@ -464,7 +462,7 @@ export default function VideoPlayer() {
     return () => { cancelled = true; clearInterval(id); };
   }, []);
 
-  // ===== Öne çıkan yayın durumu — 45sn polling → map'li kanalın LED'ini yeşile çevir =====
+  // ===== Öne çıkan yayın — 30sn polling → map'li kanalın LED'ini otomatik boya =====
   useEffect(() => {
     let cancelled = false;
     const fetchFeatured = async () => {
@@ -474,34 +472,17 @@ export default function VideoPlayer() {
         const d = await r.json();
         if (cancelled) return;
         setFeatured({ live: !!d.live, channel: d.channel || '' });
-        if (d.live && d.channel) {
-          // Otomatik algılama: yayın canlı → map'li kanal (ör. beIN) yeşil yanar
-          setLiveStatus((prev) => ({ ...prev, [d.channel]: { configured: true, ok: true } }));
-        } else if (d.channel) {
-          // Canlı değil → turuncu (maintenance) — override'ı kaldır
-          setLiveStatus((prev) => {
-            const next = { ...prev };
-            delete next[d.channel];
-            return next;
-          });
+        if (d.channel) {
+          setLiveStatus((prev) => ({
+            ...prev,
+            [d.channel]: { configured: true, ok: !!d.live },
+          }));
         }
       } catch { /* sessiz */ }
     };
     fetchFeatured();
-    const id = setInterval(fetchFeatured, 45_000);
+    const id = setInterval(fetchFeatured, 30_000);
     return () => { cancelled = true; clearInterval(id); };
-  }, []);
-
-  // ===== Öne çıkan bölmeden "TAM İZLE" → o kanalı seç =====
-  useEffect(() => {
-    const onSelect = (e: Event) => {
-      const id = (e as CustomEvent)?.detail?.id;
-      if (!id) return;
-      const ch = CHANNELS.find((c) => c.id === id);
-      if (ch) setSelected(ch);
-    };
-    window.addEventListener('bb:select-channel', onSelect as EventListener);
-    return () => window.removeEventListener('bb:select-channel', onSelect as EventListener);
   }, []);
 
   // ===== Global window callback — sayfa altındaki ServerSelector buradan tetikler =====
@@ -1738,6 +1719,8 @@ export default function VideoPlayer() {
             const effectiveStatus: Channel['status'] = live
               ? (!live.configured ? 'maintenance' : (live.ok ? 'online' : 'maintenance'))
               : c.status;
+            // Öne çıkan yayının map'li olduğu kanal + canlı → özel "canlı geçiş" vurgusu
+            const isFeaturedLive = featured.live && featured.channel === c.id;
             return (
               <button
                 key={c.id}
@@ -1760,8 +1743,9 @@ export default function VideoPlayer() {
                 }}
                 disabled={adActive || awaitingResume}
                 data-testid={`channel-${c.id}`}
-                className={`sidebar-ch-btn ch-tile ${selected.id === c.id ? 'active' : ''}${switchPendingRef.current?.id === c.id ? ' switching' : ''}`}
+                className={`sidebar-ch-btn ch-tile ${selected.id === c.id ? 'active' : ''}${switchPendingRef.current?.id === c.id ? ' switching' : ''}${isFeaturedLive ? ' featured-live' : ''}`}
                 data-status={effectiveStatus}
+                data-featured-live={isFeaturedLive ? '1' : undefined}
                 style={(adActive || awaitingResume) ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
                 aria-label={c.name}
                 title={c.name}
@@ -1781,6 +1765,7 @@ export default function VideoPlayer() {
 
                 {c.badge && <span className="new-badge">{c.badge}</span>}
                 {c.premium && <span className="ch-premium">HD</span>}
+                {isFeaturedLive && <span className="ch-featured-flag">CANLI</span>}
               </button>
             );
           })}
