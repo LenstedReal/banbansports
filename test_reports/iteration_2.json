@@ -1,0 +1,131 @@
+{
+  "summary": "Discovery/audit run (no fixes). Backend + frontend surveyed against owner's bug list. 19 pytest cases all pass structurally, but multiple functional bugs documented with reproductions.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "POST /api/stream/{ch}/refresh",
+        "issue": "Refresh returns {refreshed:false} for ALL currently-down channels (ssport, tv8, tivibuspor, trtspor). Token never updates, ok flag stays false. Root cause: (a) try_auto_refresh only mutates self.current_token in RAM (no DB persistence) — on Vercel serverless each invocation is fresh so any success would still evaporate; (b) the embed_host candidates (st15.lol / trt.daioncdn.net / www.trtspor.com.tr / tv-trthaber.medya.trt.com.tr) either don't leak a fresh token in HTML anymore or the segment-verification step (Range 200/206) is rejecting the fetched candidates. Refresh has ZERO lasting effect.",
+        "priority": "CRITICAL"
+      },
+      {
+        "endpoint": "GET /api/stream/status & /api/stream/{ch}/health",
+        "issue": "False-negative ok:false for ssport & tv8 (and likely trtspor). /api/stream/ssport/stream.m3u8 and /api/stream/tv8/stream.m3u8 BOTH return HTTP 200 with valid '#EXTM3U' body when the same manager reports ok:false. The strict last-segment Range HEAD probe in is_token_valid() (stream_registry.py L184-203) is too aggressive: many CDNs reject Range on m3u8-fresh segments, return non-200 to Range fetches, or the very-last segment listed has already rolled off the window by the time the probe fires. LEDs mislead users into thinking channels are dead when they actually play.",
+        "priority": "HIGH"
+      },
+      {
+        "endpoint": "GET /api/livescore/today + frontend MatchCenter",
+        "issue": "Match Center displays 0 cards on 'TÜMÜ' filter and 0 on EVERY league filter (filter-tr, filter-ucl, filter-pl, filter-laliga, filter-fr, filter-de, filter-it) even though /api/livescore/today returns 28 events across 18 stages TODAY (Sweden Allsvenskan, Argentina Federal A, Brazil Serie B/C/D, USA MLS Next Pro/USL, Iceland, Estonia, Paraguay, Uruguay, China, Australia). The ALL_MAJOR filter (MatchCenter.tsx L23-52) requires literal text like 'england/spain/germany/italy/france/turk' or 'champions league' in Cnm+Snm — none of today's stages match, so 100% are dropped. Combined with mid-summer off-season this is why owner sees '0/1/2 matches sometimes'.",
+        "priority": "HIGH"
+      },
+      {
+        "endpoint": "GET /api/livescore/today (no upcoming)",
+        "issue": "Match Center polls TODAY only. Scoreboard's top match ('Fransa vs İspanya YARIN 22:00', many UCL Q1 tomorrow matches) will NEVER appear in Match Center. Owner's discrepancy — scoreboard shows a match, Match Center hides it — is confirmed. There's no /api/livescore/upcoming aggregating next 1-3 days.",
+        "priority": "HIGH"
+      }
+    ],
+    "minor": [
+      {
+        "endpoint": "GET /api/match/stats (fuzzy match)",
+        "issue": "15-day back-lookback + substring match can return a STALE match with same team names. Example: /match/Fransa__İspanya__20260714 renders 'AT&T Stadium · SF' (likely a Club World Cup semi from months ago) instead of no-match. When a real date is passed but no live event exists yet, the fuzzy fallback still fires."
+      },
+      {
+        "endpoint": "GET /api/scores/top ranking",
+        "issue": "Low-value UCL 1st Qualifying Round matches (KuPS vs FK Vardar Skopje, TNS vs Sabah FK, Larne vs Tre Fiori) rank equal to real UCL group-stage matches because livescore.py scoring treats any 'champions league' Snm the same. No round/tier weighting. Also: FT_FRESH_WINDOW (30min) — a big Turkish/UCL final that finished 31min ago is dropped from top even though owner would still want it."
+      },
+      {
+        "endpoint": "MatchCenter filter (Cnm code brittleness)",
+        "issue": "When FotMob fallback fires, Cnm is a 3-letter code ('ENG','ESP','GER'). ALL_MAJOR uses /england|spain|germany/i and fails on codes — every filter tab silently goes empty even if the upstream feed had big-5 matches."
+      },
+      {
+        "endpoint": "/api/ai/*",
+        "issue": "configured:false — expected/known per problem statement, NOT flagged as bug."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "MatchBanner",
+        "issue": "No swipe/touch gesture to change matches. Owner explicitly wants it. Only dots (banner-dot-N) and 30s auto-rotation exist. grep of MatchBanner.tsx finds zero onTouchStart/onTouchMove/onPointerDown/drag handlers.",
+        "selector": "[data-testid='match-banner']",
+        "priority": "MEDIUM"
+      },
+      {
+        "component": "MatchCenter empty state",
+        "issue": "'Bugün gösterilecek önemli maç bulunamadı' shown even when raw /api/livescore/today has 28 events. UX suggests app is broken; a 'today has no big-5 matches, showing all' fallback would help.",
+        "selector": "[data-testid='matches-empty']",
+        "priority": "HIGH"
+      },
+      {
+        "component": "Channel LED indicators",
+        "issue": "Yellow/off LEDs on ssport & tv8 while their m3u8 actually plays — misleads users into not clicking playable channels.",
+        "selector": "[data-testid^='channel-']",
+        "priority": "HIGH"
+      },
+      {
+        "component": "MatchStatsModal / MatchDetail page",
+        "issue": "For a not-yet-started match, page shows counts panel with 0-0 across 7 stats + 'BU MAÇ İÇİN İSTATİSTİK YOK' banner simultaneously — mixed signal. Also 'SF' league label + 'AT&T Stadium' venue displayed for a semantically wrong (stale-matched) event.",
+        "selector": "match/[slug]",
+        "priority": "MEDIUM"
+      }
+    ],
+    "integration_issues": [
+      {
+        "flow": "Scoreboard → Match Center",
+        "issue": "Scoreboard highlights 'Fransa vs İspanya YARIN' but Match Center never shows it (today-only + big-5 filter).",
+        "affected_selectors": ["[data-testid='match-banner']", "[data-testid='matches-grid']"]
+      },
+      {
+        "flow": "Channel LED → Play button",
+        "issue": "LED says down but stream plays — user has no reason to try; or LED says up but strict-validation fluke makes it flip randomly."
+      }
+    ],
+    "design_issues": [
+      {
+        "screen": "MatchDetail",
+        "issues": ["Counts of 0 across all rows + orange 'BU MAÇ İÇİN İSTATİSTİK YOK' warning together look contradictory."]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_audit_iteration_2.py",
+    "/app/test_reports/pytest/iter2_results.xml"
+  ],
+  "action_items": [
+    "1. Fix token refresh persistence: persist current_token+last_refresh to MongoDB so serverless refresh survives cold starts. Also debug why try_auto_refresh returns False for every channel — likely embed_host HTML no longer contains token=..., or Range segment verification is falsely rejecting valid tokens.",
+    "2. Loosen is_token_valid(): fall back to master-playlist-only success when Range HEAD on last segment is rejected. Currently causing false ok:false for ssport & tv8.",
+    "3. MatchCenter: normalize Cnm to lowercase full names (map codes ENG→england, ESP→spain, GER→germany, ITA→italy, FRA→france) before ALL_MAJOR filter. Also: when today has 0 big-5 matches, show a graceful 'today: [X] friendlies + lower-tier events' toggle instead of empty.",
+    "4. Add /api/livescore/upcoming or extend /today to accept ?days=1..3 so tomorrow's important matches (which the scoreboard already highlights) actually show up in Match Center.",
+    "5. Add swipe (touch + pointer + mouse-drag) gesture to MatchBanner in addition to dots.",
+    "6. Ranking: weight UCL/UEL by round (Q1 < Q2 < Q3 < Playoff < Group < Knockout). Extend MATCH_FT_FRESH_WINDOW for tier=A leagues (UCL final, Turkish Süper Lig derby, national team) to 3h+.",
+    "7. Match detail: when available:false, hide the '0-0 counts' block entirely; show only the header + no-data banner.",
+    "8. /api/match/stats: honor the exact date param strictly (currently always searches back if same-day has no exact match) OR require min token overlap so 'Fransa/İspanya' doesn't collide with unrelated events."
+  ],
+  "critical_code_review_comments": [
+    "stream_registry.py L207-297 try_auto_refresh: only in-memory update; on Vercel EACH request is a new process — success cannot survive. Must persist to Mongo (or KV).",
+    "stream_registry.py L129-205 is_token_valid: chained failure modes (master OK → child OK → last-seg-Range) means any of 3 unrelated CDN quirks flips ok to false. Consider: master 200+#EXTM3U as PRIMARY signal; segment probe as SECONDARY-only-if-media-playlist.",
+    "MatchCenter.tsx L23-52: hardcoded country whitelist by English string match on Cnm; no normalization; no soft-fallback.",
+    "scores.py /livescore/today: no ?days query, no aggregation across days.",
+    "match_stats.py L46-63: 15-day back-lookback + substring fuzzy match on team names causes false-positive stale-event returns when future match lookup fails.",
+    "match_stats.py builds counts=0 even when events=[] and stats sources empty — frontend displays as if stats exist.",
+    "MatchBanner.tsx: complete absence of touch handlers.",
+    "General: stream_generic.py has 60s in-memory _STATUS_CACHE — invisible on Vercel (per-invocation) but here in preview it hides refresh effects for 60s."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_audit_iteration_2.py (new)"
+  ],
+  "success_rate": {
+    "backend": "structurally 100% (19/19 tests pass) but functionally ~40% (refresh broken, 4/6 channels ok:false, match-center feed disconnected from scoreboard)",
+    "frontend": "loads OK, 0 console errors, but Match Center 0 cards on every filter, no swipe on banner"
+  },
+  "seed_data_creation": "None. All tests hit live backend + real upstream feeds.",
+  "test_credentials": "Admin admin@banbansports.com / 200cf39563dc85abb595c284 available but not needed for this audit; CRON header Authorization: Bearer A7x9kL2pQ5wR1 available for POST /api/internal/refresh-all (not exercised).",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "This was pure discovery. After main agent fixes (1) token refresh persistence, (2) is_token_valid loosening, (3) MatchCenter filter normalization + upcoming days, (4) MatchBanner swipe — re-run test_audit_iteration_2.py and additionally: (a) verify at least ssport OR tv8 flips to ok:true after POST /refresh with health showing new token_preview; (b) verify /api/livescore endpoints accept ?days= or /upcoming returns tomorrow's events; (c) verify Match Center renders >=1 card when raw feed has 28 events by clicking each filter tab; (d) verify swipe gesture on MatchBanner changes visible match. Do NOT retest AI endpoints (configured:false is intentional).",
+  "rca_of_the_issue": {
+    "refresh_broken": "try_auto_refresh() (stream_registry.py L207) writes only to self.current_token in RAM. On preview it's in-memory single process (survives) but candidates all fail (either embed HTML no longer contains 'token=' pattern, or the new-token master fetch or Range segment probe returns non-200). On Vercel serverless each API call is a fresh process — even an in-memory success is lost. FIX: persist tokens to MongoDB collection stream_tokens {channel_id, token, tms, updated_at} + load-on-boot per manager.",
+    "channel_ok_false_but_stream_works": "is_token_valid() (L129) demands master 200+#EXTM3U AND (media OR resolved-child playlist) AND last-segment Range 200/206. For ssport & tv8 the master playlist proxy at /api/stream/{ch}/stream.m3u8 returns 200+#EXTM3U meaning master fetch is fine and segments must exist (HLS.js plays them client-side too). The Range probe on the very last listed segment fails intermittently (segment already rolled off, CDN 416/403 on Range, or Host header mismatch). This is a probe-design flaw, not a real outage.",
+    "match_center_empty": "Two-layer bug: (a) /api/livescore/today only returns TODAY; scoreboard's future matches never surface. (b) MatchCenter ALL_MAJOR filter requires English country names — today's 28 events are all outside big-5+Turkey+UCL, so 100% filtered out. Frontend should either normalize+relax the whitelist or receive an already-filtered top-tier feed from backend."
+  }
+}

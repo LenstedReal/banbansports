@@ -1,0 +1,201 @@
+/**
+ * TR sözlük + UX mesajları.
+ * Eski reponun `public/app.js` (3140 satır) içindeki LANG sözlüğünden
+ * damıtıldı. Vanilla JS'ten kurtulduk ama UX kararları korundu.
+ */
+export const TR = {
+  // Genel
+  LOADING: 'Yükleniyor…',
+  ERROR_GENERIC: 'Bir hata oluştu, lütfen tekrar deneyin.',
+  RETRY: 'TEKRAR DENE',
+
+  // Maç merkezi
+  MATCH_CENTER: 'MAÇ MERKEZİ',
+  ALL: 'TÜMÜ',
+  LIVE: 'CANLI',
+  FINISHED: 'BİTTİ',
+  UPCOMING: 'YAKLAŞAN',
+  MATCH_ENDED: 'MAÇ SONU',
+  MATCH_BEFORE: 'MAÇ ÖNÜ',
+  NOT_STARTED: 'BAŞLAMADI',
+  HALF_TIME: 'DEVRE ARASI',
+  EXTRA_TIME: 'UZATMA',
+  PENALTIES: 'PENALTILAR',
+  FIRST_HALF: '1. YARI',
+  SECOND_HALF: '2. YARI',
+  NO_MATCHES_LEAGUE: 'Bugün bu ligde maç yok',
+  NO_MATCHES_FILTER: 'Bu filtreye uygun maç yok',
+  NO_MATCHES_TODAY: 'Bugün gösterilecek önemli maç bulunamadı',
+  LOADING_MATCHES: 'Maçlar yükleniyor…',
+
+  // Maç detay / istatistik
+  MATCH_DETAIL: 'MAÇ DETAYI',
+  STATS_LOADING: 'İstatistikler yükleniyor…',
+  STATS_PRE_MATCH_TITLE: 'MAÇ HENÜZ BAŞLAMADI',
+  STATS_PRE_MATCH_SUB: 'İstatistikler maç başladığında otomatik olarak güncellenecek',
+  STATS_UNAVAILABLE_TITLE: 'BU MAÇ İÇİN İSTATİSTİK YOK',
+  STATS_UNAVAILABLE_SUB: 'Veri sağlayıcılarımızda bu karşılaşma için detay bulunamadı.',
+  EVENTS_TITLE: 'MAÇ OLAYLARI',
+  NO_EVENTS: 'Henüz olay yok',
+  STATS_SOURCES: 'KAYNAK',
+
+  // Skorbord
+  SCOREBOARD_EMPTY_TITLE: 'ŞU AN GÖSTERİLECEK MAÇ YOK',
+  SCOREBOARD_EMPTY_SUB: 'Birazdan tekrar bakacağız — canlı veya yaklaşan maçlar çıkınca burada görünecek.',
+
+  // Yayın / video player
+  WATCH_LIVE: 'CANLI İZLE',
+  UNMUTE: 'SESİ AÇ',
+  MUTE: 'SESİ KAPAT',
+  CAST: 'CAST',
+  PIP: 'Küçük Pencere',
+  FULLSCREEN: 'Tam Ekran',
+  PLAY: 'Oynat',
+  PAUSE: 'Duraklat',
+  QUALITY: 'KALİTE',
+  AUTO: 'AUTO',
+  AD_RUNNING: 'REKLAM OYNUYOR',
+  AD_WAIT: 'Reklamın bitmesini bekleyin.',
+  AD_SKIP: 'REKLAMI ATLA',
+  AD_SKIP_IN: 'ATLA',
+  BROADCAST_STARTING: 'YAYIN BAŞLIYOR…',
+  STREAM_UNAVAILABLE: 'Yayın şu anda aktif değil',
+  CHANNEL_MAINTENANCE: 'Yayın şu anda aktif değil',
+  CHANNEL_COMING_SOON: 'YAKINDA — takipte kal',
+  CHANNEL_NO_SOURCE: 'Yayın şu anda aktif değil',
+
+  // Bildirim
+  NOTIFICATIONS: 'BİLDİRİMLER',
+  NOTIF_ON: 'AÇIK',
+  NOTIF_OFF: 'KAPALI',
+  NOTIF_DENIED: 'REDDEDİLDİ',
+  NEW: 'YENİ',
+
+  // Olaylar
+  EVENTS: 'OLAYLAR',
+  GOALS: 'GOLLER',
+  YELLOW_CARD: 'SARI KART',
+  RED_CARD: 'KIRMIZI KART',
+  SECOND_YELLOW: '2. SARI = KIRMIZI',
+  PENALTY: 'PENALTI',
+  OWN_GOAL: 'KENDİ KALESİNE GOL',
+  SUBSTITUTION: 'DEĞİŞİKLİK',
+
+  // Sunucular
+  SERVERS: 'SUNUCULAR',
+
+  // Tahmin oyunu
+  PREDICTIONS: 'TAHMİN OYUNU',
+  PREDICTIONS_SUB: 'SKOR TAHMİNİ · TAM SKOR 5p · GOL FARKI 3p · SONUÇ 1p',
+  PREDICTIONS_NO_MATCHES: 'Şu anda açık tahmin maçı yok.',
+  PREDICTIONS_SAVE: 'KAYDET',
+  PREDICTIONS_SAVED: 'Tahmin kaydedildi ✓',
+  PREDICTIONS_LOGIN_REQUIRED: 'Tahmin yapmak için giriş yap',
+  PREDICTIONS_NEED_SCORE: 'Skor gir',
+  LEADERBOARD: 'PUAN TABLOSU',
+  LEADERBOARD_EMPTY: 'Henüz tahmin yapılmadı',
+
+  // Sohbet
+  CHAT: 'SOHBET',
+  CHAT_SUB: 'MAÇ HAKKINDA KONUŞ — KÜFÜR YOK, SAYGI VAR',
+  CHAT_EMPTY: 'Henüz mesaj yok — ilk mesajı sen yaz!',
+  CHAT_PLACEHOLDER_AUTH: 'Mesajını yaz…',
+  CHAT_PLACEHOLDER_GUEST: 'Yazmak için giriş yap',
+  CHAT_SEND: 'GÖNDER',
+
+  // Auth
+  AUTH_LOGIN: 'GİRİŞ YAP',
+  AUTH_REGISTER: 'KAYIT OL',
+  AUTH_LOGOUT: 'ÇIKIŞ',
+  AUTH_EMAIL: 'E-POSTA',
+  AUTH_PASSWORD: 'PAROLA',
+  AUTH_NAME: 'AD',
+  AUTH_GOOGLE: 'Google ile giriş',
+} as const;
+
+// İstatistik etiket sözlüğü (eski repo `app.js` 2724-2780'den port)
+export const STAT_LABEL: Record<string, string> = {
+  shots_on_goal:        'İSABETLİ ŞUT',
+  shots_off_goal:       'İSABETSİZ ŞUT',
+  blocked_shots:        'ENGELLENEN ŞUT',
+  shots_woodwork:       'DİREKTEN DÖNEN ŞUT',
+  big_chances_missed:   'KAÇAN NET POZİSYON',
+  touches_in_opp_box:   'RAKİP CEZA SAHASINDA TOPLA BULUŞMA',
+  total_shots:          'TOPLAM ŞUT',
+  goal_kicks:           'KALE VURUŞU',
+  corner_kicks:         'KORNER',
+  offsides:             'OFSAYT',
+  throw_ins:            'TAÇ ATIŞI',
+  fouls:                'FAUL',
+  goalkeeper_saves:     'KALECİ KURTARIŞI',
+  total_passes:         'TOPLAM PAS',
+  passes_accurate:      'İSABETLİ PAS',
+  'passes_%':           'PAS İSABET %',
+  ball_possession:      'TOP HÂKİMİYETİ %',
+  attacks:              'ATAK',
+  dangerous_attacks:    'TEHLİKELİ ATAK',
+  xg:                   'xG',
+  // Sayım bazlı (Incs)
+  goals:                'GOLLER',
+  penalty_goals:        'PENALTI GOLÜ',
+  own_goals:            'KENDİ KALESİNE GOL',
+  yellow_cards:         'SARI KART',
+  second_yellow:        '2. SARIDAN KIRMIZI',
+  red_cards:            'KIRMIZI KART',
+  substitutions:        'DEĞİŞİKLİK',
+};
+
+// İstatistik satır sırası (Maçkolik tarzı: önce şutlar, sonra pas, sonra olay sayımları)
+export const STAT_ORDER: { key: string; always?: boolean; icon?: string }[] = [
+  { key: 'shots_on_goal' },
+  { key: 'shots_off_goal' },
+  { key: 'blocked_shots' },
+  { key: 'shots_woodwork' },
+  { key: 'big_chances_missed' },
+  { key: 'touches_in_opp_box' },
+  { key: 'total_shots' },
+  { key: 'goal_kicks' },
+  { key: 'corner_kicks' },
+  { key: 'offsides' },
+  { key: 'throw_ins' },
+  { key: 'fouls' },
+  { key: 'goalkeeper_saves' },
+  { key: 'total_passes' },
+  { key: 'passes_accurate' },
+  { key: 'passes_%' },
+  { key: 'ball_possession' },
+  { key: 'attacks' },
+  { key: 'dangerous_attacks' },
+  { key: 'xg' },
+  // Sayım bazlı — 0-0 da göster (always: true)
+  { key: 'goals',          always: true, icon: '/icons/goal.png' },
+  { key: 'penalty_goals',  icon: '/icons/goal.png' },
+  { key: 'own_goals' },
+  { key: 'yellow_cards',   always: true, icon: '/icons/yellowcard.png' },
+  { key: 'second_yellow',  icon: '/icons/redcard.png' },
+  { key: 'red_cards',      always: true, icon: '/icons/redcard.png' },
+  { key: 'substitutions',  always: true, icon: '/icons/info.png' },
+];
+
+// EPS → durum etiketi (UI tarafında, server _zaten_ normalize'liyor ama
+// SSR cache'ten ham EPS gelirse fallback olarak burada da var)
+export const epsToLabel = (eps: string): { txt: string; live: boolean; finished: boolean; notStarted: boolean } => {
+  const e = (eps || '').toString();
+  if (e === '1H') return { txt: TR.FIRST_HALF, live: true, finished: false, notStarted: false };
+  if (e === '2H') return { txt: TR.SECOND_HALF, live: true, finished: false, notStarted: false };
+  if (e === 'HT') return { txt: TR.HALF_TIME, live: true, finished: false, notStarted: false };
+  if (e === 'ET') return { txt: TR.EXTRA_TIME, live: true, finished: false, notStarted: false };
+  if (e === 'PEN') return { txt: TR.PENALTIES, live: true, finished: false, notStarted: false };
+  if (['FT', 'AET', 'AP', 'Pen.'].includes(e)) return { txt: TR.MATCH_ENDED, live: false, finished: true, notStarted: false };
+  if (['NS', 'Not Started'].includes(e)) return { txt: TR.NOT_STARTED, live: false, finished: false, notStarted: true };
+  return { txt: e || '—', live: false, finished: false, notStarted: false };
+};
+
+// Pre-match heuristic — status string'den
+export const isPreMatchStatus = (status?: string | null): boolean => {
+  if (!status) return false;
+  const s = String(status).toUpperCase();
+  return s === 'NS' || s === 'BAŞLAMADI' || s.includes('MAÇ ÖNÜ') ||
+         s.startsWith('BUGÜN') || s.startsWith('YARIN') ||
+         /^\d{2}\.\d{2}/.test(status) || /^\d{2}:\d{2}/.test(status);
+};
