@@ -7,6 +7,7 @@ import MatchBanner from '@/components/MatchBanner';
 import MatchCenter from '@/components/MatchCenter';
 import VideoPlayer from '@/components/VideoPlayer';
 import SponsorBanner from '@/components/SponsorBanner';
+import AdModelBanner from '@/components/AdModelBanner';
 import Sponsors from '@/components/Sponsors';
 import NotificationCenter from '@/components/NotificationCenter';
 import SwRegister from '@/components/SwRegister';
@@ -80,7 +81,10 @@ export default function HomePage() {
         <MatchCenter initialStages={todayMatches.Stages} />
 
         <VideoPlayer />
-        <SponsorBanner />
+        <div className="ad-row" data-testid="ad-row">
+          <SponsorBanner />
+          <AdModelBanner />
+        </div>
         <Sponsors />
 
         {!initialFetchDone && (

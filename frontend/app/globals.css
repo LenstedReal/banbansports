@@ -238,6 +238,88 @@
         .footer-infra p { margin: 2px 0; }
         .footer-infra strong { color: var(--cyan); font-weight: 400; }
 
+        /* ===== HAREKETLİ MODEL REKLAMI — video altı, sponsor yanı ===== */
+        .ad-row {
+            display: flex; gap: 14px; align-items: stretch;
+            width: 100%; max-width: 80rem; margin: 6px auto 4px; padding: 0 1rem;
+            flex-wrap: wrap;
+        }
+        .ad-row > * { flex: 1 1 340px; min-width: 0; }
+        .ad-sponsor-cell { display: flex; }
+        .ad-sponsor-cell > a { flex: 1; min-height: 150px; }
+        .ad-model {
+            position: relative; display: block; overflow: hidden;
+            height: 150px; border-radius: 12px; text-decoration: none;
+            border: 1.5px solid rgba(255,0,170,0.55);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 24px rgba(255,0,170,0.28);
+            background: #0a0510;
+            animation: ad-border-pulse 2.4s ease-in-out infinite;
+            will-change: box-shadow;
+        }
+        @keyframes ad-border-pulse {
+            0%,100% { box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 20px rgba(255,0,170,0.25); border-color: rgba(255,0,170,0.5); }
+            50%     { box-shadow: 0 8px 36px rgba(0,0,0,0.6), 0 0 34px rgba(0,240,255,0.45); border-color: rgba(0,240,255,0.7); }
+        }
+        .ad-model-img {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; object-position: center 16%;
+            animation: ad-ken-burns 7s ease-in-out infinite alternate;
+            will-change: transform;
+        }
+        @keyframes ad-ken-burns {
+            0%   { transform: scale(1.02) translate(0, 0); }
+            50%  { transform: scale(1.14) translate(-2%, -3%); }
+            100% { transform: scale(1.08) translate(2%, -1%); }
+        }
+        .ad-model-shade {
+            position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(90deg, rgba(10,5,16,0.15) 0%, rgba(10,5,16,0.35) 45%, rgba(10,5,16,0.85) 100%);
+        }
+        .ad-model-content {
+            position: absolute; inset: 0; z-index: 2;
+            display: flex; flex-direction: column; align-items: flex-end; justify-content: center;
+            gap: 8px; padding: 14px 18px; text-align: right;
+        }
+        .ad-model-cta {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 18px; border-radius: 999px;
+            font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 900; letter-spacing: 1.5px;
+            color: #0a0510; text-transform: uppercase; white-space: nowrap;
+            background: linear-gradient(90deg, var(--pink) 0%, var(--cyan) 100%);
+            box-shadow: 0 4px 16px rgba(255,0,170,0.55), 0 0 20px rgba(0,240,255,0.4);
+            animation: ad-cta-bounce 1.3s ease-in-out infinite;
+            will-change: transform;
+        }
+        @keyframes ad-cta-bounce {
+            0%,100% { transform: translateY(0) scale(1); }
+            50%     { transform: translateY(-4px) scale(1.06); }
+        }
+        .ad-model-hand { display: inline-block; animation: ad-hand-tap 1.3s ease-in-out infinite; }
+        @keyframes ad-hand-tap {
+            0%,100% { transform: translateX(0) rotate(0deg); }
+            50%     { transform: translateX(4px) rotate(-12deg); }
+        }
+        .ad-model-sub {
+            font-family: 'VT323', monospace; font-size: 13px; letter-spacing: 0.6px;
+            color: rgba(255,255,255,0.85); text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+        }
+        .ad-model-badge {
+            position: absolute; top: 8px; left: 8px; z-index: 3;
+            font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 700; letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.75); background: rgba(0,0,0,0.55);
+            border: 1px solid rgba(255,255,255,0.25); padding: 2px 7px; border-radius: 4px;
+            text-transform: uppercase;
+        }
+        .ad-model:hover .ad-model-img { animation-play-state: paused; }
+        @media (prefers-reduced-motion: reduce) {
+            .ad-model, .ad-model-img, .ad-model-cta, .ad-model-hand { animation: none !important; }
+        }
+        @media (max-width: 640px) {
+            .ad-model { height: 130px; }
+            .ad-model-cta { font-size: 12px; padding: 8px 14px; }
+        }
+
+
 
 
         /* MATCH BANNER */
