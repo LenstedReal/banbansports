@@ -72,12 +72,18 @@ export default function HomePage() {
 
         <VideoPlayer />
 
-        {/* Erişim notu — sağdan sola akan marquee (sponsordan boşalan alana taşındı) */}
+        {/* Erişim notu — profesyonel DUYURU ticker'ı (sponsordan boşalan alana taşındı) */}
         <div className="access-notice" data-testid="access-notice">
-          <div className="access-marquee-wrap">
-            <div className="access-marquee neon-note">
-              <span>👉 Bir sonraki alan adımız bir artacaktır; erişim engellendiğinde yeni adresten devam edilir.&nbsp;&nbsp;&nbsp;&nbsp;</span>
-              <span aria-hidden="true">👉 Bir sonraki alan adımız bir artacaktır; erişim engellendiğinde yeni adresten devam edilir.&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          <div className="access-ticker">
+            <span className="access-ticker-label">
+              <span className="access-ticker-dot" aria-hidden="true" />
+              DUYURU
+            </span>
+            <div className="access-marquee-wrap">
+              <div className="access-marquee neon-note">
+                <span>👉 Bir sonraki alan adımız bir artacaktır; erişim engellendiğinde yeni adresten devam edilir.&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <span aria-hidden="true">👉 Bir sonraki alan adımız bir artacaktır; erişim engellendiğinde yeni adresten devam edilir.&nbsp;&nbsp;&nbsp;&nbsp;</span>
+              </div>
             </div>
           </div>
         </div>
