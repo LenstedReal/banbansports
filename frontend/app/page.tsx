@@ -77,9 +77,7 @@ export default function HomePage() {
         <div className="access-notice" data-testid="access-notice">
           <div className="access-ticker">
             <span className="access-ticker-label" aria-label="Duyuru">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M3 10v4a1 1 0 0 0 1 1h2l3.5 3.5A1 1 0 0 0 11.2 18V6a1 1 0 0 0-1.7-.7L6 9H4a1 1 0 0 0-1 1zm12.5 2a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 15.5 12zM13 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
-              </svg>
+              <span className="access-mega-emoji" aria-hidden="true">📢</span>
             </span>
             <div className="access-marquee-wrap">
               <div className="access-marquee neon-note">

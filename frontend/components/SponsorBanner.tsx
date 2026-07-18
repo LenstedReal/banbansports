@@ -10,7 +10,8 @@ const SPONSOR_URL = 'https://grandpashabet8239.com/?btag=52146205_483350';
 export default function SponsorBanner() {
   return (
     <section
-      className="mx-auto max-w-7xl px-4 mt-6 mb-4"
+      className="mx-auto px-4 mt-6 mb-4"
+      style={{ maxWidth: 1060 }}
       data-testid="sponsor-banner"
       aria-label="Sponsor"
     >
