@@ -89,6 +89,27 @@ export default function SponsorsFooter() {
       </div>
       <div className="footer-copyright" data-testid="footer-copyright">® 2026 banbansports UNDERGROUND HD · TÜM HAKLARI SAKLIDIR</div>
 
+      {/* Telegram destek / iletişim hattı */}
+      <a
+        href="https://t.me/swrearty8_bot"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="footer-telegram"
+        data-testid="telegram-support"
+        aria-label="Telegram Destek"
+      >
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+          <path fill="currentColor" d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71l-4.14-3.05-1.99 1.93c-.22.22-.4.4-.83.4z"/>
+        </svg>
+        <span>Sorun / Destek için Telegram'dan bize yazın</span>
+      </a>
+
+      <div className="footer-infra" data-testid="footer-infra">
+        <p>Bu sitenin altyapısı <strong>lenstedreal Stremradar</strong> tarafından yapılmıştır.</p>
+        <p>Alan adları birer araçtır; erişim engellendiğinde yeni adresten devam edilir.</p>
+        <p>En iyi izleme deneyimi için <strong>Opera</strong> tarayıcısı kullanmanız önerilir.</p>
+      </div>
+
       <div className="server-selector" style={{marginTop:20}} data-testid="server-selector">
         <div className="server-title">SUNUCULAR</div>
         <div className="server-grid">

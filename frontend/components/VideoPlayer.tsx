@@ -1782,11 +1782,32 @@ export default function VideoPlayer() {
             );
           })}
 
-          {/* "YAKINDA DAHA FAZLASI" — sidebar'ın ALTINDA ayrı şerit (kart içinde DEĞİL) */}
-          <div className="ch-soon-banner" data-testid="channels-coming-soon" aria-hidden="false">
-            <span className="ch-soon-dot" />
-            <span className="ch-soon-text">YAKINDA DAHA FAZLASI</span>
-          </div>
+          {/* ÖNE ÇIKAN MAÇ — mono kaynak; canlıysa yeşil + tıklayınca o kanalı oynatır (tüm işlevlerle) */}
+          {(() => {
+            const featName = CHANNELS.find((c) => c.id === featured.channel)?.name || 'beIN SPORTS';
+            return (
+              <button
+                type="button"
+                className={`ch-featured-banner ${featured.live ? 'live' : 'off'}`}
+                data-testid="featured-match-tile"
+                disabled={!featured.live}
+                onClick={() => {
+                  if (!featured.live) return;
+                  const ch = CHANNELS.find((c) => c.id === featured.channel);
+                  if (ch) setSelected(ch);
+                }}
+              >
+                <span className={`ch-featured-dot ${featured.live ? 'on' : ''}`} />
+                <span className="ch-featured-col">
+                  <span className="ch-featured-title">ÖNE ÇIKAN MAÇ</span>
+                  <span className="ch-featured-desc">
+                    {featured.live ? `CANLI · ${featName}` : 'Yayın beklemede'}
+                  </span>
+                </span>
+                {featured.live && <span className="ch-featured-play">▶</span>}
+              </button>
+            );
+          })()}
         </div>
       </div>
 
