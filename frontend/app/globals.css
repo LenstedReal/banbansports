@@ -380,7 +380,6 @@
             animation: model-breathe 5.5s ease-in-out infinite;
             will-change: transform;
         }
-        /* Çok küçük "nefes alma" hareketi — abartısız */
         @keyframes model-breathe {
             0%,100% { transform: translateY(0) scale(1) rotate(0deg); }
             50%     { transform: translateY(-5px) scale(1.006) rotate(0.4deg); }
