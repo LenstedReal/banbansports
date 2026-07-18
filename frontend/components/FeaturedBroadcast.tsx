@@ -36,7 +36,6 @@ export default function FeaturedBroadcast() {
 
   const live = !!status?.live;
 
-  // Canlı önizleme (muted autoplay) — sadece yayın canlıyken
   useEffect(() => {
     const v = videoRef.current;
     if (!v || !live) {
@@ -72,7 +71,6 @@ export default function FeaturedBroadcast() {
     };
   }, [live]);
 
-  // "İZLE" → ana oynatıcıda ilgili kanalı seç (reklam/kalite/failover dahil tüm işlevler)
   const watchFull = () => {
     if (!live || !status?.channel) return;
     try { window.dispatchEvent(new CustomEvent('bb:select-channel', { detail: { id: status.channel } })); } catch { /* noop */ }
@@ -84,36 +82,54 @@ export default function FeaturedBroadcast() {
   const logo = CHANNEL_LOGO[status?.channel || 'bein1'];
 
   return (
-    <section className="featured-strip" data-testid="featured-broadcast" data-live={live ? '1' : '0'}>
-      <div className="featured-strip-inner">
-        {/* Sol: küçük canlı ekran */}
-        <div className="fs-screen" onClick={watchFull} role="button" data-testid="featured-screen">
+    <section className="fb-hero" data-testid="featured-broadcast" data-live={live ? '1' : '0'}>
+      <div className="fb-hero-inner">
+        {/* Sol: canlı ekran */}
+        <div className="fb-screen" onClick={watchFull} role="button" data-testid="featured-screen">
           {live && !previewFailed ? (
-            <video ref={videoRef} className="fs-video" muted playsInline autoPlay controls={false} data-testid="featured-preview-video" />
+            <video ref={videoRef} className="fb-video" muted playsInline autoPlay controls={false} data-testid="featured-preview-video" />
           ) : (
-            <div className="fs-poster">
-              <div className="fs-grid" />
-              {logo ? <img src={logo} alt={name} className="fs-poster-logo" /> : null}
+            <div className="fb-poster">
+              <div className="fb-poster-grid" />
+              <div className="fb-poster-glow" />
+              {logo ? <img src={logo} alt={name} className="fb-poster-logo" /> : null}
             </div>
           )}
-          <span className={`fs-badge ${live ? 'on' : 'off'}`} data-testid="featured-live-badge">
-            <span className="fs-dot" />{live ? 'CANLI' : 'BEKLEMEDE'}
+          <div className="fb-scan" />
+          <span className={`fb-livechip ${live ? 'on' : 'off'}`} data-testid="featured-live-badge">
+            <span className="fb-dot" />{live ? 'CANLI YAYIN' : 'YAYIN BEKLEMEDE'}
           </span>
+          {live && (
+            <button className="fb-playoverlay" onClick={watchFull} aria-label="İzle">
+              <span className="fb-playicon">▶</span>
+            </button>
+          )}
         </div>
 
-        {/* Orta: bilgi */}
-        <div className="fs-meta">
-          <div className="fs-kicker">ÖNE ÇIKAN MAÇ</div>
-          <div className="fs-title" data-testid="featured-channel-name">{name}</div>
-          <div className="fs-sub">
-            {live ? 'Günün öne çıkan yayını şu an aktif' : 'Öne çıkan maç başlayınca burada canlı görünür'}
+        {/* Sağ: bilgi + aksiyon */}
+        <div className="fb-meta">
+          <div className="fb-kicker">
+            <span className="fb-kicker-dot" /> ÖNE ÇIKAN YAYIN
+          </div>
+          <div className="fb-title" data-testid="featured-channel-name">{name}</div>
+          <p className="fb-desc">
+            {live
+              ? 'Günün en önemli karşılaşması şu an yayında. Tek dokunuşla tam ekran, reklamsız kanal deneyimiyle izle.'
+              : 'Günün öne çıkan maçı başladığında burada canlı belirir ve ilgili kanal otomatik aktifleşir.'}
+          </p>
+          <div className="fb-actions">
+            <button className="fb-cta" onClick={watchFull} disabled={!live} data-testid="featured-watch-btn">
+              {live ? '▶  HEMEN İZLE' : 'YAYIN BEKLENİYOR'}
+            </button>
+            <div className="fb-ch">
+              {logo ? <img src={logo} alt={name} className="fb-ch-logo" /> : null}
+              <div className="fb-ch-txt">
+                <span className="fb-ch-name">{name}</span>
+                <span className={`fb-ch-state ${live ? 'on' : 'off'}`}>{live ? '● Aktif' : '● Beklemede'}</span>
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* Sağ: aksiyon */}
-        <button className="fs-cta" onClick={watchFull} disabled={!live} data-testid="featured-watch-btn">
-          {live ? '▶  İZLE' : 'BEKLEMEDE'}
-        </button>
       </div>
     </section>
   );

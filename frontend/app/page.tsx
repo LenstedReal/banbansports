@@ -64,14 +64,14 @@ export default function HomePage() {
         <FpsCounter />
         <Header />
 
+        {/* Öne çıkan yayın — sayfa üstünde rafine hero banner (canlıysa ilgili kanal da yeşile döner) */}
+        <FeaturedBroadcast />
+
         {/* Carousel tarzı tek scoreboard — en büyük maçlar */}
         <MatchBanner initialMatches={topScores.matches} />
 
         {/* Maç merkezi — tüm günün maçları */}
         <MatchCenter initialStages={todayMatches.Stages} />
-
-        {/* Öne çıkan maç — ayrı, kompakt bölme (canlıysa ilgili kanal da yeşile döner) */}
-        <FeaturedBroadcast />
 
         <VideoPlayer />
         <SponsorBanner />
