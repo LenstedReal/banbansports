@@ -5,6 +5,7 @@ import { AuthProvider } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import MatchBanner from '@/components/MatchBanner';
 import MatchCenter from '@/components/MatchCenter';
+import FeaturedBroadcast from '@/components/FeaturedBroadcast';
 import VideoPlayer from '@/components/VideoPlayer';
 import SponsorBanner from '@/components/SponsorBanner';
 import Sponsors from '@/components/Sponsors';
@@ -62,6 +63,9 @@ export default function HomePage() {
         <NotificationCenter />
         <FpsCounter />
         <Header />
+
+        {/* Öne çıkan yayın — günün en önemli maçı, en üstte büyük bölme */}
+        <FeaturedBroadcast />
 
         {/* Carousel tarzı tek scoreboard — en büyük maçlar */}
         <MatchBanner initialMatches={topScores.matches} />

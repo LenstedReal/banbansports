@@ -108,6 +108,8 @@ const qualityLabel = (h: number): string => {
 export default function VideoPlayer() {
   const [selected, setSelected] = useState<Channel>(CHANNELS[2]); // TRT 1 default
   const [serverIndex, setServerIndex] = useState(0);
+  // ===== Öne çıkan yayın (mono kaynak) — hangi kanala map'lendiği + canlı mı =====
+  const [featured, setFeatured] = useState<{ live: boolean; channel: string }>({ live: false, channel: '' });
   // ===== Canlı kanal sağlığı — backend /api/stream/status polling (30sn) =====
   // Backend cache TTL 60sn — yani gerçek segment check maksimum 60sn'de bir çalışır,
   // aradaki isteklerde cache dönüyor. LED renkleri buna göre dinamik boyanır.
@@ -434,7 +436,11 @@ export default function VideoPlayer() {
   }, [hasStarted, adActive, awaitingResume, streamError, selected.id, serverIndex]);
 
   // ===== Mevcut yayın URL'i — server failover destekli =====
-  const sources = CHANNEL_SOURCES[selected.id] || (selected.src ? [selected.src] : []);
+  // Öne çıkan yayın canlıysa ve seçili kanal ona map'liyse → featured proxy'yi kaynak yap
+  const featuredActiveForSelected = featured.live && featured.channel === selected.id;
+  const sources = featuredActiveForSelected
+    ? ['/api/featured/stream.m3u8']
+    : (CHANNEL_SOURCES[selected.id] || (selected.src ? [selected.src] : []));
   const activeSrc = sources[serverIndex] || sources[0] || selected.src || '';
 
   // ===== Kanal değişince server index sıfırla =====
@@ -449,13 +455,53 @@ export default function VideoPlayer() {
         if (!r.ok || cancelled) return;
         const data = await r.json();
         if (data && data.channels && !cancelled) {
-          setLiveStatus(data.channels);
+          setLiveStatus((prev) => ({ ...prev, ...data.channels }));
         }
       } catch { /* network hata — sessiz, bir sonraki polling'de tekrar dener */ }
     };
     fetchStatus();
     const id = setInterval(fetchStatus, 30_000);
     return () => { cancelled = true; clearInterval(id); };
+  }, []);
+
+  // ===== Öne çıkan yayın durumu — 45sn polling → map'li kanalın LED'ini yeşile çevir =====
+  useEffect(() => {
+    let cancelled = false;
+    const fetchFeatured = async () => {
+      try {
+        const r = await fetch('/api/featured/status', { cache: 'no-store' });
+        if (!r.ok || cancelled) return;
+        const d = await r.json();
+        if (cancelled) return;
+        setFeatured({ live: !!d.live, channel: d.channel || '' });
+        if (d.live && d.channel) {
+          // Otomatik algılama: yayın canlı → map'li kanal (ör. beIN) yeşil yanar
+          setLiveStatus((prev) => ({ ...prev, [d.channel]: { configured: true, ok: true } }));
+        } else if (d.channel) {
+          // Canlı değil → turuncu (maintenance) — override'ı kaldır
+          setLiveStatus((prev) => {
+            const next = { ...prev };
+            delete next[d.channel];
+            return next;
+          });
+        }
+      } catch { /* sessiz */ }
+    };
+    fetchFeatured();
+    const id = setInterval(fetchFeatured, 45_000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, []);
+
+  // ===== Öne çıkan bölmeden "TAM İZLE" → o kanalı seç =====
+  useEffect(() => {
+    const onSelect = (e: Event) => {
+      const id = (e as CustomEvent)?.detail?.id;
+      if (!id) return;
+      const ch = CHANNELS.find((c) => c.id === id);
+      if (ch) setSelected(ch);
+    };
+    window.addEventListener('bb:select-channel', onSelect as EventListener);
+    return () => window.removeEventListener('bb:select-channel', onSelect as EventListener);
   }, []);
 
   // ===== Global window callback — sayfa altındaki ServerSelector buradan tetikler =====
@@ -736,7 +782,7 @@ export default function VideoPlayer() {
       }
       (hlsRef as any).__pendingDestroy = willRemount;
     };
-  }, [selected.id, serverIndex, adActive, awaitingResume, hasStarted, hqMode, liveStatus]);
+  }, [selected.id, serverIndex, adActive, awaitingResume, hasStarted, hqMode, liveStatus, featured.live, featured.channel]);
 
   // ===== Battery API — düşük batarya tespit + HQ MODE otomatik kapat (Bug #9 + P2) =====
   useEffect(() => {

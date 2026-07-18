@@ -71,6 +71,7 @@ for _path in (
     "_backend_app.routers.bein",
     "_backend_app.routers.ssport",
     "_backend_app.routers.stream_generic",  # multi-kanal token+tms proxy (TRT, TV8, S Sport, Tivibu)
+    "_backend_app.routers.featured",        # öne çıkan yayın (mono kaynak proxy)
     "_backend_app.routers.internal",        # Vercel Cron endpoints
 ):
     _safe_include(_path)

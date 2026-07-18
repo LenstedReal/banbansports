@@ -14,7 +14,7 @@ from .services.ws_manager import manager
 from .services.st11 import st11_manager
 from .services.settlement import settle_loop
 from .services import stream_registry as stream_reg
-from .routers import scores, streams, bein, channels, ssport, stream_generic, auth as auth_router, predictions, chat, notifications, ws, match_stats, admin, push, ai_predict, internal
+from .routers import scores, streams, bein, channels, ssport, stream_generic, auth as auth_router, predictions, chat, notifications, ws, match_stats, admin, push, ai_predict, internal, featured
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -117,6 +117,7 @@ app.include_router(streams.router)
 app.include_router(bein.router)
 app.include_router(ssport.router)            # backward-compat redirect
 app.include_router(stream_generic.router)    # generic /api/stream/{ch}/*
+app.include_router(featured.router)           # öne çıkan yayın (mono kaynak proxy)
 app.include_router(channels.router)
 app.include_router(auth_router.router)
 app.include_router(predictions.router)
