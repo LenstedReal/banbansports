@@ -47,7 +47,7 @@ export default function SponsorBanner() {
         {/* SAĞ — CTA */}
         <div className="gpb-cta" data-testid="sponsor-cta">
           Gel Buraya Tıkla <span className="gpb-cta-sep">|</span> Kayıt Ol
-          <span className="gpb-cta-hand" aria-hidden="true">👆</span>
+          <span className="gpb-cta-emojis" aria-hidden="true">👆🔥</span>
         </div>
 
         {/* Yasal şeffaflık rozeti */}

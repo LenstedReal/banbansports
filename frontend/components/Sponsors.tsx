@@ -86,6 +86,7 @@ export default function SponsorsFooter() {
           <svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.8.3 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.5.4 1.1.4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.3 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.5.2-1.1.4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.8-.3-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.5-.4-1.1-.4-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.9c.1-1.2.3-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.5-.2 1.1-.4 2.2-.4C8.4 2.2 8.8 2.2 12 2.2M12 0C8.7 0 8.3 0 7.1.1 5.8.1 4.9.3 4.2.6c-.8.3-1.5.7-2.1 1.4C1.4 2.6.9 3.3.6 4.2.3 4.9.1 5.8.1 7.1 0 8.3 0 8.7 0 12s0 3.7.1 4.9c.1 1.3.2 2.2.5 2.9.3.8.8 1.5 1.4 2.1.6.6 1.3 1.1 2.1 1.4.8.3 1.6.5 2.9.5 1.3.1 1.7.1 4.9.1s3.7 0 4.9-.1c1.3-.1 2.2-.2 2.9-.5.8-.3 1.5-.8 2.1-1.4.6-.6 1.1-1.3 1.4-2.1.3-.8.5-1.6.5-2.9.1-1.3.1-1.7.1-4.9s0-3.7-.1-4.9c-.1-1.3-.2-2.2-.5-2.9-.3-.8-.8-1.5-1.4-2.1C21.4 1.4 20.7.9 19.8.6 19.1.3 18.2.1 16.9.1 15.7 0 15.3 0 12 0zm0 5.8C8.6 5.8 5.8 8.6 5.8 12s2.8 6.2 6.2 6.2 6.2-2.8 6.2-6.2S15.4 5.8 12 5.8zm0 10.2c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm6.4-11.8c-.8 0-1.4.6-1.4 1.4s.6 1.4 1.4 1.4 1.4-.6 1.4-1.4c.1-.8-.6-1.4-1.4-1.4z"/></svg>
           <span>@lenstedreal.exe</span>
         </a>
+        <div className="footer-copyright" data-testid="footer-copyright">® 2026 banbansports UNDERGROUND HD · TÜM HAKLARI SAKLIDIR · by <span className="sponsor-name">lenstedreal</span> ❤️‍🩹</div>
         <a
           href="https://t.me/swearty8_bot"
           target="_blank"
@@ -105,8 +106,6 @@ export default function SponsorsFooter() {
         <p className="access-opera" data-testid="opera-recommend">En iyi izleme deneyimi için <strong>Opera</strong> tarayıcısı kullanmanız önerilir.</p>
         <p>Bu sitenin altyapısı <strong>lenstedreal Stremradar</strong> tarafından yapılmıştır.</p>
       </div>
-
-      <div className="footer-copyright" data-testid="footer-copyright">® 2026 banbansports UNDERGROUND HD · TÜM HAKLARI SAKLIDIR · by <span className="sponsor-name">lenstedreal</span> ❤️‍🩹</div>
 
       <div className="server-selector" style={{marginTop:20}} data-testid="server-selector">
         <div className="server-title">SUNUCULAR</div>

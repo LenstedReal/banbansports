@@ -312,19 +312,24 @@
             position: relative; z-index: 2; flex-shrink: 0;
             display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 999px;
             font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 900; letter-spacing: 1px;
-            color: #2a1400; text-transform: uppercase; white-space: nowrap;
-            background: linear-gradient(180deg, #ffe08a 0%, #f4b942 50%, #e09a1e 100%);
-            box-shadow: 0 4px 16px rgba(240,160,40,0.6), 0 0 22px rgba(255,215,110,0.5);
+            color: #fff; text-transform: uppercase; white-space: nowrap;
+            background: linear-gradient(180deg, #ff3b5c 0%, #e01236 55%, #b00a28 100%);
+            box-shadow: 0 4px 16px rgba(224,18,54,0.55), 0 0 22px rgba(255,59,92,0.5);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.45);
             animation: gpb-cta-pulse 1.4s ease-in-out infinite;
             will-change: transform;
         }
         @keyframes gpb-cta-pulse {
-            0%,100% { transform: scale(1); box-shadow: 0 4px 16px rgba(240,160,40,0.6), 0 0 18px rgba(255,215,110,0.45); }
-            50%     { transform: scale(1.06); box-shadow: 0 6px 22px rgba(240,160,40,0.8), 0 0 34px rgba(255,215,110,0.75); }
+            0%,100% { transform: scale(1); box-shadow: 0 4px 16px rgba(224,18,54,0.5), 0 0 18px rgba(255,59,92,0.45); }
+            50%     { transform: scale(1.06); box-shadow: 0 6px 22px rgba(224,18,54,0.75), 0 0 34px rgba(255,59,92,0.8); }
         }
-        .gpb-cta-sep { opacity: 0.5; font-weight: 400; }
-        .gpb-cta-hand { display: inline-block; animation: gpb-hand 1.4s ease-in-out infinite; }
-        @keyframes gpb-hand { 0%,100% { transform: translateX(0) rotate(0deg); } 50% { transform: translateX(4px) rotate(-14deg); } }
+        .gpb-cta-sep { opacity: 0.55; font-weight: 400; }
+        .gpb-cta-emojis {
+            display: inline-block; font-size: 20px; line-height: 1;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+            animation: gpb-hand 1.4s ease-in-out infinite;
+        }
+        @keyframes gpb-hand { 0%,100% { transform: translateX(0) scale(1); } 50% { transform: translateX(3px) scale(1.14); } }
         .gpb-adbadge {
             position: absolute; top: 8px; right: 10px; z-index: 3;
             font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 700; letter-spacing: 1.5px;
