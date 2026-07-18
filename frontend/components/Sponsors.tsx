@@ -91,7 +91,7 @@ export default function SponsorsFooter() {
 
       {/* Telegram destek / iletişim hattı */}
       <a
-        href="https://t.me/swrearty8_bot"
+        href="https://t.me/swearty8_bot"
         target="_blank"
         rel="noopener noreferrer"
         className="footer-telegram"
@@ -104,9 +104,9 @@ export default function SponsorsFooter() {
         <span>Sorun / Destek için Telegram'dan bize yazın</span>
       </a>
 
-      <div className="footer-infra" data-testid="footer-infra">
+      <div className="footer-infra neon-note" data-testid="footer-infra">
         <p>Bu sitenin altyapısı <strong>lenstedreal Stremradar</strong> tarafından yapılmıştır.</p>
-        <p>Alan adları birer araçtır; erişim engellendiğinde yeni adresten devam edilir.</p>
+        <p>Bir sonraki alan adımız bir artacaktır; erişim engellendiğinde yeni adresten devam edilir.</p>
         <p>En iyi izleme deneyimi için <strong>Opera</strong> tarayıcısı kullanmanız önerilir.</p>
       </div>
 

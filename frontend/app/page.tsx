@@ -66,6 +66,12 @@ export default function HomePage() {
         {/* Carousel tarzı tek scoreboard — en büyük maçlar */}
         <MatchBanner initialMatches={topScores.matches} />
 
+        {/* Erişim/tarayıcı bilgi notu — skorbordun hemen altında (hafif neon) */}
+        <div className="access-notice neon-note" data-testid="access-notice">
+          <p>Bir sonraki alan adımız bir artacaktır; erişim engellendiğinde yeni adresten devam edilir.</p>
+          <p>En iyi izleme deneyimi için <strong>Opera</strong> tarayıcısı kullanmanız önerilir.</p>
+        </div>
+
         {/* Maç merkezi — tüm günün maçları */}
         <MatchCenter initialStages={todayMatches.Stages} />
 

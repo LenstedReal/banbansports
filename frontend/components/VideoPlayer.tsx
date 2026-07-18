@@ -1808,6 +1808,12 @@ export default function VideoPlayer() {
               </button>
             );
           })()}
+
+          {/* YAKINDA DAHA FAZLASI — kanal listesi teaser şeridi */}
+          <div className="ch-soon-banner" data-testid="channels-coming-soon">
+            <span className="ch-soon-dot" />
+            <span className="ch-soon-text">YAKINDA DAHA FAZLASI</span>
+          </div>
         </div>
       </div>
 

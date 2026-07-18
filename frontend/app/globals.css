@@ -149,6 +149,24 @@
         .channel-tab:hover { border-color: var(--cyan); color: var(--cyan); }
         .channel-tab.active { border-color: var(--pink); color: var(--pink); background: rgba(255, 0, 170, 0.1); box-shadow: 0 0 10px rgba(255, 0, 170, 0.3); }
 
+        /* ===== Erişim/bilgi notu — hafif neon parlak (üst + alt) ===== */
+        .neon-note p {
+            color: #cfe9ff;
+            text-shadow: 0 0 6px rgba(0,240,255,0.45), 0 0 12px rgba(0,240,255,0.2);
+        }
+        .neon-note strong {
+            color: var(--pink); font-weight: 700;
+            text-shadow: 0 0 8px rgba(255,0,170,0.6);
+        }
+        .access-notice {
+            max-width: 1180px; margin: 10px auto 0; padding: 10px 18px; text-align: center;
+            font-family: 'VT323', monospace; font-size: 16px; line-height: 1.55; letter-spacing: 0.5px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(0,240,255,0.05), rgba(255,0,170,0.05));
+            border: 1px solid rgba(0,240,255,0.18);
+        }
+        .access-notice p { margin: 1px 0; }
+
         /* ===== ÖNE ÇIKAN MAÇ — kanal listesi altındaki fonksiyonel şerit ===== */
         .ch-featured-banner {
             display: flex; align-items: center; gap: 11px; width: 100%;
