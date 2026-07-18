@@ -355,6 +355,45 @@
             .gpb-cta { font-size: 12px; padding: 10px 18px; }
         }
 
+        /* ===== MODEL SHOWCASE — sponsor banner altında, şeffaf cutout, hafif animasyon ===== */
+        .model-showcase {
+            display: flex; justify-content: center; align-items: flex-end;
+            width: 100%; max-width: 80rem; margin: 4px auto 10px; padding: 0 1rem;
+        }
+        .model-showcase-link { position: relative; display: block; line-height: 0; text-decoration: none; }
+        .model-glow {
+            position: absolute; left: 50%; bottom: 4%; transform: translateX(-50%);
+            width: 78%; height: 26%; z-index: 0; pointer-events: none; border-radius: 50%;
+            background: radial-gradient(ellipse at center, rgba(240,60,110,0.45) 0%, rgba(170,0,255,0.22) 45%, transparent 72%);
+            filter: blur(22px);
+            animation: model-glow-pulse 5s ease-in-out infinite;
+        }
+        @keyframes model-glow-pulse {
+            0%,100% { opacity: 0.55; transform: translateX(-50%) scale(1); }
+            50%     { opacity: 0.9;  transform: translateX(-50%) scale(1.08); }
+        }
+        .model-showcase-img {
+            position: relative; z-index: 1;
+            height: auto; width: auto; max-height: 560px; max-width: 100%;
+            object-fit: contain; transform-origin: center bottom;
+            filter: drop-shadow(0 18px 34px rgba(0,0,0,0.6));
+            animation: model-breathe 5.5s ease-in-out infinite;
+            will-change: transform;
+        }
+        /* Çok küçük "nefes alma" hareketi — abartısız */
+        @keyframes model-breathe {
+            0%,100% { transform: translateY(0) scale(1) rotate(0deg); }
+            50%     { transform: translateY(-5px) scale(1.006) rotate(0.4deg); }
+        }
+        .model-showcase-link:hover .model-showcase-img { animation-play-state: paused; }
+        @media (prefers-reduced-motion: reduce) {
+            .model-showcase-img, .model-glow { animation: none !important; }
+        }
+        @media (max-width: 640px) {
+            .model-showcase-img { max-height: 400px; }
+        }
+
+
 
 
 
