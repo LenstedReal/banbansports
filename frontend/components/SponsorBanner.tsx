@@ -8,7 +8,7 @@
 export default function SponsorBanner() {
   return (
     <section
-      className="ad-sponsor-cell"
+      className="mx-auto max-w-7xl px-4 mt-6 mb-4"
       data-testid="sponsor-banner"
       aria-label="Sponsor"
     >
