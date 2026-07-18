@@ -53,6 +53,9 @@ async def get_match_stats(home: str, away: str, date: Optional[str] = None):
 
     async with httpx.AsyncClient(timeout=LIVESCORE_FETCH_TIMEOUT) as http:
         found = None
+        incidents_ok = False   # incidents endpoint'inden GERÇEK olay verisi geldi mi
+        stat_ok = False        # statistics endpoint'i cevap verdi mi (0 değerleri de gerçek olur)
+        subs_counts = None     # lineups'tan doğrulanmış değişiklik sayısı [home, away]
         dates_to_try = [date] if (date and len(date) == 8) else [
             (datetime.now(timezone.utc) - timedelta(days=d)).strftime("%Y%m%d") for d in range(0, 15)
         ]
@@ -116,11 +119,29 @@ async def get_match_stats(home: str, away: str, date: Optional[str] = None):
                             stats["venue"] = venue_raw
                         if md.get("Esd"):
                             stats["start_date"] = md.get("Esd")
-                        for period_key, groups in (md.get("Incs-s") or {}).items():
-                            for grp in (groups or []):
-                                for inc in (grp.get("Incs") or [grp]):
-                                    side = "a" if str(inc.get("Nm", "1")) == "2" else "h"
-                                    md_incs.append((side, inc))
+                except Exception:
+                    pass
+
+                # OLAYLAR — dedicated incidents endpoint (scoreboard Incs-s eksik veriyordu).
+                # IT kodları 12 bitmiş maçta resmi istatistiklerle çapraz doğrulandı:
+                # 36=GOL, 37=PENALTI GOL, 38=K.KALE, 43=SARI KART, 45=KIRMIZI, 63=ASİST.
+                try:
+                    inc_r = await http.get(f"https://prod-public-api.livescore.com/v1/api/app/incidents/soccer/{event_id}",
+                                           headers=LIVESCORE_HEADERS)
+                    if inc_r.status_code == 200:
+                        def _walk(node):
+                            if isinstance(node, dict):
+                                if "IT" in node:
+                                    side = "a" if str(node.get("Nm", "1")) == "2" else "h"
+                                    md_incs.append((side, node))
+                                for v in node.values():
+                                    _walk(v)
+                            elif isinstance(node, list):
+                                for v in node:
+                                    _walk(v)
+                        _walk((inc_r.json() or {}).get("Incs"))
+                        incidents_ok = True
+                        stats["sources"].append("livescore_incidents")
                 except Exception:
                     pass
 
@@ -158,28 +179,62 @@ async def get_match_stats(home: str, away: str, date: Optional[str] = None):
                                     "home": f"{hv}{suffix or ''}",
                                     "away": f"{av}{suffix or ''}",
                                 }
+                        if home_stat or away_stat:
+                            stat_ok = True
                         stats["sources"].append("livescore_statistics")
                 except Exception:
                     pass
 
-            # Incidents (goals/cards/subs)
-            for inc in (ev.get("Incs") or []):
-                side = "a" if str(inc.get("Nm", "1")) == "2" else "h"
-                md_incs.append((side, inc))
+                # DEĞİŞİKLİKLER — lineups endpoint (IT 5 = oyuna giren, IDo = çıkan oyuncunun ID'si).
+                # Doğrulandı: takım başına 0-5 arası gerçekçi sayımlar dönüyor.
+                try:
+                    lu_r = await http.get(f"https://prod-public-api.livescore.com/v1/api/app/lineups/soccer/{event_id}",
+                                          headers=LIVESCORE_HEADERS)
+                    if lu_r.status_code == 200:
+                        lu = lu_r.json() or {}
+                        if lu.get("Lu"):
+                            subs_counts = [0, 0]
+                            sub_records = []
+                            name_by_id = {}
+                            for _period, recs in (lu.get("Subs") or {}).items():
+                                for rec in (recs or []):
+                                    pid = str(rec.get("ID") or "")
+                                    pn = rec.get("Pn") or f"{rec.get('Fn', '')} {rec.get('Ln', '')}".strip()
+                                    if pid and pn:
+                                        name_by_id[pid] = pn
+                                    sub_records.append(rec)
+                            for rec in sub_records:
+                                if rec.get("IT") != 5:  # sadece 'giren oyuncu' kaydı = 1 değişiklik
+                                    continue
+                                side_i = 1 if str(rec.get("Nm", "1")) == "2" else 0
+                                subs_counts[side_i] += 1
+                                stats["events"].append({
+                                    "minute": rec.get("Min") or 0,
+                                    "type": "sub", "label": "DEĞİŞİKLİK",
+                                    "team": "away" if side_i else "home",
+                                    "player": rec.get("Pn") or "—",
+                                    "assist": name_by_id.get(str(rec.get("IDo") or "")),
+                                })
+                except Exception:
+                    pass
 
-            GOAL_ITS = {4, 36, 49, 50}
+            # Incidents fallback: incidents endpoint'i başarısızsa gün feed'indeki Incs kullan
+            if not incidents_ok:
+                for inc in (ev.get("Incs") or []):
+                    side = "a" if str(inc.get("Nm", "1")) == "2" else "h"
+                    md_incs.append((side, inc))
+
+            # === IT KOD HARİTASI — YALNIZCA DOĞRULANMIŞ KODLAR ===
+            # Eski koddaki 39/40/41/49/50/4/6/7/11-31 kodları KALDIRILDI:
+            # ör. 41 = penaltı atışları demekti, '2. SARI' sanılıp yanlış veri üretiyordu.
+            GOAL_ITS = {36}
             PEN_ITS = {37}
             OG_ITS = {38}
-            YC_ITS = {6, 39}
-            SYC_ITS = {41}
-            RC_ITS = {7, 40}
-            # Bug #8 derinleştirme: LiveScore'un SUB IT kodları farklı maç türlerinde {11,12,13,14,15,25,26,27,30,31}
-            # gibi geniş bir aralıkta gelebiliyor. SUB için player out + player in alanlarını da kontrol et.
-            SUB_ITS = {11, 12, 13, 14, 15, 25, 26, 27, 30, 31}
+            YC_ITS = {43}
+            RC_ITS = {45}
             seen = set()
             for side, inc in md_incs:
                 it = inc.get("IT")
-                # Dedup: sub'larda (side, minute, player) — gol/kart aynı dakikada player ile de ayırt edilir
                 player_name = inc.get("Pn") or (f"{inc.get('Fn','')} {inc.get('Ln','')}".strip()) or inc.get("Player") or "—"
                 key = (side, it, inc.get("Min"), player_name)
                 if key in seen:
@@ -188,15 +243,8 @@ async def get_match_stats(home: str, away: str, date: Optional[str] = None):
                 kind = label = None
                 if it in YC_ITS:
                     kind, label = "yellow", "SARI KART"
-                elif it in SYC_ITS:
-                    kind, label = "red", "2. SARI = KIRMIZI"
                 elif it in RC_ITS:
                     kind, label = "red", "KIRMIZI KART"
-                elif it in SUB_ITS:
-                    kind, label = "sub", "DEĞİŞİKLİK"
-                # Ek tespit: LiveScore raw "Pn2" (player out) alanı doluysa sub event'tir
-                elif it is None and inc.get("Pn2") and not inc.get("Tsc"):
-                    kind, label = "sub", "DEĞİŞİKLİK"
                 elif it in PEN_ITS:
                     kind, label = "goal", "PENALTI GOL"
                 elif it in OG_ITS:
@@ -302,42 +350,68 @@ async def get_match_stats(home: str, away: str, date: Optional[str] = None):
         except Exception:
             pass
 
-    # === SAYIM BAZLI İSTATİSTİKLER — events array'inden GERÇEK sayım hesapla ===
-    # (Bug #8 fix: backend bunları hesaplamıyordu, frontend hep 0 gösteriyordu.
-    # Veri YİNE LiveScore/SofaScore — sadece toplama yapıyoruz, fake değil.)
-    counts = {
-        "goals":          [0, 0],
-        "penalty_goals":  [0, 0],
-        "own_goals":      [0, 0],
-        "yellow_cards":   [0, 0],
-        "second_yellow":  [0, 0],
-        "red_cards":      [0, 0],
-        "substitutions":  [0, 0],
-    }
+    # === SAYIM BAZLI İSTATİSTİKLER — YALNIZCA DOĞRULANMIŞ VERİ, YOKSA '?' ===
+    # Kullanıcı kuralı: yanlış istatistik göstermektense '?' (bilinmiyor) göster.
+    stats["events"].sort(key=lambda e: int(e.get("minute") or 0))
+    started = stats.get("eps") not in (None, "", "NS", "Not Started", "Postp.", "POSTP",
+                                       "Canc.", "CANC", "TBA", "TBD", "Delayed")
+
+    def _int(v):
+        try:
+            return int(v)
+        except (TypeError, ValueError):
+            return None
+
+    ev_counts = {"penalty_goals": [0, 0], "own_goals": [0, 0],
+                 "yellow_cards": [0, 0], "red_cards": [0, 0]}
     for ev in stats["events"]:
         side = 0 if ev.get("team") == "home" else 1
         ev_type = ev.get("type") or ""
         label = (ev.get("label") or "").upper()
         if ev_type == "goal":
-            counts["goals"][side] += 1
             if "PENALTI" in label:
-                counts["penalty_goals"][side] += 1
+                ev_counts["penalty_goals"][side] += 1
             elif "K. KALE" in label or "KENDİ KALE" in label:
-                counts["own_goals"][side] += 1
+                ev_counts["own_goals"][side] += 1
         elif ev_type == "yellow":
-            counts["yellow_cards"][side] += 1
+            ev_counts["yellow_cards"][side] += 1
         elif ev_type == "red":
-            counts["red_cards"][side] += 1
-            if "2. SARI" in label or "İKİNCİ SARI" in label:
-                counts["second_yellow"][side] += 1
-        elif ev_type == "sub":
-            counts["substitutions"][side] += 1
-    # Yalnızca events'den GERÇEK sayı çıkıyorsa stats'e yaz — boş array'de
-    # de always:true olan stat'lar 0-0 gösterilecek (ki bu DOĞRU davranış,
-    # maç başlamamış/event yok demektir).
-    for k, (h, a) in counts.items():
-        if k not in stats["stats"]:
-            stats["stats"][k] = {"home": h, "away": a}
+            ev_counts["red_cards"][side] += 1
+
+    if started:
+        # GOLLER — skor her zaman güvenilir kaynak
+        if "goals" not in stats["stats"]:
+            sc = stats.get("score") or {}
+            gh, ga = _int(sc.get("home")), _int(sc.get("away"))
+            if gh is not None and ga is not None:
+                stats["stats"]["goals"] = {"home": gh, "away": ga}
+            else:
+                stats["stats"]["goals"] = {"home": "?", "away": "?"}
+
+        # PENALTI / K.KALE GOLÜ — yalnızca gerçekten varsa göster (yoksa satır gizli kalır)
+        for k in ("penalty_goals", "own_goals"):
+            h, a = ev_counts[k]
+            if (h or a) and k not in stats["stats"]:
+                stats["stats"][k] = {"home": h, "away": a}
+
+        # SARI/KIRMIZI KART — resmi statistics alanı varsa o (zaten yazıldı);
+        # yoksa doğrulanmış incidents sayımı; ikisi de yoksa statistics-0; en son '?'
+        for k in ("yellow_cards", "red_cards"):
+            if k not in stats["stats"]:
+                if incidents_ok:
+                    h, a = ev_counts[k]
+                    stats["stats"][k] = {"home": h, "away": a}
+                elif stat_ok:
+                    stats["stats"][k] = {"home": 0, "away": 0}  # statistics geldi, alan yok = gerçekten 0
+                else:
+                    stats["stats"][k] = {"home": "?", "away": "?"}
+
+        # DEĞİŞİKLİK — yalnızca lineups'tan doğrulanmış sayım; yoksa '?'
+        if "substitutions" not in stats["stats"]:
+            if subs_counts is not None:
+                stats["stats"]["substitutions"] = {"home": subs_counts[0], "away": subs_counts[1]}
+            else:
+                stats["stats"]["substitutions"] = {"home": "?", "away": "?"}
 
     stats["available"] = bool(stats["sources"])
     if not stats["available"]:

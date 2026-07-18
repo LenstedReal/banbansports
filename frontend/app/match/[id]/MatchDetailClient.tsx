@@ -93,19 +93,21 @@ function MatchDetailInner({ home, away, date, initial }: { home: string; away: s
             const raw = data.stats[key];
             const has = raw && raw.home != null && raw.away != null;
             if (!has && !always) return null;
-            const hv = has ? raw.home : 0;
-            const av = has ? raw.away : 0;
+            // Bilinmeyen veri: 0 gibi yanlış değer göstermek yerine '?' göster
+            const hv = has ? raw.home : '?';
+            const av = has ? raw.away : '?';
+            const unknown = hv === '?' || av === '?';
             const total = toNum(hv) + toNum(av) || 1;
-            const hp = Math.max(2, Math.min(98, (toNum(hv) / total) * 100));
+            const hp = unknown ? 50 : Math.max(2, Math.min(98, (toNum(hv) / total) * 100));
             return (
               <div key={key} style={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', gap: 10, padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }} data-testid={`match-page-stat-${key}`}>
-                <div style={{ fontFamily: 'Orbitron', color: 'var(--cyan)', fontSize: 14, minWidth: 30, textAlign: 'right' }}>{has ? hv : 0}</div>
+                <div style={{ fontFamily: 'Orbitron', color: unknown ? 'var(--text-dim)' : 'var(--cyan)', fontSize: 14, minWidth: 30, textAlign: 'right' }}>{hv}</div>
                 <div style={{ textAlign: 'center', fontFamily: 'VT323', fontSize: 12, color: 'var(--text-dim)', letterSpacing: 2 }}>
                   {icon && <img src={icon} alt="" style={{ width: 12, height: 12, marginRight: 6, verticalAlign: 'middle' }} />}
                   {STAT_LABEL[key] || key.toUpperCase()}
                 </div>
-                <div style={{ fontFamily: 'Orbitron', color: 'var(--pink)', fontSize: 14, minWidth: 30 }}>{has ? av : 0}</div>
-                <div style={{ gridColumn: '1/-1', display: 'flex', height: 3, borderRadius: 2, overflow: 'hidden', background: 'rgba(255,255,255,0.06)' }}>
+                <div style={{ fontFamily: 'Orbitron', color: unknown ? 'var(--text-dim)' : 'var(--pink)', fontSize: 14, minWidth: 30 }}>{av}</div>
+                <div style={{ gridColumn: '1/-1', display: 'flex', height: 3, borderRadius: 2, overflow: 'hidden', background: 'rgba(255,255,255,0.06)', opacity: unknown ? 0.3 : 1 }}>
                   <div style={{ background: 'var(--cyan)', width: `${hp}%` }} />
                   <div style={{ background: 'var(--pink)', width: `${100 - hp}%` }} />
                 </div>
