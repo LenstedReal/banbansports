@@ -162,14 +162,15 @@ async def get_match_stats(home: str, away: str, date: Optional[str] = None):
                             "shots_on_goal":     ("Shon", None),
                             "shots_off_goal":    ("Shof", None),
                             "blocked_shots":     ("Shbl", None),
-                            "corner_kicks":      ("Crs", None),
+                            "shots_woodwork":    ("Shwd", None),
+                            "corner_kicks":      ("Cos", None),
                             "offsides":          ("Ofs", None),
                             "fouls":             ("Fls", None),
                             "yellow_cards":      ("Ycs", None),
+                            "second_yellow":     ("YRcs", None),
                             "red_cards":         ("Rcs", None),
                             "goalkeeper_saves":  ("Gks", None),
                             "throw_ins":         ("Ths", None),
-                            "xg":                ("Xg", None),
                         }
                         for stat_key, (field, suffix) in stat_map.items():
                             hv = home_stat.get(field, 0)
@@ -179,6 +180,11 @@ async def get_match_stats(home: str, away: str, date: Optional[str] = None):
                                     "home": f"{hv}{suffix or ''}",
                                     "away": f"{av}{suffix or ''}",
                                 }
+                        # TOPLAM ŞUT = isabetli + isabetsiz + bloklanan (gerçek alanlardan türetilir)
+                        th = sum(int(home_stat.get(f) or 0) for f in ("Shon", "Shof", "Shbl"))
+                        ta = sum(int(away_stat.get(f) or 0) for f in ("Shon", "Shof", "Shbl"))
+                        if th or ta:
+                            stats["stats"]["total_shots"] = {"home": th, "away": ta}
                         if home_stat or away_stat:
                             stat_ok = True
                         stats["sources"].append("livescore_statistics")
