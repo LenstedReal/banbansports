@@ -5,6 +5,7 @@ import { AuthProvider } from '@/components/AuthProvider';
 import Header from '@/components/Header';
 import MatchBanner from '@/components/MatchBanner';
 import MatchCenter from '@/components/MatchCenter';
+import FeaturedBroadcast from '@/components/FeaturedBroadcast';
 import VideoPlayer from '@/components/VideoPlayer';
 import SponsorBanner from '@/components/SponsorBanner';
 import Sponsors from '@/components/Sponsors';
@@ -68,6 +69,9 @@ export default function HomePage() {
 
         {/* Maç merkezi — tüm günün maçları */}
         <MatchCenter initialStages={todayMatches.Stages} />
+
+        {/* Öne çıkan maç — ayrı, kompakt bölme (canlıysa ilgili kanal da yeşile döner) */}
+        <FeaturedBroadcast />
 
         <VideoPlayer />
         <SponsorBanner />

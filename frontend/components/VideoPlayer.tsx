@@ -485,6 +485,18 @@ export default function VideoPlayer() {
     return () => { cancelled = true; clearInterval(id); };
   }, []);
 
+  // ===== Öne çıkan bölmedeki "İZLE" → o kanalı ana oynatıcıda seç =====
+  useEffect(() => {
+    const onSelect = (e: Event) => {
+      const id = (e as CustomEvent)?.detail?.id;
+      if (!id) return;
+      const ch = CHANNELS.find((c) => c.id === id);
+      if (ch) setSelected(ch);
+    };
+    window.addEventListener('bb:select-channel', onSelect as EventListener);
+    return () => window.removeEventListener('bb:select-channel', onSelect as EventListener);
+  }, []);
+
   // ===== Global window callback — sayfa altındaki ServerSelector buradan tetikler =====
   useEffect(() => {
     if (typeof window === 'undefined') return;

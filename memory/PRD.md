@@ -1,29 +1,38 @@
 # banbansports — PRD / Changelog
 
-## CHANGELOG — 2026-07-13 (E1 oturumu)
+## CHANGELOG — 2026-07-18 (E1 — Öne Çıkan Maç)
 
-GitHub reposu (LenstedReal/banbansports) ortama alındı; mimari + Vercel deploy yapısı
-korunarak SADECE hatalı kısımlar düzeltildi. Emergent kalıntısı temizlendi.
+GitHub'dan orijinal repo **sıfırdan** çekildi (orijinal tasarım korundu). Yeni özellik:
+**Öne Çıkan Maç** — günün önemli yayınını (tünellenmiş residential kaynak) gösteren
+ayrı, kompakt bir bölme + otomatik kanal-LED entegrasyonu.
 
-Yapılan düzeltmeler:
-- VideoPlayer: bakım overlay'i artık canlı `liveStatus`'tan türetilen "effective status"
-  kullanıyor (turuncu/ok:false kanal seçilince TRT1 gibi bakım metni çıkıyor).
-- Scoreboard (`fetch_live_scores`): UEFA KULÜP kupalarının ELEME turlarındaki ufak kulüpler
-  (KuPS/Riga/TNS/Larne...) eleniyor — sadece büyük Türk kulübü varsa kalır. Dünya Kupası /
-  milli maçlar (Fransa-İspanya, İngiltere-Arjantin) öne çıkıyor.
-- Match Center: kaynak artık bugün + yaklaşan 3 gün (yaz sezon arasında boş kalmasın);
-  frontend'de UEFA kulüp elemesi ufak kulüpleri `BIG_CLUB_RE` gate ile eleniyor.
-- MatchBanner: 15sn otomatik geçiş + dokunmatik sağ/sol swipe + görünür ‹ › ok butonları.
-- Stream token persistence: yenilenen token'lar MongoDB'ye (`stream_tokens`) yazılıyor;
-  `is_token_valid`/`stream.m3u8` DB'den hydrate ediyor → Vercel serverless'te token/yayın ölmez.
+### Backend (`app/routers/featured.py`, `_backend_app` senkron, Vercel `api/index.py`'e kayıtlı)
+- `FEATURED_SOURCE_URL` (cloudflared/ngrok tüneli — residential Termux köprüsü) düz `httpx` ile proxy'lenir
+  (tünel datacenter'dan erişilebilir; curl_cffi gerekmez).
+- `/api/featured/status` (30sn cache) → `{live, channel, name, configured}`. 200+#EXTM3U → live.
+- `/api/featured/stream.m3u8` → manifest proxy; MUTLAK segment URL'leri olduğu gibi bırakılır
+  (tarayıcı=residential IP doğrudan CDN'den çeker → datacenter engeli yok), göreliler seg_base ile mutlaklaştırılır.
+- `FEATURED_CHANNEL` (varsayılan bein1) hangi kanalın yeşile döneceğini belirler.
 
-Backend'in iki kopyası (`backend/app` + `frontend/_backend_app`) birebir senkron.
+### Frontend
+- `components/FeaturedBroadcast.tsx` — MatchCenter ile VideoPlayer arasında **kompakt şerit** (~150px, ekran kaplamaz).
+  Canlıysa yeşil "CANLI" + muted önizleme + aktif "İZLE"; değilse turuncu "BEKLEMEDE".
+- `İZLE` → `bb:select-channel` event → ana VideoPlayer'da o kanalı seçer → reklam/kalite/failover/cast dahil TÜM işlevler.
+- `VideoPlayer.tsx`: `/api/featured/status` polling → map'li kanalın (beIN) LED'i canlıysa YEŞİL + "CANLI" flag + glow geçiş efekti; kaynak `/api/featured/stream.m3u8`.
 
-## AÇIK / DOĞRULANMAMIŞ (sonraki tur)
-- İstatistik paneli canlı güncelleme ("0'da takılı"): şu an tüm maçlar başlamadı (WC yarı
-  final yarın) → istatistik doğal olarak 0. Canlı maç olmadan doğrulanamadı.
-- Test aracının başsız tarayıcısı client fetch'leri çekemiyor (egress); gerçek tarayıcıda çalışıyor.
+### Kanıtlanan
+- Erişilebilir kaynakla (mux test yayını) uçtan uca doğrulandı: status live, master→child→segment 200,
+  beIN LED yeşil, kompakt bölme + oynatım.
 
-## Ortam notları (yalnız preview)
-- `frontend/package.json` `start` → `next dev` (Vercel bunu kullanmaz; `next start` → `start:prod`).
-- `.env` değerleri preview içindir; Vercel kendi environment variables'ını kullanır.
+### DOĞRULANMADI (dış bağımlılık)
+- Kullanıcının gerçek tüneli (`*.trycloudflare.com`) + Termux köprüsü test anında 404/530 döndü
+  (Python köprüsü cevap vermedi veya hedef `tzy.zirvedesin236.cfd` ölü). Kod hazır; köprü canlı m3u8
+  döndüğü an sistem çalışır. Tünel URL'i her restart'ta değişir → `.env` (preview) / Vercel env (prod) güncellenmeli.
+
+### ÖNEMLİ TEKNİK GERÇEK
+`tzy.zirvedesin236.cfd` gibi kaynaklar datacenter IP'lerini Cloudflare ile 403'ler (Python curl_cffi + Node cycletls + Node fetch = hepsi 403).
+Vercel de datacenter → doğrudan çekemez. Çözüm: residential IP (Termux) + tünel. Bu bir ağ meselesidir, kod meselesi değil.
+
+## Ortam
+- Admin: admin@banbansports.com / 200cf39563dc85abb595c284 (local `test_database`).
+- Preview MONGO_URL lokaldir (prod Atlas'a dokunulmaz). Vercel env variables dashboard'da.
