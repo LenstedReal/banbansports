@@ -20,29 +20,32 @@ const toNum = (v: any) => {
   return isNaN(n) ? 0 : n;
 };
 
-export default function MatchDetailClient({ home, away, initial }: { home: string; away: string; initial: Stats | null }) {
+export default function MatchDetailClient({ home, away, date, initial }: { home: string; away: string; date?: string; initial: Stats | null }) {
   return (
     <AuthProvider>
-      <MatchDetailInner home={home} away={away} initial={initial} />
+      <MatchDetailInner home={home} away={away} date={date} initial={initial} />
     </AuthProvider>
   );
 }
 
-function MatchDetailInner({ home, away, initial }: { home: string; away: string; initial: Stats | null }) {
+function MatchDetailInner({ home, away, date, initial }: { home: string; away: string; date?: string; initial: Stats | null }) {
   const [data, setData] = useState<Stats | null>(initial);
 
   useEffect(() => {
     let alive = true;
     const tick = async () => {
-      const d = await getClient<Stats>(`/api/match/stats?home=${encodeURIComponent(home)}&away=${encodeURIComponent(away)}`);
+      // Çakışma fix: slug'daki tarihi de gönder — backend başka günün maçını bulamasın
+      const dateQ = date && date.length === 8 ? `&date=${date}` : '';
+      const d = await getClient<Stats>(`/api/match/stats?home=${encodeURIComponent(home)}&away=${encodeURIComponent(away)}${dateQ}`);
       if (alive && d) setData(d);
     };
     tick();
-    const live = data?.eps && ['1H', '2H', 'HT', 'ET', 'PEN'].includes(data.eps);
+    const eps = String(data?.eps || '');
+    const live = ['1H', '2H', 'HT', 'ET', 'PEN'].includes(eps) || /^\d/.test(eps);
     const intervalMs = live ? 15_000 : 60_000;
     const id = setInterval(tick, intervalMs);
     return () => { alive = false; clearInterval(id); };
-  }, [home, away]);
+  }, [home, away, date]);
 
   // Pre-match: sadece veri MEVCUT ve eps açıkça pre-match. data yok ya da
   // available=false ise pre-match diyemeyiz — "stats bulunamadı" göstereceğiz.

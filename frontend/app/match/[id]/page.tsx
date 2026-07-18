@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getServer } from '@/lib/api';
+import { epsToLabel } from '@/lib/i18n';
 import MatchDetailClient from './MatchDetailClient';
 
 export const dynamic = 'force-dynamic';
@@ -112,18 +113,18 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
           </div>
           {m?.eps && (
             <div style={{ textAlign: 'center', marginTop: 12, color: 'var(--pink)', fontFamily: 'VT323, monospace', letterSpacing: 2 }} data-testid="match-eps">
-              {m.eps}
+              {epsToLabel(m.eps).txt}
             </div>
           )}
           {m?.venue && (
-            <div style={{ textAlign: 'center', marginTop: 6, color: 'var(--text-dim)', fontSize: 11, letterSpacing: 2 }}>
-              · {typeof m.venue === 'string' ? m.venue : (m.venue as any)?.Vnm || ''} ·
+            <div style={{ textAlign: 'center', marginTop: 6, color: 'var(--text-dim)', fontSize: 11, letterSpacing: 2 }} data-testid="match-venue">
+              🏟 STADYUM: {(typeof m.venue === 'string' ? m.venue : (m.venue as any)?.Vnm || '').toUpperCase()}
             </div>
           )}
         </div>
 
         {/* Client-side modal-style detail (events + stats + my prediction badge) */}
-        <MatchDetailClient home={home} away={away} initial={m} />
+        <MatchDetailClient home={home} away={away} date={decoded.date} initial={m} />
       </main>
     </div>
   );

@@ -35,11 +35,21 @@ async def get_match_stats(home: str, away: str, date: Optional[str] = None):
     away_candidates = [_normalize_tr(c) for c in tr_to_en_candidates(away.strip())]
     stats: dict = {"home": home, "away": away, "events": [], "stats": {}, "sources": []}
 
-    def _match(t1: str, t2: str) -> bool:
+    def _match_level(t1: str, t2: str) -> int:
+        """2 = tam eşleşme, 1 = bulanık (substring), 0 = yok.
+        Çakışma fix: iki canlı maçta benzer isimler (ör. 'Inter' ~ 'Inter Miami')
+        yanlış maça bağlanmasın diye önce TAM eşleşme tercih edilir."""
         t1n, t2n = _normalize_tr(t1), _normalize_tr(t2)
+        h_exact = any(h == t1n for h in home_candidates if h)
+        a_exact = any(a == t2n for a in away_candidates if a)
+        if h_exact and a_exact:
+            return 2
         h_ok = any(h in t1n or t1n in h for h in home_candidates if h)
         a_ok = any(a in t2n or t2n in a for a in away_candidates if a)
-        return h_ok and a_ok
+        return 1 if (h_ok and a_ok) else 0
+
+    def _match(t1: str, t2: str) -> bool:
+        return _match_level(t1, t2) > 0
 
     async with httpx.AsyncClient(timeout=LIVESCORE_FETCH_TIMEOUT) as http:
         found = None
@@ -50,15 +60,21 @@ async def get_match_stats(home: str, away: str, date: Optional[str] = None):
             data = await livescore_fetch_day(http, d)
             if not data:
                 continue
+            exact = None
+            fuzzy = None
             for stage in (data.get("Stages") or []):
                 for ev in (stage.get("Events") or []):
                     t1 = ((ev.get("T1") or [{}])[0].get("Nm") or "")
                     t2 = ((ev.get("T2") or [{}])[0].get("Nm") or "")
-                    if _match(t1, t2):
-                        found = (ev, d, stage)
+                    lvl = _match_level(t1, t2)
+                    if lvl == 2 and exact is None:
+                        exact = (ev, d, stage)
                         break
-                if found:
+                    if lvl == 1 and fuzzy is None:
+                        fuzzy = (ev, d, stage)
+                if exact:
                     break
+            found = exact or fuzzy
             if found:
                 break
 
@@ -192,21 +208,52 @@ async def get_match_stats(home: str, away: str, date: Optional[str] = None):
         # SofaScore fallback for live incidents
         try:
             sofa_id = None
-            for d_iso in [datetime.now(timezone.utc).strftime("%Y-%m-%d")] + \
-                        [(datetime.now(timezone.utc) - timedelta(days=d)).strftime("%Y-%m-%d") for d in range(1, 8)]:
+            # Çakışma fix: tarih verilmişse SADECE o günü (±1 gün) ara — 8 gün geriye
+            # bulanık tarama başka maçın verisini yapıştırıyordu.
+            target_date = stats.get("date") or (date if (date and len(date) == 8) else None)
+            if target_date:
+                base_dt = datetime.strptime(target_date, "%Y%m%d")
+                sofa_dates = [base_dt.strftime("%Y-%m-%d"),
+                              (base_dt + timedelta(days=1)).strftime("%Y-%m-%d"),
+                              (base_dt - timedelta(days=1)).strftime("%Y-%m-%d")]
+            else:
+                sofa_dates = [datetime.now(timezone.utc).strftime("%Y-%m-%d")] + \
+                             [(datetime.now(timezone.utc) - timedelta(days=d)).strftime("%Y-%m-%d") for d in range(1, 8)]
+            for d_iso in sofa_dates:
                 r = await http.get(f"https://api.sofascore.com/api/v1/sport/football/scheduled-events/{d_iso}",
                                    headers=SOFASCORE_HEADERS)
                 if r.status_code != 200:
                     continue
+                # Önce TAM eşleşme ara — bulanık (substring) eşleşme benzer isimli
+                # başka maça bağlanabiliyor (ör. 'Inter' ~ 'Inter Miami')
+                fuzzy_id = None
                 for ev in (r.json().get("events") or []):
                     h = (ev.get("homeTeam") or {}).get("name") or ""
                     a = (ev.get("awayTeam") or {}).get("name") or ""
-                    if _match(h, a):
+                    lvl = _match_level(h, a)
+                    if lvl == 2:
                         sofa_id = ev.get("id")
                         break
+                    if lvl == 1 and fuzzy_id is None:
+                        fuzzy_id = ev.get("id")
+                if sofa_id is None:
+                    sofa_id = fuzzy_id
                 if sofa_id:
                     break
             if sofa_id:
+                # Stadyum bilgisi eksikse SofaScore event detayından al
+                if not stats.get("venue"):
+                    try:
+                        ev_r = await http.get(f"https://api.sofascore.com/api/v1/event/{sofa_id}",
+                                              headers=SOFASCORE_HEADERS)
+                        if ev_r.status_code == 200:
+                            venue_obj = ((ev_r.json() or {}).get("event") or {}).get("venue") or {}
+                            v_name = (venue_obj.get("stadium") or {}).get("name") or venue_obj.get("name") or ""
+                            v_city = (venue_obj.get("city") or {}).get("name") or ""
+                            if v_name:
+                                stats["venue"] = f"{v_name}, {v_city}" if v_city else v_name
+                    except Exception:
+                        pass
                 inc_r = await http.get(f"https://api.sofascore.com/api/v1/event/{sofa_id}/incidents",
                                        headers=SOFASCORE_HEADERS)
                 if inc_r.status_code == 200:

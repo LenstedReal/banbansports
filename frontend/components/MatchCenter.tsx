@@ -102,6 +102,22 @@ const epsToLabel = (e: Event) => {
     }
     return { txt: TR.NOT_STARTED, live: false, finished: false, notStarted: true };
   }
+  // Dakika formatı ("40'", "90+3'") → canlı maç
+  if (/^\d+(\+\d+)?'?$/.test(eps)) return { txt: eps.endsWith("'") ? eps : `${eps}'`, live: true, finished: false, notStarted: false };
+  // İngilizce durum kodları → Türkçe
+  const EN_STATUS: Record<string, string> = {
+    'POSTP': 'ERTELENDİ', 'POSTP.': 'ERTELENDİ', 'POSTPONED': 'ERTELENDİ',
+    'CANC': 'İPTAL', 'CANC.': 'İPTAL', 'CANCELLED': 'İPTAL', 'CANCELED': 'İPTAL',
+    'AW': 'HÜKMEN', 'AWARDED': 'HÜKMEN',
+    'SUSP': 'ASKIDA', 'SUSP.': 'ASKIDA', 'SUSPENDED': 'ASKIDA',
+    'INT': 'DURDURULDU', 'INT.': 'DURDURULDU', 'INTERRUPTED': 'DURDURULDU',
+    'ABAND': 'YARIDA KALDI', 'ABAND.': 'YARIDA KALDI', 'ABANDONED': 'YARIDA KALDI',
+    'DELAYED': 'GECİKMELİ', 'DEL.': 'GECİKMELİ',
+    'TBA': 'BELİRLENECEK', 'TBD': 'BELİRLENECEK',
+    'BREAK': 'ARA', 'BREAK TIME': 'ARA',
+  };
+  const tr = EN_STATUS[eps.toUpperCase()];
+  if (tr) return { txt: tr, live: false, finished: false, notStarted: false };
   return { txt: eps || '—', live: false, finished: false, notStarted: false };
 };
 
