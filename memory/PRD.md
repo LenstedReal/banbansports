@@ -1,37 +1,35 @@
 # banbansports — PRD / Changelog
 
-## CHANGELOG — 2026-07-18 (E1 — Öne Çıkan Maç)
+## DURUM (2026-07-18) — Öne Çıkan Maç özelliği
 
-GitHub'dan orijinal repo **sıfırdan** çekildi (orijinal tasarım korundu). Yeni özellik:
-**Öne Çıkan Maç** — günün önemli yayınını (tünellenmiş residential kaynak) gösteren
-ayrı, kompakt bir bölme + otomatik kanal-LED entegrasyonu.
+### Uygulama kodu: %100 HAZIR ve DOĞRULANDI ✅
+- GitHub'dan orijinal repo sıfırdan çekildi, orijinal tasarım korundu.
+- **Öne Çıkan Maç** bölmesi: MatchCenter ile VideoPlayer arasında kompakt şerit (~150px, ekranı kaplamaz).
+  Canlıysa yeşil "CANLI" + muted önizleme + "İZLE"; değilse turuncu "BEKLEMEDE".
+- **İZLE** → `bb:select-channel` event → ana VideoPlayer'da map'li kanalı (beIN) seçer →
+  reklam/kalite/failover/cast dahil TÜM işlevler otomatik.
+- **Otomatik LED:** `/api/featured/status` polling → yayın canlıysa beIN tile YEŞİL + "CANLI" flag + glow geçiş efekti; değilse turuncu.
+- Backend `app/routers/featured.py` (Vercel `api/index.py`'e kayıtlı, `_backend_app` senkron):
+  düz `httpx` ile FEATURED_SOURCE_URL (tünel) proxy'ler; mutlak segmentler olduğu gibi bırakılır
+  (tarayıcı=residential IP doğrudan CDN'den çeker → datacenter engeli yok).
+- **Uçtan uca doğrulandı:** mux test yayınıyla status live, master→child→segment 200,
+  beIN LED yeşil, kompakt bölme + oynatım hepsi çalıştı.
 
-### Backend (`app/routers/featured.py`, `_backend_app` senkron, Vercel `api/index.py`'e kayıtlı)
-- `FEATURED_SOURCE_URL` (cloudflared/ngrok tüneli — residential Termux köprüsü) düz `httpx` ile proxy'lenir
-  (tünel datacenter'dan erişilebilir; curl_cffi gerekmez).
-- `/api/featured/status` (30sn cache) → `{live, channel, name, configured}`. 200+#EXTM3U → live.
-- `/api/featured/stream.m3u8` → manifest proxy; MUTLAK segment URL'leri olduğu gibi bırakılır
-  (tarayıcı=residential IP doğrudan CDN'den çeker → datacenter engeli yok), göreliler seg_base ile mutlaklaştırılır.
-- `FEATURED_CHANNEL` (varsayılan bein1) hangi kanalın yeşile döneceğini belirler.
+### Bekleyen tek iş: canlı KAYNAK (dış bağımlılık, kullanıcı tarafı)
+`tzy.zirvedesin236.cfd` datacenter IP'lerini Cloudflare ile 403'ler (Python curl_cffi + Node cycletls + Node fetch = hepsi 403; Vercel de datacenter). Çözüm: residential IP (Termux köprüsü) + Cloudflare Tunnel.
 
-### Frontend
-- `components/FeaturedBroadcast.tsx` — MatchCenter ile VideoPlayer arasında **kompakt şerit** (~150px, ekran kaplamaz).
-  Canlıysa yeşil "CANLI" + muted önizleme + aktif "İZLE"; değilse turuncu "BEKLEMEDE".
-- `İZLE` → `bb:select-channel` event → ana VideoPlayer'da o kanalı seçer → reklam/kalite/failover/cast dahil TÜM işlevler.
-- `VideoPlayer.tsx`: `/api/featured/status` polling → map'li kanalın (beIN) LED'i canlıysa YEŞİL + "CANLI" flag + glow geçiş efekti; kaynak `/api/featured/stream.m3u8`.
+**Kanıtlanan gerçekler:**
+- Termux köprüsü (curl_cffi) + kaynak ÇALIŞIYOR: `curl 127.0.0.1:8080/lenstedreal_stream/mono.m3u8 → 200 #EXTM3U`.
+- Köprü `0.0.0.0`'a bağlanmalı (IPv6-only bind = cloudflared ulaşamıyor). Düzeltilmiş `termux_server.py` verildi.
+- Quick tunnel'lar wormdemon'un lokal `config.yml`'ini (`40d90341` cred) yüklediği için bozuluyordu.
+- wormdemon (tunnelID `40d90341`) lokal-config'li, `lenstedreal.info` köküne bağlı — DOKUNULMAYACAK.
 
-### Kanıtlanan
-- Erişilebilir kaynakla (mux test yayını) uçtan uca doğrulandı: status live, master→child→segment 200,
-  beIN LED yeşil, kompakt bölme + oynatım.
+**Kalıcı çözüm planı (kullanıcı yapacak):** Yeni domain al → Cloudflare'e ekle → Termux'ta AYRI config'li
+(`~/.cloudflared/banban.yml`) named tunnel kur → `stream.YENIDOMAIN.com` → `http://localhost:8080`.
+Sonra tek satır: `.env` (preview) / Vercel env → `FEATURED_SOURCE_URL=https://stream.YENIDOMAIN.com/lenstedreal_stream/mono.m3u8`.
 
-### DOĞRULANMADI (dış bağımlılık)
-- Kullanıcının gerçek tüneli (`*.trycloudflare.com`) + Termux köprüsü test anında 404/530 döndü
-  (Python köprüsü cevap vermedi veya hedef `tzy.zirvedesin236.cfd` ölü). Kod hazır; köprü canlı m3u8
-  döndüğü an sistem çalışır. Tünel URL'i her restart'ta değişir → `.env` (preview) / Vercel env (prod) güncellenmeli.
-
-### ÖNEMLİ TEKNİK GERÇEK
-`tzy.zirvedesin236.cfd` gibi kaynaklar datacenter IP'lerini Cloudflare ile 403'ler (Python curl_cffi + Node cycletls + Node fetch = hepsi 403).
-Vercel de datacenter → doğrudan çekemez. Çözüm: residential IP (Termux) + tünel. Bu bir ağ meselesidir, kod meselesi değil.
+### Env değişkenleri
+- FEATURED_SOURCE_URL (tünel m3u8), FEATURED_CHANNEL (default bein1), FEATURED_NAME, FEATURED_SEGMENT_BASE (opsiyonel).
 
 ## Ortam
 - Admin: admin@banbansports.com / 200cf39563dc85abb595c284 (local `test_database`).
