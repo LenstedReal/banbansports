@@ -106,8 +106,6 @@ export default function SponsorsFooter() {
 
       <div className="footer-infra neon-note" data-testid="footer-infra">
         <p>Bu sitenin altyapısı <strong>lenstedreal Stremradar</strong> tarafından yapılmıştır.</p>
-        <p>Bir sonraki alan adımız bir artacaktır; erişim engellendiğinde yeni adresten devam edilir.</p>
-        <p>En iyi izleme deneyimi için <strong>Opera</strong> tarayıcısı kullanmanız önerilir.</p>
       </div>
 
       <div className="server-selector" style={{marginTop:20}} data-testid="server-selector">

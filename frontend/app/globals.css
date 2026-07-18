@@ -1668,5 +1668,20 @@ video {
   .sidebar-ch-btn.ch-tile .ch-logo-wrap {
     padding: 8px 10px;
   }
+  /* ÖNE ÇIKAN MAÇ tile — yatay şeritte kanal kutusu gibi davransın (tam genişlik değil) */
+  .channel-sidebar .ch-featured-banner {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 168px !important;
+    max-width: 210px !important;
+    height: 68px !important;
+    margin-top: 0 !important;
+    padding: 8px 12px !important;
+  }
 }
+/* Yatay şeritte ilk/son kutu kenardan sert kesilmesin */
+@media (max-width: 1099px), (hover: none), (pointer: coarse) {
+  .channel-sidebar { padding-left: 12px !important; padding-right: 12px !important; }
+}
+
 
