@@ -186,7 +186,7 @@
             85% { transform: rotate(2deg); }
         }
         .access-marquee-wrap {
-            flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; padding: 16px 0; position: relative;
+            flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; padding: 30px 0; position: relative;
             -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
             mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
         }
@@ -260,7 +260,7 @@
         /* ===== GRANDPASHABET SPONSOR BANNER — video altı, tam yatay, hareketli ===== */
         .gpb-banner {
             position: relative; display: flex; align-items: center; gap: 20px;
-            width: 100%; min-height: 150px; padding: 30px 24px; overflow: hidden;
+            width: 100%; min-height: 150px; padding: 30px 150px 30px 24px; overflow: hidden;
             border-radius: 14px; text-decoration: none; color: #fff;
             background-image:
                 linear-gradient(90deg, rgba(20,4,14,0.78) 0%, rgba(30,6,20,0.55) 45%, rgba(20,4,14,0.82) 100%),
@@ -356,22 +356,36 @@
             100% { transform: translateY(0) rotate(0deg) scale(1); }
         }
         .gpb-adbadge {
-            position: absolute; top: 8px; right: 10px; z-index: 3;
+            position: absolute; top: 8px; left: 10px; z-index: 5;
             font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 700; letter-spacing: 1.5px;
             color: rgba(255,255,255,0.65); background: rgba(0,0,0,0.5);
             border: 1px solid rgba(255,255,255,0.2); padding: 2px 7px; border-radius: 4px; text-transform: uppercase;
         }
         .gpb-banner:hover { transform: translateY(-2px); }
         .gpb-banner { transition: transform 0.2s; }
+        /* Entegre model — banner sağ ucu */
+        .gpb-model {
+            position: absolute; right: 20px; bottom: 0; z-index: 4;
+            height: 174px; width: auto; pointer-events: none;
+            filter: drop-shadow(0 10px 22px rgba(0,0,0,0.6));
+            transform-origin: center bottom;
+            animation: gpb-model-breathe 4.5s ease-in-out infinite;
+            will-change: transform;
+        }
+        @keyframes gpb-model-breathe {
+            0%,100% { transform: translateY(0) scale(1) rotate(0deg); }
+            50%     { transform: translateY(-4px) scale(1.012) rotate(0.5deg); }
+        }
         @media (prefers-reduced-motion: reduce) {
-            .gpb-banner, .gpb-shine, .gpb-coin, .gpb-cta, .gpb-cta-hand, .gpb-crown { animation: none !important; }
+            .gpb-banner, .gpb-shine, .gpb-coin, .gpb-cta, .gpb-cta-hand, .gpb-crown, .gpb-model { animation: none !important; }
         }
         @media (max-width: 760px) {
             .gpb-banner { flex-direction: column; gap: 10px; padding: 16px; text-align: center; min-height: auto; }
             .gpb-logo { font-size: 19px; }
             .gpb-title { font-size: 13px; letter-spacing: 1.5px; }
             .gpb-sub { font-size: 13px; }
-            .gpb-cta { font-size: 12px; padding: 10px 18px; }
+            .gpb-cta { font-size: 11px; padding: 9px 14px; }
+            .gpb-model { height: 110px; right: 0; opacity: 0.95; }
         }
 
         /* ===== SPONSOR + MODEL yan yana satır ===== */

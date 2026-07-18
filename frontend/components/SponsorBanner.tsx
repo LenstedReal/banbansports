@@ -11,7 +11,7 @@ export default function SponsorBanner() {
   return (
     <section
       className="mx-auto px-4 mt-6 mb-4"
-      style={{ maxWidth: 1060 }}
+      style={{ maxWidth: 1100, position: 'relative' }}
       data-testid="sponsor-banner"
       aria-label="Sponsor"
     >
@@ -54,6 +54,17 @@ export default function SponsorBanner() {
         {/* Yasal şeffaflık rozeti */}
         <span className="gpb-adbadge" aria-hidden="true">Reklam</span>
       </a>
+
+      {/* Entegre model — banner'ın sağ ucunda, tek parça reklam görünümü */}
+      <img
+        className="gpb-model"
+        src="/ad_model_cutout.png"
+        alt="Sponsor model"
+        loading="lazy"
+        decoding="async"
+        draggable={false}
+        aria-hidden="true"
+      />
     </section>
   );
 }
