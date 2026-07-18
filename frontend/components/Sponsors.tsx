@@ -81,33 +81,34 @@ export default function SponsorsFooter() {
         </div>
       </div>
       <div className="sponsor">by <span className="sponsor-name">lenstedreal</span> ❤️‍🩹</div>
-      <div className="footer-social">
-        <a href="https://www.instagram.com/lenstedreal/" target="_blank" rel="noopener noreferrer" className="footer-ig" data-testid="ig-link">
+
+      {/* Instagram + Telegram — alt alta, aralarında boşluk */}
+      <div className="footer-socials" data-testid="footer-socials">
+        <a href="https://www.instagram.com/lenstedreal.exe?igsh=ZWFta2F5MWJ3dzg5" target="_blank" rel="noopener noreferrer" className="footer-ig" data-testid="ig-link">
           <svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.8.3 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.5.4 1.1.4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.3 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.5.2-1.1.4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.8-.3-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.5-.4-1.1-.4-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.9c.1-1.2.3-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.5-.2 1.1-.4 2.2-.4C8.4 2.2 8.8 2.2 12 2.2M12 0C8.7 0 8.3 0 7.1.1 5.8.1 4.9.3 4.2.6c-.8.3-1.5.7-2.1 1.4C1.4 2.6.9 3.3.6 4.2.3 4.9.1 5.8.1 7.1 0 8.3 0 8.7 0 12s0 3.7.1 4.9c.1 1.3.2 2.2.5 2.9.3.8.8 1.5 1.4 2.1.6.6 1.3 1.1 2.1 1.4.8.3 1.6.5 2.9.5 1.3.1 1.7.1 4.9.1s3.7 0 4.9-.1c1.3-.1 2.2-.2 2.9-.5.8-.3 1.5-.8 2.1-1.4.6-.6 1.1-1.3 1.4-2.1.3-.8.5-1.6.5-2.9.1-1.3.1-1.7.1-4.9s0-3.7-.1-4.9c-.1-1.3-.2-2.2-.5-2.9-.3-.8-.8-1.5-1.4-2.1C21.4 1.4 20.7.9 19.8.6 19.1.3 18.2.1 16.9.1 15.7 0 15.3 0 12 0zm0 5.8C8.6 5.8 5.8 8.6 5.8 12s2.8 6.2 6.2 6.2 6.2-2.8 6.2-6.2S15.4 5.8 12 5.8zm0 10.2c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm6.4-11.8c-.8 0-1.4.6-1.4 1.4s.6 1.4 1.4 1.4 1.4-.6 1.4-1.4c.1-.8-.6-1.4-1.4-1.4z"/></svg>
-          <span>@lenstedreal</span>
+          <span>@lenstedreal.exe</span>
+        </a>
+        <a
+          href="https://t.me/swearty8_bot"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="footer-telegram"
+          data-testid="telegram-support"
+          aria-label="Telegram Destek"
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path fill="currentColor" d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71l-4.14-3.05-1.99 1.93c-.22.22-.4.4-.83.4z"/>
+          </svg>
+          <span>Sorun / Destek için Telegram'dan bize yazın</span>
         </a>
       </div>
-      <div className="footer-copyright" data-testid="footer-copyright">® 2026 banbansports UNDERGROUND HD · TÜM HAKLARI SAKLIDIR</div>
-
-      {/* Telegram destek / iletişim hattı */}
-      <a
-        href="https://t.me/swearty8_bot"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="footer-telegram"
-        data-testid="telegram-support"
-        aria-label="Telegram Destek"
-      >
-        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-          <path fill="currentColor" d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71l-4.14-3.05-1.99 1.93c-.22.22-.4.4-.83.4z"/>
-        </svg>
-        <span>Sorun / Destek için Telegram'dan bize yazın</span>
-      </a>
 
       <div className="footer-infra neon-note" data-testid="footer-infra">
         <p className="access-opera" data-testid="opera-recommend">En iyi izleme deneyimi için <strong>Opera</strong> tarayıcısı kullanmanız önerilir.</p>
         <p>Bu sitenin altyapısı <strong>lenstedreal Stremradar</strong> tarafından yapılmıştır.</p>
       </div>
+
+      <div className="footer-copyright" data-testid="footer-copyright">® 2026 banbansports UNDERGROUND HD · TÜM HAKLARI SAKLIDIR</div>
 
       <div className="server-selector" style={{marginTop:20}} data-testid="server-selector">
         <div className="server-title">SUNUCULAR</div>
@@ -140,8 +141,6 @@ export default function SponsorsFooter() {
           })}
         </div>
       </div>
-
-      <div className="footer-copyright" data-testid="footer-copyright">® 2026 banbansports UNDERGROUND HD · TÜM HAKLARI SAKLIDIR</div>
     </footer>
   );
 }
