@@ -42,7 +42,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: '#07070b',
-  width: '1280',
+  width: '980',
   colorScheme: 'dark',
 };
 
@@ -50,12 +50,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="tr" suppressHydrationWarning>
       <head>
-        {/* Telefonda da masaüstü düzeni: viewport'u kalıcı olarak width=1280'e sabitle.
-            Next hydration sonrası etiketi geri yazsa bile MutationObserver anında düzeltir. */}
+        {/* Telefonda da masaüstü düzeni: viewport'u kalıcı olarak width=980'e sabitle
+            (Chrome "masaüstü modu" ile birebir aynı genişlik). Next hydration sonrası
+            etiketi geri yazsa bile MutationObserver anında düzeltir. */}
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){function fix(){var ms=document.querySelectorAll('meta[name=viewport]');if(!ms.length){var m=document.createElement('meta');m.name='viewport';m.setAttribute('content','width=1280');document.head.appendChild(m);return;}ms.forEach(function(m){if(m.getAttribute('content')!=='width=1280'){m.setAttribute('content','width=1280');}});}try{fix();new MutationObserver(fix).observe(document.head,{childList:true,subtree:true,attributes:true,attributeFilter:['content','name']});}catch(e){}})();",
+              "(function(){function fix(){var ms=document.querySelectorAll('meta[name=viewport]');if(!ms.length){var m=document.createElement('meta');m.name='viewport';m.setAttribute('content','width=980');document.head.appendChild(m);return;}ms.forEach(function(m){if(m.getAttribute('content')!=='width=980'){m.setAttribute('content','width=980');}});}try{fix();new MutationObserver(fix).observe(document.head,{childList:true,subtree:true,attributes:true,attributeFilter:['content','name']});}catch(e){}})();",
           }}
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
