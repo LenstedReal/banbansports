@@ -177,6 +177,45 @@ export const STAT_ORDER: { key: string; always?: boolean; icon?: string }[] = [
   { key: 'substitutions',  always: true, icon: '/icons/info.png' },
 ];
 
+// Lig / turnuva aşaması adlarındaki İngilizce kalıpları Türkçe'ye çevir
+// (ör. "Third Place Play-off" → "ÜÇÜNCÜLÜK MAÇI")
+const LEAGUE_PHRASES: [RegExp, string][] = [
+  [/third[\s-]?place[\s-]?(play[\s-]?off|match)?/gi, 'ÜÇÜNCÜLÜK MAÇI'],
+  [/3rd[\s-]?place[\s-]?(play[\s-]?off|match)?/gi, 'ÜÇÜNCÜLÜK MAÇI'],
+  [/semi[\s-]?finals?/gi, 'YARI FİNAL'],
+  [/quarter[\s-]?finals?/gi, 'ÇEYREK FİNAL'],
+  [/round of 16/gi, 'SON 16 TURU'],
+  [/round of 32/gi, 'SON 32 TURU'],
+  [/knockout[\s-]?stage/gi, 'ELEME AŞAMASI'],
+  [/group[\s-]?stage/gi, 'GRUP AŞAMASI'],
+  [/\bgroup\s+([a-h])\b/gi, '$1 GRUBU'],
+  [/\bgrand\s+final\b/gi, 'BÜYÜK FİNAL'],
+  [/\bfinals?\b/gi, 'FİNAL'],
+  [/play[\s-]?offs?/gi, 'PLAY-OFF'],
+  [/qualif(ication|ying|iers?)?/gi, 'ELEMELER'],
+  [/1st round/gi, '1. TUR'],
+  [/2nd round/gi, '2. TUR'],
+  [/3rd round/gi, '3. TUR'],
+  [/\bround\s+(\d+)\b/gi, '$1. HAFTA'],
+  [/international friendl(y|ies)/gi, 'ULUSLARARASI HAZIRLIK'],
+  [/club friendl(y|ies)/gi, 'KULÜP HAZIRLIK'],
+  [/friendl(y|ies)/gi, 'HAZIRLIK'],
+  [/\bwomen\b/gi, 'KADINLAR'],
+  [/world cup/gi, 'DÜNYA KUPASI'],
+  [/european championship/gi, 'AVRUPA ŞAMPİYONASI'],
+  [/champions league/gi, 'ŞAMPİYONLAR LİGİ'],
+  [/europa league/gi, 'AVRUPA LİGİ'],
+  [/conference league/gi, 'KONFERANS LİGİ'],
+  [/nations league/gi, 'ULUSLAR LİGİ'],
+];
+
+export const trLeagueName = (name?: string | null): string => {
+  if (!name) return '';
+  let out = String(name);
+  for (const [re, tr] of LEAGUE_PHRASES) out = out.replace(re, tr);
+  return out.replace(/\s{2,}/g, ' ').trim();
+};
+
 // EPS → durum etiketi (UI tarafında, server _zaten_ normalize'liyor ama
 // SSR cache'ten ham EPS gelirse fallback olarak burada da var)
 export const epsToLabel = (eps: string): { txt: string; live: boolean; finished: boolean; notStarted: boolean } => {

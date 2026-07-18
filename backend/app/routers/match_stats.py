@@ -83,7 +83,14 @@ async def get_match_stats(home: str, away: str, date: Optional[str] = None):
             stats["sources"].append("livescore")
             stats["live_event_id"] = ev.get("Eid")
             stats["date"] = ev_date
-            stats["league"] = stage.get("Snm") or stage.get("Cnm") or ""
+            _snm = stage.get("Snm") or ""
+            _cnm = stage.get("Cnm") or ""
+            # Aşama-adı (Final, Third Place Play-Off...) tek başına anlamsız → turnuva adıyla birleştir
+            import re as _re
+            if _cnm and _re.match(r'^(third[\s-]?place|3rd[\s-]?place|finals?$|semi|quarter|round of|knockout|play[\s-]?offs?$)', _snm, _re.I):
+                stats["league"] = f"{_cnm} {_snm}"
+            else:
+                stats["league"] = _snm or _cnm or ""
             stats["score"] = {
                 "home": ev.get("Tr1", 0), "away": ev.get("Tr2", 0),
                 "pen_home": ev.get("Trp1"), "pen_away": ev.get("Trp2"),

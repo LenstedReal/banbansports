@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { getClient } from '@/lib/api';
-import { TR } from '@/lib/i18n';
+import { TR, trLeagueName } from '@/lib/i18n';
 
 type Event = {
   Eid?: any;
@@ -184,9 +184,7 @@ export default function MatchCenter({ initialStages }: { initialStages: Stage[] 
       const snm = (s.Snm || '').trim();
       const cnm = (s.Cnm || '').trim();
       const combined = `${cnm} ${snm}`;
-      // Grup adı (Group A, Grup B, Hazırlık Grubu...) → ana turnuvaya çevir
-      const isGroup = /^(group|grup|gr\.?)\s*[a-z]\d*$/i.test(snm) || /^(group|grup)\s*[a-z]/i.test(snm);
-      if (isGroup) {
+      const tournament = (): string => {
         if (/world cup|wc|dünya/i.test(combined)) return 'DÜNYA KUPASI';
         if (/euro|european championship/i.test(combined)) return 'AVRUPA ŞAMP.';
         if (/champions league/i.test(combined)) return 'ŞAMPİYONLAR LİGİ';
@@ -196,15 +194,28 @@ export default function MatchCenter({ initialStages }: { initialStages: Stage[] 
         if (/africa|afcon/i.test(combined)) return 'AFRİKA KUPASI';
         if (/asia|afc/i.test(combined)) return 'ASYA KUPASI';
         if (/copa america/i.test(combined)) return 'COPA AMERİKA';
+        return '';
+      };
+      // Grup adı (Group A, Grup B, Hazırlık Grubu...) → ana turnuvaya çevir
+      const isGroup = /^(group|grup|gr\.?)\s*[a-z]\d*$/i.test(snm) || /^(group|grup)\s*[a-z]/i.test(snm);
+      if (isGroup) {
+        const t = tournament();
+        if (t) return t;
         // Genel fallback: ülke + "GRUP"
         if (cnm) return cnm.toUpperCase();
+      }
+      // Aşama adı (Third Place Play-Off, Final, Semi-finals...) → "TURNUVA · AŞAMA"
+      if (/^(third[\s-]?place|3rd[\s-]?place|finals?$|semi|quarter|round of|knockout|play[\s-]?offs?$)/i.test(snm)) {
+        const t = tournament();
+        const stage = trLeagueName(snm);
+        return t ? `${t} · ${stage}` : stage;
       }
       // "International" + boş → HAZIRLIK
       if (/international/i.test(cnm) && (/friendly|club friendly|exhibition/i.test(snm) || !snm)) return 'HAZIRLIK';
       // "Club Friendly" → HAZIRLIK
       if (/friendly/i.test(snm)) return 'HAZIRLIK';
-      // Standart liga adı
-      return snm || cnm || 'FUTBOL';
+      // Standart liga adı — İngilizce aşama kalıplarını Türkçe'ye çevir
+      return trLeagueName(snm || cnm) || 'FUTBOL';
     };
     visible.forEach((s) => {
       const qualifierStage = isUefaClubQualifier(s);

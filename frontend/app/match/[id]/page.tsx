@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getServer } from '@/lib/api';
-import { epsToLabel } from '@/lib/i18n';
+import { epsToLabel, trLeagueName } from '@/lib/i18n';
 import MatchDetailClient from './MatchDetailClient';
 
 export const dynamic = 'force-dynamic';
@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     ? `${home} ${score} ${away} — Detay · banbansports`
     : `${home} vs ${away} — Canlı Detay · banbansports`;
   const desc = m?.league
-    ? `${m.league} · ${home} - ${away} canlı skor, istatistik ve maç olayları.`
+    ? `${trLeagueName(m.league)} · ${home} - ${away} canlı skor, istatistik ve maç olayları.`
     : 'Canlı skor, istatistik ve maç olayları — banbansports UNDERGROUND HD.';
   const og = `/og/match?home=${encodeURIComponent(home)}&away=${encodeURIComponent(away)}&score=${encodeURIComponent(score)}&league=${encodeURIComponent(m?.league || '')}`;
   return {
@@ -92,7 +92,7 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
         }}>
           {m?.league && (
             <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 11, letterSpacing: 3, color: 'var(--cyan, #00f0ff)', textAlign: 'center', marginBottom: 14 }} data-testid="match-league">
-              {m.league.toUpperCase()}
+              {trLeagueName(m.league).toUpperCase()}
             </div>
           )}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 'clamp(8px, 2vw, 16px)' }}>
@@ -100,7 +100,7 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
               <h1 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'clamp(15px, 4vw, 28px)', letterSpacing: 1, color: '#fff', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis' }} data-testid="match-home">{home}</h1>
             </div>
             <div style={{ textAlign: 'center', fontFamily: 'Orbitron, sans-serif', fontSize: 'clamp(28px, 7vw, 48px)', color: 'var(--cyan, #00f0ff)', textShadow: '0 0 14px rgba(0,240,255,0.5)', letterSpacing: 'clamp(2px, 0.5vw, 4px)', whiteSpace: 'nowrap' }} data-testid="match-score">
-              {m?.score ? `${m.score.home}–${m.score.away}` : 'vs'}
+              {m?.score && !['NS', 'Not Started'].includes(String(m?.eps || '')) ? `${m.score.home}–${m.score.away}` : 'vs'}
               {m?.score?.pen_home != null && (
                 <div style={{ fontSize: 13, color: 'var(--orange, #ffa600)', marginTop: 6, letterSpacing: 2 }}>
                   PEN {m.score.pen_home}-{m.score.pen_away}
