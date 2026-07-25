@@ -122,3 +122,18 @@ Cloudflare özel yayını (mono.m3u8) artık KALICI adresle canlıya alındı.
   + `pkill -9 -f python3; nohup python3 stream_server.py &`. Tünel/adres sabit kalır.
 - **KALICILIK:** termux-wake-lock + Termux pil kısıtlaması KAPALI olmalı (yoksa "Killed").
   stream_server.py ve cloudflared ikisi de nohup ile arka planda.
+
+## 2026-07-25 (2) — KRİTİK FIX: Segment Proxy (DNS bağımsız oynatma)
+SORUN: İstemci tarayıcısı stream.lenstedreal.xyz'yi çözemiyordu (ERR_NAME_NOT_RESOLVED /
+short.io 404 — .xyz DNS istemci tarafında yayılmamış/negatif cache). Manifest segment URL'leri
+mutlak (stream.lenstedreal.xyz/seg) bırakıldığı için tarayıcı segmentleri çekemiyor → siyah ekran.
+127.0.0.1 çalışıyordu çünkü segment direkt telefondan geliyordu.
+ÇÖZÜM (featured.py):
+1. stream.m3u8 artık TÜM segment URL'lerini /api/featured/seg?u=<mutlak> olarak rewrite ediyor.
+2. Yeni /api/featured/seg endpoint segmenti backend'den çekip byte olarak döner (video/mp2t, CORS).
+   → Tarayıcı SADECE backend (preview URL) ile konuşur; stream.lenstedreal.xyz'yi çözmesi GEREKMEZ.
+   Herkeste, her DNS'te, her cihazda çalışır.
+3. _fetch httpx yerine curl_cffi impersonate=chrome120 kullanıyor (Cloudflare orange-cloud tüneli
+   düz httpx'e bot challenge HTML dönüyordu; gerçek Chrome TLS parmak izi geçiyor).
+DOĞRULAMA: manifest 200 + /api/featured/seg segment 3.8MB indi; tarayıcı testinde oynatıcı 4 seg
+isteğini backend üzerinden attı, canlı moda geçti (0x0 = headless H.264 decode yok, gerçek cihazda gelir).

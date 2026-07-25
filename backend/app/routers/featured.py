@@ -15,17 +15,21 @@ Endpointler:
 """
 import logging
 import os
+import asyncio
 import httpx
+from curl_cffi import requests as cffi_requests
 from time import time
-from urllib.parse import urljoin
+from urllib.parse import urljoin, quote
 from fastapi import APIRouter, HTTPException, Response
 
 logger = logging.getLogger("banbansports.featured")
 router = APIRouter(prefix="/api/featured", tags=["featured"])
 
-_TIMEOUT = 10.0
+_TIMEOUT = 15.0
 _STATUS_CACHE = {"at": 0.0, "live": False}
 _STATUS_TTL = 30.0
+_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+       "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
 
 
 def _cfg():
@@ -38,8 +42,13 @@ def _cfg():
 
 
 async def _fetch(url: str):
-    async with httpx.AsyncClient(timeout=_TIMEOUT, follow_redirects=True) as http:
-        return await http.get(url, headers={"User-Agent": "Mozilla/5.0", "Accept": "*/*"})
+    # Kaynak Cloudflare arkasında (tünel = orange cloud). Düz httpx bazen bot
+    # challenge (HTML) yiyor; curl_cffi impersonate gerçek Chrome TLS parmak izi
+    # ile bunu güvenilir şekilde geçer. Sync olduğu için thread'e alıyoruz.
+    def _do():
+        return cffi_requests.get(url, headers={"User-Agent": _UA, "Accept": "*/*"},
+                                 impersonate="chrome120", timeout=_TIMEOUT)
+    return await asyncio.to_thread(_do)
 
 
 @router.get("/status")
@@ -82,9 +91,11 @@ async def stream_m3u8():
             if not s or s.startswith("#"):
                 out.append(line)
                 continue
-            # Mutlak URL'leri OLDUĞU GİBİ bırak (tarayıcı doğrudan CDN'den çeker,
-            # residential IP → engel yok). Göreli olanları seg_base ile mutlaklaştır.
-            out.append(line if s.startswith("http") else urljoin(seg_base, s))
+            # Segment URL'sini MUTLAKLAŞTIR, sonra BACKEND proxy'sine sar.
+            # Böylece tarayıcı segmenti bizim üzerimizden çeker → istemcinin
+            # stream.lenstedreal.xyz'yi çözebilmesi GEREKMEZ (short.io/DNS sorunu biter).
+            abs_url = s if s.startswith("http") else urljoin(seg_base, s)
+            out.append(f"/api/featured/seg?u={quote(abs_url, safe='')}")
         return Response(content="\n".join(out),
                         media_type="application/vnd.apple.mpegurl",
                         headers={"Access-Control-Allow-Origin": "*",
@@ -93,3 +104,22 @@ async def stream_m3u8():
         raise
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Fetch failed: {e}")
+
+
+@router.get("/seg")
+async def seg(u: str):
+    """Segment proxy — tarayıcı yerine backend segmenti çeker (DNS/CORS bağımsız)."""
+    if not u:
+        raise HTTPException(status_code=400, detail="segment yok")
+    try:
+        r = await _fetch(u)
+        if r.status_code != 200:
+            raise HTTPException(status_code=502, detail=f"segment {r.status_code}")
+        return Response(content=r.content,
+                        media_type="video/mp2t",
+                        headers={"Access-Control-Allow-Origin": "*",
+                                 "Cache-Control": "no-cache"})
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"segment fetch failed: {e}")
