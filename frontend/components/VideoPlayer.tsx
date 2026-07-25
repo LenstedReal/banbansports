@@ -552,6 +552,9 @@ export default function VideoPlayer() {
         const Hls = mod.default;
         if (cancelled) return;
         if (Hls.isSupported()) {
+          // Featured (Cloudflare tünel) kaynağı yavaş (ev upload'ı) → canlı kenardan
+          // daha geride başla ki hep backend cache'inde hazır segmentleri oynat.
+          const isFeaturedSrc = featured.live && featured.channel === selected.id;
           const h = new Hls({
             // En yüksek kalite & dayanıklılık (4K destekli)
             enableWorker: true,
@@ -560,8 +563,8 @@ export default function VideoPlayer() {
             // 404 patlatıyordu. Standart HLS için kapatıyoruz; LL-HLS desteği
             // olan kaynaklarda manuel override edilebilir.
             lowLatencyMode: false,
-            liveSyncDurationCount: 3,   // canlı edge'den 3 segment geride başla (güvenli buffer)
-            liveMaxLatencyDurationCount: 10,
+            liveSyncDurationCount: isFeaturedSrc ? 5 : 3,   // featured: kenardan 5 segment geride (cache'li bölge)
+            liveMaxLatencyDurationCount: isFeaturedSrc ? 30 : 10,
             backBufferLength: 30,
             // Bug #9: HQ (Geniş Bant) modu agresif değerler kullanır
             maxBufferLength: hqMode ? 120 : 60,
@@ -570,10 +573,10 @@ export default function VideoPlayer() {
             manifestLoadingTimeOut: 15_000,
             manifestLoadingMaxRetry: 4,
             levelLoadingTimeOut: 15_000,
-            fragLoadingTimeOut: 20_000,
+            fragLoadingTimeOut: isFeaturedSrc ? 45_000 : 20_000,  // featured: yavaş segment için uzun timeout
             // FIX: Segment 404 olursa hls.js otomatik retry yapsın (eski segment
             // expire olduysa yeni manifest fetch ile güncel segment'lere geç).
-            fragLoadingMaxRetry: 4,
+            fragLoadingMaxRetry: isFeaturedSrc ? 6 : 4,
             fragLoadingRetryDelay: 500,
             levelLoadingMaxRetry: 4,
             startLevel: hqMode ? 0 : -1,     // HQ: en yüksek seviyeden başla

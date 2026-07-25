@@ -137,3 +137,20 @@ mutlak (stream.lenstedreal.xyz/seg) bırakıldığı için tarayıcı segmentler
    düz httpx'e bot challenge HTML dönüyordu; gerçek Chrome TLS parmak izi geçiyor).
 DOĞRULAMA: manifest 200 + /api/featured/seg segment 3.8MB indi; tarayıcı testinde oynatıcı 4 seg
 isteğini backend üzerinden attı, canlı moda geçti (0x0 = headless H.264 decode yok, gerçek cihazda gelir).
+
+## 2026-07-25 (3) — Featured Yayın Performans: Cache + Prefetch + Dedup
+Sorun: 4MB/10sn segment ev upload'ından ~7-15sn çekiliyordu → hls.js buffer kuramayıp siyah kalıyordu.
+Çözümler (featured.py + VideoPlayer.tsx):
+1. Backend SEGMENT CACHE (_seg_cache, max 24, TTL 180s): her segment 1 kez indirilir, tüm
+   izleyicilere/tekrar isteklere bellekten ANINDA (0.2sn, X-Cache:HIT) servis edilir.
+2. Arka plan PREFETCH loop (_prefetch_loop): izleyici aktifken manifesti sürekli poll edip yeni
+   segmentleri önceden indirir → home upload gizlenir. _ensure_prefetch() stream.m3u8'de tetiklenir.
+3. IN-FLIGHT DEDUP (_get_segment/_inflight): aynı segment prefetcher+viewer tarafından aynı anda
+   istenirse TEK indirme yapılır → home upload israfı biter (MISS süreleri 15sn→5-7sn düştü).
+4. _fetch artık curl_cffi impersonate=chrome120 (Cloudflare orange-cloud tüneli httpx'e bot
+   challenge dönüyordu). asyncio.to_thread ile sync curl_cffi async'e sarıldı.
+5. hls.js featured kaynağı için: liveSyncDurationCount 3→5 (kenardan geride=cache'li bölge),
+   liveMaxLatencyDurationCount 30, fragLoadingTimeOut 45sn, fragLoadingMaxRetry 6.
+DOĞRULAMA: cache HIT 0.18sn; ısınma sonrası en eski segmentler HIT, en yeniler MISS(4-7sn).
+DARBOĞAZ: ev UPLOAD hızı (~5-8Mbps) — 3.4Mbps stream'i sınırda taşıyor. Tam pürüzsüz için
+kaynağı düşük bitrate'e transcode gerekir (Termux'ta ffmpeg, ağır CPU — istenirse eklenir).

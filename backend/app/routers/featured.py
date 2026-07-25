@@ -51,6 +51,100 @@ async def _fetch(url: str):
     return await asyncio.to_thread(_do)
 
 
+# === SEGMENT CACHE + ARKA PLAN ÖN-YÜKLEME ===
+# Evin upload hızı darboğaz (4MB segment ~7sn). Backend segmentleri sürekli
+# önceden indirip belleğe alır → oynatıcı istediğinde ANINDA verir, home upload
+# gizlenir, çoklu izleyicide telefon yükü artmaz (her segment 1 kez indirilir).
+_seg_cache: dict = {}            # abs_url -> (bytes, ts)
+_SEG_CACHE_MAX = 24
+_SEG_TTL = 180.0
+_last_activity = 0.0
+_prefetch_started = False
+
+
+def _seg_abs_urls(text: str, source: str) -> list:
+    seg_base = _cfg()["seg_base"] or (source.rsplit("/", 1)[0] + "/")
+    urls = []
+    for line in text.split("\n"):
+        s = line.strip()
+        if s and not s.startswith("#"):
+            urls.append(s if s.startswith("http") else urljoin(seg_base, s))
+    return urls
+
+
+def _cache_put(url: str, data: bytes):
+    _seg_cache[url] = (data, time())
+    if len(_seg_cache) > _SEG_CACHE_MAX:
+        for k in sorted(_seg_cache, key=lambda k: _seg_cache[k][1])[:len(_seg_cache) - _SEG_CACHE_MAX]:
+            _seg_cache.pop(k, None)
+
+
+_inflight: dict = {}   # url -> asyncio.Task (aynı segment 2 kez indirilmesin)
+
+
+async def _get_segment(url: str) -> bytes:
+    """Segmenti getir: önce cache, sonra tek bir indirme (in-flight dedup)."""
+    c = _seg_cache.get(url)
+    if c:
+        return c[0]
+    task = _inflight.get(url)
+    fresh = task is None
+    if fresh:
+        task = asyncio.create_task(_fetch_seg(url))
+        _inflight[url] = task
+    try:
+        return await task
+    finally:
+        if fresh:
+            _inflight.pop(url, None)
+
+
+async def _fetch_seg(url: str) -> bytes:
+    r = await _fetch(url)
+    if r.status_code != 200 or not r.content:
+        raise HTTPException(status_code=502, detail=f"segment {r.status_code}")
+    _cache_put(url, r.content)
+    return r.content
+
+
+async def _prefetch_loop():
+    global _prefetch_started
+    _prefetch_started = True
+    logger.info("featured prefetch loop started")
+    while True:
+        try:
+            if (time() - _last_activity) > 90:      # izleyici yoksa dinlen
+                await asyncio.sleep(3)
+                continue
+            cfg = _cfg()
+            if not cfg["source"]:
+                await asyncio.sleep(5)
+                continue
+            r = await _fetch(cfg["source"])
+            if r.status_code == 200 and r.text.lstrip().startswith("#EXTM3U"):
+                for u in _seg_abs_urls(r.text, cfg["source"]):
+                    if u not in _seg_cache:
+                        try:
+                            await _get_segment(u)   # dedup'lı: viewer ile çakışmaz
+                        except Exception:
+                            pass
+        except Exception as e:
+            logger.debug(f"prefetch err: {e}")
+        await asyncio.sleep(1.5)
+
+
+def _ensure_prefetch():
+    global _last_activity, _prefetch_started
+    _last_activity = time()
+    if not _prefetch_started:
+        _prefetch_started = True
+        try:
+            asyncio.create_task(_prefetch_loop())
+        except Exception as e:
+            _prefetch_started = False
+            logger.debug(f"prefetch start fail: {e}")
+
+
 @router.get("/status")
 async def status():
     cfg = _cfg()
@@ -80,6 +174,7 @@ async def stream_m3u8():
     cfg = _cfg()
     if not cfg["source"]:
         raise HTTPException(status_code=503, detail="Öne çıkan yayın yapılandırılmadı")
+    _ensure_prefetch()   # izleyici geldi → arka plan ön-yükleme başlasın
     try:
         r = await _fetch(cfg["source"])
         if r.status_code != 200 or not r.text.lstrip().startswith("#EXTM3U"):
@@ -108,18 +203,18 @@ async def stream_m3u8():
 
 @router.get("/seg")
 async def seg(u: str):
-    """Segment proxy — tarayıcı yerine backend segmenti çeker (DNS/CORS bağımsız)."""
+    """Segment proxy — cache/in-flight dedup ile tek indirme, çoklu servis."""
     if not u:
         raise HTTPException(status_code=400, detail="segment yok")
+    global _last_activity
+    _last_activity = time()
+    hit = u in _seg_cache
     try:
-        r = await _fetch(u)
-        if r.status_code != 200:
-            raise HTTPException(status_code=502, detail=f"segment {r.status_code}")
-        return Response(content=r.content,
-                        media_type="video/mp2t",
-                        headers={"Access-Control-Allow-Origin": "*",
-                                 "Cache-Control": "no-cache"})
+        data = await _get_segment(u)
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"segment fetch failed: {e}")
+    return Response(content=data, media_type="video/mp2t",
+                    headers={"Access-Control-Allow-Origin": "*", "Cache-Control": "no-cache",
+                             "X-Cache": "HIT" if hit else "MISS"})
