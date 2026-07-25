@@ -1728,11 +1728,13 @@ export default function VideoPlayer() {
             //  - Kayıtlı ama segment fail    → sarı/turuncu (maintenance — token/segment sorunu)
             //  - Configured değil / kayıtsız → CHANNELS[]'daki hardcoded status (backward-compat)
             const live = liveStatus[c.id];
-            const effectiveStatus: Channel['status'] = live
-              ? (!live.configured ? 'maintenance' : (live.ok ? 'online' : 'maintenance'))
-              : c.status;
             // Öne çıkan yayının map'li olduğu kanal + canlı → özel "canlı geçiş" vurgusu
             const isFeaturedLive = featured.live && featured.channel === c.id;
+            const effectiveStatus: Channel['status'] = isFeaturedLive
+              ? 'online'
+              : (live
+                  ? (!live.configured ? 'maintenance' : (live.ok ? 'online' : 'maintenance'))
+                  : c.status);
             return (
               <button
                 key={c.id}

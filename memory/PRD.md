@@ -102,3 +102,23 @@ Kullanıcı kuralı: **yanlış istatistik gösterme; bilinmiyorsa '?' göster.*
    Shwd=direkten dönen, YRcs=2. sarı eklendi, TOPLAM ŞUT türetiliyor. xG LiveScore'da YOK (FotMob'dan).
 4. Regresyon: 6 ana endpoint 200 ✓ (livescore/today, scores/top, channels, by-slug, predictions/open,
    featured/status). Ekran görüntüsüyle panel doğrulandı.
+
+## 2026-07-25 — ÖNE ÇIKAN YAYIN (Cloudflare Tunnel) CANLI ✅
+Cloudflare özel yayını (mono.m3u8) artık KALICI adresle canlıya alındı.
+- **Kaynak:** Cloudflare-korumalı .cfd yayını (tzy.zirvedesin236.cfd/zirve/mono.m3u8, Referer: fanatiktv5.com)
+- **Köprü:** Termux'ta stream_server.py (Flask, port 8080) — curl_cffi(chrome120) ile bypass,
+  segmentleri /seg?u= üzerinden proxy'ler (residential IP, .cfd rotasyonu otomatik). Yol: /mono.m3u8
+- **Tünel:** cloudflared named tunnel `banban-stream` (UUID 513a0c00-f112-4731-a7af-957e4766ad7b)
+  config: ~/.cloudflared/banban.yml → hostname stream.lenstedreal.xyz → localhost:8080
+- **Kalıcı adres:** https://stream.lenstedreal.xyz/mono.m3u8 (lenstedreal.xyz Cloudflare'de aktif)
+- **Backend:** backend/.env → FEATURED_SOURCE_URL=https://stream.lenstedreal.xyz/mono.m3u8,
+  FEATURED_CHANNEL=bein1, FEATURED_NAME="beIN SPORTS 1". /api/featured/status → live:true ✅
+  /api/featured/stream.m3u8 manifesti /seg URL'lerini stream.lenstedreal.xyz/seg'e rewrite ediyor.
+- **Frontend (VideoPlayer.tsx):** featured.live && channel==bein1 → beIN SPORTS 1 tile'ı YEŞİL + "CANLI"
+  rozeti, tıklayınca /api/featured/stream.m3u8 oynatılıyor. effectiveStatus artık featured'da 'online'.
+- **DOĞRULAMA:** curl ile manifest 200 + segment 4.8MB indi; tarayıcı testinde 10 stream/seg isteği
+  aktı, oynatıcı canlı moda geçti (headless H.264 decode yok, gerçek cihazda görüntü gelir).
+- **BAKIM:** Kaynak .cfd kök domaini değişirse telefonda stream_server.py'deki SOURCE satırını güncelle
+  + `pkill -9 -f python3; nohup python3 stream_server.py &`. Tünel/adres sabit kalır.
+- **KALICILIK:** termux-wake-lock + Termux pil kısıtlaması KAPALI olmalı (yoksa "Killed").
+  stream_server.py ve cloudflared ikisi de nohup ile arka planda.
