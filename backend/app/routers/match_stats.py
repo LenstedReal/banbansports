@@ -9,7 +9,7 @@ from ..core.config import LIVESCORE_FETCH_TIMEOUT
 from ..core.team_translations import tr_to_en_candidates
 from ..services.livescore import (
     livescore_fetch_day, _normalize_tr,
-    LIVESCORE_HEADERS, SDB_BASE, SOFASCORE_HEADERS,
+    LIVESCORE_HEADERS, SDB_BASE, SOFASCORE_HEADERS, FOTMOB_HEADERS,
 )
 
 logger = logging.getLogger("banbansports.matchstats")
@@ -33,10 +33,33 @@ async def get_match_stats(home: str, away: str, date: Optional[str] = None):
     # Accept both Turkish and English team names — generate all candidates
     home_candidates = [_normalize_tr(c) for c in tr_to_en_candidates(home.strip())]
     away_candidates = [_normalize_tr(c) for c in tr_to_en_candidates(away.strip())]
+
+    def _forms(s: str) -> set:
+        """İsim varyantları: normalize, boşluksuz, baş harf kısaltması.
+        (FotMob 'LAFC' der, LiveScore 'Los Angeles FC' — ikisi de eşleşmeli.)"""
+        n = _normalize_tr(s)
+        out = {n}
+        ns = n.replace(" ", "").replace(".", "").replace("-", "")
+        if ns:
+            out.add(ns)
+        words = [w for w in n.replace(".", " ").replace("-", " ").split() if w]
+        if len(words) >= 2:
+            # Kısa ekler (FC, SC, AS...) tam kalır: "Los Angeles FC" → "lafc"
+            acr = "".join(w if len(w) <= 2 else w[0] for w in words)
+            if len(acr) >= 3:
+                out.add(acr)
+        return out
+
+    home_forms: set = set()
+    away_forms: set = set()
+    for c in tr_to_en_candidates(home.strip()):
+        home_forms |= _forms(c)
+    for c in tr_to_en_candidates(away.strip()):
+        away_forms |= _forms(c)
     stats: dict = {"home": home, "away": away, "events": [], "stats": {}, "sources": []}
 
     def _match_level(t1: str, t2: str) -> int:
-        """2 = tam eşleşme, 1 = bulanık (substring), 0 = yok.
+        """2 = tam eşleşme, 1 = bulanık (substring/kısaltma), 0 = yok.
         Çakışma fix: iki canlı maçta benzer isimler (ör. 'Inter' ~ 'Inter Miami')
         yanlış maça bağlanmasın diye önce TAM eşleşme tercih edilir."""
         t1n, t2n = _normalize_tr(t1), _normalize_tr(t2)
@@ -44,8 +67,9 @@ async def get_match_stats(home: str, away: str, date: Optional[str] = None):
         a_exact = any(a == t2n for a in away_candidates if a)
         if h_exact and a_exact:
             return 2
-        h_ok = any(h in t1n or t1n in h for h in home_candidates if h)
-        a_ok = any(a in t2n or t2n in a for a in away_candidates if a)
+        t1f, t2f = _forms(t1), _forms(t2)
+        h_ok = any(h in t1n or t1n in h for h in home_candidates if h) or bool(home_forms & t1f)
+        a_ok = any(a in t2n or t2n in a for a in away_candidates if a) or bool(away_forms & t2f)
         return 1 if (h_ok and a_ok) else 0
 
     def _match(t1: str, t2: str) -> bool:
@@ -266,7 +290,84 @@ async def get_match_stats(home: str, away: str, date: Optional[str] = None):
                         "assist": inc.get("Pn2") or inc.get("P2"),
                     })
 
-        # SofaScore fallback for live incidents
+        # === FotMob ZENGİNLEŞTİRME — xG (gol beklentisi) ve gelişmiş istatistikler ===
+        # LiveScore'da xG yok; FotMob matchDetails'ten eksik alanlar doldurulur (üzerine yazılmaz).
+        FOT_MAP = {
+            "expected_goals": "xg",
+            "expected_goals_on_target": "xgot",
+            "big_chance": "big_chances",
+            "big_chance_missed_title": "big_chances_missed",
+            "touches_opp_box": "touches_in_opp_box",
+            "passes": "total_passes",
+            "accurate_passes": "passes_accurate",
+            "accurate_crosses": "accurate_crosses",
+            "long_balls_accurate": "long_balls",
+            "matchstats.headers.tackles": "tackles",
+            "interceptions": "interceptions",
+            "clearances": "clearances",
+            "keeper_saves": "goalkeeper_saves",
+            "duel_won": "duels_won",
+            "aerials_won": "aerial_duels",
+            "dribbles_succeeded": "dribbles",
+            "shots_inside_box": "shots_inside_box",
+            "shots_outside_box": "shots_outside_box",
+            "total_shots": "total_shots",
+            "ShotsOnTarget": "shots_on_goal",
+            "ShotsOffTarget": "shots_off_goal",
+            "blocked_shots": "blocked_shots",
+            "shots_woodwork": "shots_woodwork",
+            "corners": "corner_kicks",
+            "Offsides": "offsides",
+            "fouls": "fouls",
+            "yellow_cards": "yellow_cards",
+            "red_cards": "red_cards",
+            "BallPossesion": "ball_possession",
+        }
+        try:
+            fot_date = stats.get("date") or (date if (date and len(date) == 8)
+                                             else datetime.now(timezone.utc).strftime("%Y%m%d"))
+            fr = await http.get(f"https://www.fotmob.com/api/data/matches?date={fot_date}",
+                                headers=FOTMOB_HEADERS)
+            fot_id = None
+            if fr.status_code == 200:
+                fuzzy_fid = None
+                for lg in (fr.json().get("leagues") or []):
+                    for m in (lg.get("matches") or []):
+                        hn = (m.get("home") or {}).get("name") or ""
+                        an = (m.get("away") or {}).get("name") or ""
+                        lvl = _match_level(hn, an)
+                        if lvl == 2:
+                            fot_id = m.get("id")
+                            break
+                        if lvl == 1 and fuzzy_fid is None:
+                            fuzzy_fid = m.get("id")
+                    if fot_id:
+                        break
+                fot_id = fot_id or fuzzy_fid
+            if fot_id:
+                dr = await http.get(f"https://www.fotmob.com/api/data/matchDetails?matchId={fot_id}",
+                                    headers=FOTMOB_HEADERS)
+                if dr.status_code == 200:
+                    groups = (((((dr.json() or {}).get("content") or {}).get("stats") or {})
+                               .get("Periods") or {}).get("All") or {}).get("stats") or []
+                    added = False
+                    for grp in groups:
+                        for st in (grp.get("stats") or []):
+                            key = FOT_MAP.get(st.get("key"))
+                            if not key or st.get("type") == "title" or key in stats["stats"]:
+                                continue
+                            vals = st.get("stats") or []
+                            if len(vals) != 2 or (vals[0] is None and vals[1] is None):
+                                continue
+                            hv = 0 if vals[0] is None else vals[0]
+                            av = 0 if vals[1] is None else vals[1]
+                            suffix = "%" if key == "ball_possession" else ""
+                            stats["stats"][key] = {"home": f"{hv}{suffix}", "away": f"{av}{suffix}"}
+                            added = True
+                    if added:
+                        stats["sources"].append("fotmob")
+        except Exception as _fe:
+            logger.warning(f"fotmob enrich fail: {type(_fe).__name__}: {_fe}")
         try:
             sofa_id = None
             # Çakışma fix: tarih verilmişse SADECE o günü (±1 gün) ara — 8 gün geriye

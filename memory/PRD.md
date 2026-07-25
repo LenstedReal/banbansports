@@ -90,3 +90,15 @@ Kullanıcı kuralı: **yanlış istatistik gösterme; bilinmiyorsa '?' göster.*
 4. Frontend (`MatchDetailClient.tsx`): veri yoksa 0 yerine '?' (soluk renk + soluk bar) gösteriliyor.
 5. NOT: SofaScore API bu ortamdan 403 dönüyor (engelli). Fallback kodu duruyor ama fiilen pasif;
    tüm canlı veriler LiveScore'un 4 endpointinden geliyor (day/scoreboard/statistics/incidents/lineups).
+
+## 2026-07-18 (3) — xG + Dev İstatistik Paneli (FotMob Zenginleştirme)
+1. FotMob `matchDetails` entegrasyonu (match_stats.py): LiveScore'da olmayan gelişmiş istatistikler
+   eksik alanlara doldurulur (üzerine yazmaz). Yeni satırlar: GOL BEKLENTİSİ (xG), xGOT, NET POZİSYON,
+   KAÇAN NET POZİSYON, CEZA SAHASI İÇİ/DIŞI ŞUT, TOPLAM/İSABETLİ PAS, İSABETLİ ORTA, UZUN TOP,
+   TOP ÇALMA, PAS ARASI, UZAKLAŞTIRMA, İKİLİ MÜCADELE, HAVA TOPU, BAŞARILI ÇALIM. Panel 13→32 satır.
+2. Takım adı eşleştirme güçlendirildi (`_forms`): boşluksuz + kısaltma formları ("Los Angeles FC" ↔ "LAFC",
+   "Paris Saint Germain" ↔ "PSG"). Kısa ekler (FC/SC) kısaltmada tam kalır.
+3. LiveScore statistics alan düzeltmeleri: KORNER yanlış alandaydı (Crs→Cos, artık görünüyor),
+   Shwd=direkten dönen, YRcs=2. sarı eklendi, TOPLAM ŞUT türetiliyor. xG LiveScore'da YOK (FotMob'dan).
+4. Regresyon: 6 ana endpoint 200 ✓ (livescore/today, scores/top, channels, by-slug, predictions/open,
+   featured/status). Ekran görüntüsüyle panel doğrulandı.
