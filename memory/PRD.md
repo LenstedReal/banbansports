@@ -151,6 +151,39 @@ Sorun: 4MB/10sn segment ev upload'ından ~7-15sn çekiliyordu → hls.js buffer 
    challenge dönüyordu). asyncio.to_thread ile sync curl_cffi async'e sarıldı.
 5. hls.js featured kaynağı için: liveSyncDurationCount 3→5 (kenardan geride=cache'li bölge),
    liveMaxLatencyDurationCount 30, fragLoadingTimeOut 45sn, fragLoadingMaxRetry 6.
-DOĞRULAMA: cache HIT 0.18sn; ısınma sonrası en eski segmentler HIT, en yeniler MISS(4-7sn).
-DARBOĞAZ: ev UPLOAD hızı (~5-8Mbps) — 3.4Mbps stream'i sınırda taşıyor. Tam pürüzsüz için
-kaynağı düşük bitrate'e transcode gerekir (Termux'ta ffmpeg, ağır CPU — istenirse eklenir).
+## 2026-07-26 — ÖNE ÇIKAN YAYIN: OTOMATİK KANAL TESPİTİ + UI Düzenleme
+Öne çıkan yayının (mono.m3u8) hangi kanal kutusuna ait olduğu artık OTOMATİK belirleniyor.
+
+### Backend — TV programı scraper (`app/services/tv_schedule.py`, YENİ)
+- sporekrani.com günlük programı hafif REGEX ile parse edilir (bs4/lxml gibi ek bağımlılık YOK).
+  curl_cffi(chrome120) ile fetch, 15 dk in-memory cache (motoru/telefonu yormaz).
+- Sadece FUTBOL maçları + uygulamadaki 8 kanaldan birine eşlenenler alınır.
+  `map_channel_name()`: beIN Sports 1 / TRT 1 / TRT Spor / TRT Haber / TV 8 / S Sport(+Plus) /
+  Tivibu Spor / ATV. Alt-kanallar (beIN 4/Max, TV 8 Buçuk, S Sport 2, TRT Spor Yıldız) BİLEREK dışlanır.
+- `pick_featured(source_live)` kuralları (kullanıcı onaylı):
+  * Yayın FİZİKSEL olarak beIN Sports 1 → kaynak ayaktaysa VARSAYILAN kutu HER ZAMAN **bein1** (live).
+  * TEK istisna: **Galatasaray** maçı canlıysa (10 dk öncesinden aktif, ~2.5s pencere) → GS'nin
+    olduğu kanala geçer (öncelik GS > beIN 1; çakışırsa GS kazanır).
+  * Kaynak kapalıysa: 12s içindeki GS maçı "upcoming" gösterilir, yoksa "none" (gizli).
+  * Diğer kanallar (TRT Spor vb.) öne çıkan yayına ASLA otomatik atanmaz.
+- `featured.py` `/api/featured/status` artık: `{configured, source_live, live, channel, name,
+  status(live|upcoming|none), match{home,away,league,time,kickoff_iso,starts_in_min}}`.
+  Kaynak reachability 30sn cache (`_source_live`). Scraper patlarsa env kanalına graceful düşer.
+- DOĞRULAMA: 5 sentetik senaryo (GS override, beIN default, no-match, upcoming, hidden) + gerçek
+  endpoint (`source_live:true` → channel bein1 live) geçti.
+
+### Frontend (`VideoPlayer.tsx`)
+- `featured` state {live, channel, status, match}. `/api/featured/status` 30sn polling.
+- CANLI rozeti otomatik doğru kutuya (varsayılan beIN 1, GS canlıysa GS kanalı). YAKINDA (turuncu)
+  rozeti + geri sayım (dk/sa) upcoming durumunda. Tile title'ında maç bilgisi (takımlar/saat/lig).
+- Kanal grid'i artık **2 sütun** (Tivibu'nun altı yan yana). YAKINDA DAHA FAZLASI banner 2 sütunu kaplar.
+
+### Frontend (`page.tsx` + `globals.css`)
+- Duyuru şeridi (📢 alan adı) skorboard'ın ALTINA, MAÇ MERKEZİ'nin ÜSTÜNE taşındı (kullanıcı isteği).
+- `.access-ticker` kalitesi yükseltildi (glassy gradient, glow border, shine sweep — YAKINDA DAHA
+  FAZLASI kalitesinde). Tüm animasyonlar transform/opacity + prefers-reduced-motion (hafif).
+
+### Bekleyen / Notlar
+- FEATURED_SOURCE_URL kalıcı adres zaten yüklü: `stream.lenstedreal.xyz/lenstedreal_stream/mono.m3u8`.
+- Kullanıcı Cloudflare tünel/alan adı başlatma kodlarını + 15sn'de güncellenen cfd script'ini sonra verecek.
+

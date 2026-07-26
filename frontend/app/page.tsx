@@ -66,15 +66,8 @@ export default function HomePage() {
         {/* Carousel tarzı tek scoreboard — en büyük maçlar */}
         <MatchBanner initialMatches={topScores.matches} />
 
-        {/* Maç merkezi — tüm günün maçları */}
-        <MatchCenter initialStages={todayMatches.Stages} />
-
-        <VideoPlayer />
-
-        <SponsorBanner />
-
-        {/* Akan bilgi şeridi — güncel alan adı duyurusu */}
-        <div className="access-notice" data-testid="access-notice">
+        {/* Akan bilgi şeridi — güncel alan adı duyurusu (MAÇ MERKEZİ'nin hemen üstünde) */}
+        <div className="access-notice access-notice--top" data-testid="access-notice">
           <div className="access-ticker">
             <span className="access-ticker-label" aria-label="Duyuru">
               <span className="access-mega-emoji" aria-hidden="true">📢</span>
@@ -87,6 +80,13 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+
+        {/* Maç merkezi — tüm günün maçları */}
+        <MatchCenter initialStages={todayMatches.Stages} />
+
+        <VideoPlayer />
+
+        <SponsorBanner />
 
         <Sponsors />
 
