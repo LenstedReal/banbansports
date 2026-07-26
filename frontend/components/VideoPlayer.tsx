@@ -1072,6 +1072,7 @@ export default function VideoPlayer() {
   }, [isPlaying]);
 
   return (
+    <>
     <main className="main-content">
       <div className="player-layout">
         <div
@@ -1801,9 +1802,6 @@ export default function VideoPlayer() {
             );
           })}
 
-          {/* ÖNE ÇIKAN MAÇ — Cloudflare özel yayını şimdilik rafta; UI'dan kaldırıldı.
-              Backend (featured.py) ve featured state ileride tekrar açmak için korunuyor. */}
-
           {/* YAKINDA DAHA FAZLASI — kanal listesi teaser şeridi */}
           <div className="ch-soon-banner" data-testid="channels-coming-soon">
             <span className="ch-soon-dot" />
@@ -1816,5 +1814,57 @@ export default function VideoPlayer() {
           globals.css'in sonunda yer alıyor. Daha önce burada <style jsx> bloğu vardı;
           styled-jsx paketinin kaldırılmasıyla CSS global stylesheet'e taşındı. */}
     </main>
+
+      {/* ===== GÜNÜN MAÇI / ÖNE ÇIKAN YAYIN — video+kanalların ALTINDA, tam genişlik ===== */}
+      {featured.status !== 'none' && featured.channel && (() => {
+        const fch = CHANNELS.find((x) => x.id === featured.channel);
+        const fm = featured.match;
+        const isUp = featured.status === 'upcoming';
+        const cd = (() => {
+          const n = fm?.starts_in_min ?? 0;
+          if (!isUp || n <= 0) return '';
+          if (n < 60) return `${n} DK SONRA`;
+          const h = Math.floor(n / 60); const mm = n % 60;
+          return mm ? `${h} SA ${mm} DK SONRA` : `${h} SA SONRA`;
+        })();
+        return (
+          <div className={`feat-day ${isUp ? 'upcoming' : 'live'}`} data-testid="featured-match-box">
+            <div className="feat-day-left">
+              <span className="feat-day-kicker">GÜNÜN MAÇI</span>
+              {fch?.logo
+                ? <img className="feat-day-logo" src={fch.logo} alt={featured.name} loading="lazy" />
+                : <span className="feat-day-chname">{featured.name}</span>}
+            </div>
+            <div className="feat-day-mid">
+              {fm ? (
+                <>
+                  <div className="feat-day-teams">
+                    <span className="fd-home">{fm.home}</span>
+                    <span className="fd-vs">VS</span>
+                    <span className="fd-away">{fm.away}</span>
+                  </div>
+                  <div className="feat-day-meta">{[fm.league, fm.time].filter(Boolean).join('  ·  ')}</div>
+                </>
+              ) : (
+                <div className="feat-day-teams solo">{featured.name}</div>
+              )}
+              {cd && <div className="feat-day-countdown">{cd}</div>}
+            </div>
+            <div className="feat-day-right">
+              <span className={`feat-day-badge ${isUp ? 'upcoming' : 'live'}`}>
+                <span className="fd-badge-dot" />{isUp ? 'YAKINDA' : 'CANLI'}
+              </span>
+              <button
+                className="feat-day-watch"
+                data-testid="featured-watch-btn"
+                onClick={() => { try { window.dispatchEvent(new CustomEvent('bb:select-channel', { detail: { id: featured.channel } })); } catch { /* noop */ } }}
+              >
+                ▶ İZLE
+              </button>
+            </div>
+          </div>
+        );
+      })()}
+    </>
   );
 }
