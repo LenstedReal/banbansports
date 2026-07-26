@@ -32,6 +32,16 @@ LIVESCORE_STATUS_MAP = {
 
 BIG_CLUB_REGEX_S = re.compile(r'\b(galatasaray|fenerbah[cç]e|be[sş]ikta[sş]|trabzonspor)\b', re.IGNORECASE)
 
+# Ünlü Avrupa/dünya kulüpleri — tanınmayan lig/hazırlık turnuvasında bile ASLA kaçmaz
+BIG_EU_CLUB_REGEX = re.compile(
+    r'\b(real madrid|barcelona|atletico|bayern|borussia dortmund|leverkusen|rb leipzig'
+    r'|eintracht frankfurt|liverpool|manchester united|manchester city|arsenal|chelsea'
+    r'|tottenham|newcastle|aston villa|west ham|everton|leeds|sunderland|wrexham'
+    r'|psg|paris saint|marseille|lyon|monaco|lille|juventus|inter|ac milan|milan|roma'
+    r'|napoli|lazio|atalanta|fiorentina|ajax|psv|feyenoord|benfica|porto|sporting'
+    r'|celtic|rangers|sevilla|valencia|villarreal|athletic bilbao|real sociedad|real betis'
+    r'|al nassr|al hilal|inter miami)\b', re.IGNORECASE)
+
 EXCLUDE_KEYWORDS = ["u18", "u19", "u20", "u21", "u23", "youth", "reserve", "women",
                     "primavera", "qualification: round", "u15", "u16", "u17",
                     "amateur", "regionalliga", "oberliga", "veterans",
@@ -57,6 +67,7 @@ INTL_KEYWORDS = [
     "euro 2028", "european championship", "euro qualif",
     "copa america", "copa libertadores", "copa sudamericana",
     "friendly", "international friendly", "club friendly",
+    "summer series", "pre-season", "preseason",
     "afcon", "africa cup of nations", "asian cup", "gold cup",
     "milli", "national team", "intercontinental",
 ]
@@ -84,6 +95,9 @@ BIG_LEAGUE_KEYWORDS = [
     ("nations league",        "ULUSLAR LİGİ",           175),
     ("copa america",          "COPA AMERİCA",           170),
     ("international friendly","ULUSLAR ARASI HAZIRLIK", 150),
+    ("summer series",         "PREMİER LİG YAZ SERİSİ", 120),
+    ("pre-season",            "SEZON ÖNCESİ HAZIRLIK",  115),
+    ("preseason",             "SEZON ÖNCESİ HAZIRLIK",  115),
     ("club friendly",         "KULÜP HAZIRLIK MAÇI",    110),
     ("friendly",              "HAZIRLIK MAÇI",          115),
     ("afcon",                 "AFRİKA KUPASI",          155),
@@ -356,15 +370,17 @@ async def fetch_live_scores(top_n: int = 1) -> Optional[dict]:
                             league_match = (label, base_score)
                             break
                 else:
-                    if not any(c in combined for c in BIG_COUNTRIES):
-                        continue
-                    for kw, label, score in BIG_LEAGUE_KEYWORDS:
-                        if sn_root == kw:
-                            league_match = (label, score)
-                            break
-                if not league_match:
-                    continue
-                league_label, base = league_match
+                    if any(c in combined for c in BIG_COUNTRIES):
+                        for kw, label, score in BIG_LEAGUE_KEYWORDS:
+                            if sn_root == kw:
+                                league_match = (label, score)
+                                break
+                if league_match:
+                    league_label, base = league_match
+                else:
+                    # Tanınmayan lig/ülke → stage ATLANMAZ; event bazında SADECE büyük
+                    # TR kulübü (GS/FB/BJK/TS) maçları alınır (GS maçı ASLA kaçmaz).
+                    league_label, base = None, 0
                 for ev in (stage.get("Events") or []):
                     eps = (ev.get("Eps") or "")
                     if eps not in ("NS", "Not Started", "1H", "2H", "HT", "ET", "PEN",
@@ -379,17 +395,29 @@ async def fetch_live_scores(top_n: int = 1) -> Optional[dict]:
                     t2 = _normalize_tr(t2_raw)
                     is_gs = bool(re.search(r'\bgalatasaray\b', t1) or re.search(r'\bgalatasaray\b', t2))
                     is_big_tr = is_gs or bool(BIG_CLUB_REGEX_S.search(t1) or BIG_CLUB_REGEX_S.search(t2))
+                    if league_label is None:
+                        # Tanınmayan lig: büyük TR kulübü VEYA ünlü Avrupa kulübü maçı geçer
+                        is_famous = bool(BIG_EU_CLUB_REGEX.search(t1) or BIG_EU_CLUB_REGEX.search(t2))
+                        if not (is_big_tr or is_famous):
+                            continue
+                        # Etiket TÜRKÇE: hazırlık turnuvaları "HAZIRLIK MAÇI" olur
+                        _snm_l = (stage.get("Snm") or "").lower()
+                        cur_label = ("HAZIRLIK MAÇI" if ("friendl" in _snm_l or "pre-season" in _snm_l or "preseason" in _snm_l)
+                                     else (stage.get("Snm") or "ÖZEL MAÇ").upper())
+                        cur_base = 120
+                    else:
+                        cur_label, cur_base = league_label, base
                     # UEFA KULÜP kupalarının ELEME turlarındaki ufak kulüpleri (KuPS/Riga/TNS/Larne...)
                     # ele — sadece büyük bir Türk kulübü oynuyorsa göster. Grup/eleme dışı turlar
                     # (gerçek UCL/UEL) etkilenmez; milli takım (Dünya Kupası/Euro/Uluslar/Hazırlık) etkilenmez.
-                    if ("ŞAMPİYONLAR" in league_label or "AVRUPA LİGİ" in league_label
-                            or "KONFERANS" in league_label):
+                    if ("ŞAMPİYONLAR" in cur_label or "AVRUPA LİGİ" in cur_label
+                            or "KONFERANS" in cur_label):
                         is_qualifier = any(q in combined for q in (
                             "qualif", "preliminary", "prelim", "1st round", "2nd round",
                             "3rd round", "play-off", "playoff"))
                         if is_qualifier and not is_big_tr:
                             continue
-                    score = base
+                    score = cur_base
                     if eps in ("1H", "2H", "HT", "ET", "PEN"):
                         score += 2000
                     elif eps in ("FT", "AET", "AP", "Pen."):
@@ -409,7 +437,7 @@ async def fetch_live_scores(top_n: int = 1) -> Optional[dict]:
                         score += 1000
                     elif is_big_tr:
                         score += 350
-                    out.append((score, ev, league_label, d_str, day_offset, eps))
+                    out.append((score, ev, cur_label, d_str, day_offset, eps))
             return out
 
         all_c = []
@@ -470,6 +498,14 @@ async def fetch_live_scores(top_n: int = 1) -> Optional[dict]:
             if len(top_list) >= top_n:
                 break
 
+        # SAAT DÜZELTME: sporekrani'nin (TR yayın rehberi) kesin saatleri LiveScore'u düzeltir
+        try:
+            from app.services.tv_schedule import correct_kickoff_labels
+            await correct_kickoff_labels(top_list)
+        except Exception as _e:
+            logger.debug(f"kickoff label correction skipped: {_e}")
+
         if top_n == 1:
             return top_list[0] if top_list else None
         return {"type": "score_top", "matches": top_list, "timestamp": datetime.now(timezone.utc).isoformat()}
+

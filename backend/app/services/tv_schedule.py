@@ -13,6 +13,7 @@ Kullanıcı öncelik kuralları:
   * Hiçbir maç yoksa → gizli (channel="").
 """
 import re
+import json
 import logging
 import asyncio
 from time import time
@@ -38,8 +39,8 @@ APP_CHANNEL_NAMES = {
     "ssport": "S SPORT", "atv": "ATV",
 }
 
-# ==== Program cache (hafif; tek dict) ====
-_SCHED_CACHE = {"date": "", "at": 0.0, "matches": []}
+# ==== Program cache (hafif; tarih -> {at, matches}) ====
+_SCHED_CACHE: dict = {}
 _SCHED_TTL = 900.0  # 15 dk
 
 
@@ -94,12 +95,34 @@ _TIME_RE = re.compile(r'event-list__time[^>]*>\s*([0-9]{1,2}:[0-9]{2})')
 _NAME_RE = re.compile(r'event-list__name[^>]*>([^<]+)<')
 _LEAGUE_RE = re.compile(r'event-list__league[^>]*>([^<]+)<')
 _CHAN_RE = re.compile(r'src="[^"]*/channels/[^"]*"\s+alt="([^"]*)"')
+# Sayfaya gömülü Nuxt JSON'u — GERÇEK TR saati burada ("Z" yanıltıcı, değer TR yereldir)
+_JSON_EVT_RE = re.compile(
+    r'\{"id":(\d+),"event_type_name":"match","date_time":"([^"]+)","league_name":"([^"]*)","name":"([^"]*)"')
+
+
+def _unesc(s: str) -> str:
+    try:
+        return json.loads(f'"{s}"')
+    except Exception:
+        return s
+
+
+def _parse_json_events(html: str, date_str: str) -> dict:
+    """Gömülü JSON'dan {id: {time, league, name}} — saatler kesin doğru (TR yerel)."""
+    out = {}
+    for mid, dt, lg, name in _JSON_EVT_RE.findall(html):
+        if not dt.startswith(date_str):
+            continue
+        out[mid] = {"time": dt[11:16], "league": _unesc(lg), "name": _unesc(name)}
+    return out
 
 
 def _parse(html: str) -> list:
     """HTML → futbol maçları [{time, home, away, league, channels[], app_channel}]."""
     out = []
     for _href, inner in _ANCHOR_RE.findall(html):
+        mid_m = re.search(r'/home/match/(\d+)/', _href)
+        mid = mid_m.group(1) if mid_m else ""
         sport = _SPORT_RE.search(inner)
         if not sport or _norm(sport.group(1)) != "futbol":
             continue  # sadece futbol (öne çıkan yayın futbol odaklı)
@@ -119,40 +142,252 @@ def _parse(html: str) -> list:
             if c not in seen:
                 seen.add(c)
                 raw_chans.append(c)
-        app_ch = None
-        # beIN 1 varsa onu tercih et, yoksa ilk eşleşen
+        # beIN 1 varsa onu tercih et, yoksa ilk eşleşen; bizde olmayan kanal → None
         mapped = [map_channel_name(c) for c in raw_chans]
         mapped = [m for m in mapped if m]
-        if "bein1" in mapped:
-            app_ch = "bein1"
-        elif mapped:
-            app_ch = mapped[0]
-        if not app_ch:
-            continue  # bu maç bizim 8 kanaldan birinde değil → atla
-        out.append({"time": t.group(1), "home": home, "away": away,
+        app_ch = "bein1" if "bein1" in mapped else (mapped[0] if mapped else None)
+        # NOT: app_ch None olsa bile maç TUTULUR (GÜNÜN MAÇI kutusu bilgi gösterir, TV100 vb.)
+        out.append({"id": mid, "time": t.group(1), "home": home, "away": away,
                     "league": league, "channels": raw_chans, "app_channel": app_ch})
     return out
 
 
-async def _get_schedule() -> list:
+async def _get_schedule(day_offset: int = 0) -> list:
+    """Günün (veya yarının) programı. Anchor'lardan kanallar + gömülü JSON'dan KESİN saatler.
+    JSON'da olup anchor'da olmayan maçlar da eklenir (json_only, kanal bilgisi yok)."""
     now = time()
-    today = datetime.now(_TZ).strftime("%Y-%m-%d")
-    if _SCHED_CACHE["date"] == today and (now - _SCHED_CACHE["at"]) < _SCHED_TTL:
-        return _SCHED_CACHE["matches"]
+    d = (datetime.now(_TZ) + timedelta(days=day_offset)).strftime("%Y-%m-%d")
+    c = _SCHED_CACHE.get(d)
+    if c and (now - c["at"]) < _SCHED_TTL:
+        return c["matches"]
     try:
-        html = await asyncio.to_thread(_fetch_html, today)
+        html = await asyncio.to_thread(_fetch_html, d)
         matches = _parse(html) if html else []
-        if matches or html:  # başarılı fetch (boş liste de geçerli)
-            _SCHED_CACHE.update(date=today, at=now, matches=matches)
+        jevents = _parse_json_events(html, d) if html else {}
+        seen = set()
+        for m in matches:
+            seen.add(m.get("id"))
+            je = jevents.get(m.get("id"))
+            if je and je.get("time"):
+                m["time"] = je["time"]  # JSON saati kesindir (anchor bazen yanlış/eksik)
+        for mid, je in jevents.items():
+            if mid in seen or " - " not in je["name"]:
+                continue
+            home, away = [x.strip() for x in je["name"].split(" - ", 1)]
+            matches.append({"id": mid, "time": je["time"], "home": home, "away": away,
+                            "league": je["league"], "channels": [], "app_channel": None,
+                            "json_only": True})
+        if html:
+            _SCHED_CACHE[d] = {"at": now, "matches": matches}
         return matches
     except Exception as e:
         logger.debug(f"tv schedule fetch fail: {e}")
-        return _SCHED_CACHE["matches"] if _SCHED_CACHE["date"] == today else []
+        return c["matches"] if c else []
 
 
 def _is_gala(m: dict) -> bool:
     blob = _norm(m["home"] + " " + m["away"])
     return "galatasaray" in blob
+
+
+# ===== ÖNEM SIRALAMASI — skorboard/match center (livescore.py) ile AYNI mantık =====
+# Lig baz puanları + GS +1000, büyük TR kulübü +350, canlı maç +2000
+_LEAGUE_SCORES = [
+    ("super lig", 500), ("turkiye kupasi", 380), ("ziraat", 380),
+    ("dunya kupasi", 260), ("world cup", 260),
+    ("sampiyonlar ligi", 200), ("champions league", 200),
+    ("avrupa ligi", 180), ("europa league", 180),
+    ("konferans ligi", 165), ("conference league", 165),
+    ("uluslar ligi", 175), ("nations league", 175),
+    ("premier lig", 150), ("premier league", 150),
+    ("la liga", 145), ("bundesliga", 140), ("serie a", 138), ("ligue 1", 130),
+    ("hazirlik", 115), ("friendly", 115),
+]
+_BIG_TR_RE = re.compile(r"galatasaray|fenerbahce|besiktas|trabzonspor")
+# Gençlik/kadın/rezerv/alt ligler + "championship" gibi alt kategoriler ASLA günün maçı olamaz
+_EXCLUDE_RE = re.compile(
+    r"u-?1[5-9]\b|u-?2[0-3]\b|genc|kadin|women|rezerv|reserve|youth|amator|amateur"
+    r"|championship|akademi|academy|primavera|2\. lig|3\. lig|serie b|serie c|ligue 2")
+
+
+def _importance(m: dict) -> int:
+    lg = _norm(m["league"])
+    base = 50
+    for kw, sc in _LEAGUE_SCORES:
+        if kw in lg:
+            base = sc
+            break
+    blob = _norm(m["home"] + " " + m["away"])
+    if "galatasaray" in blob:
+        base += 1000
+    elif _BIG_TR_RE.search(blob):
+        base += 350
+    return base
+
+
+async def pick_day_match():
+    """GÜNÜN MAÇI kutusu — KUSURSUZ hibrit sistem:
+    1) Maç seçimi: skorboard/match center'ın BİREBİR aynı sistemi (fetch_live_scores,
+       LiveScore→FotMob→SofaScore zinciri + aynı önem sıralaması).
+    2) Kanal bilgisi: sporekrani'den takım adı eşleştirmesiyle zenginleştirilir
+       (YouTube / "Yayın Yok" elenir). Bulunamazsa kanal boş — maç yine gösterilir.
+    3) LiveScore zinciri komple çökerse: sporekrani-only yedek seçim devreye girer.
+    Sonuç 60 sn cache'lenir (motor yorulmaz)."""
+    now_ts = time()
+    if _DAY_CACHE["val"] is not None and (now_ts - _DAY_CACHE["at"]) < 60:
+        return _DAY_CACHE["val"]
+    val = None
+    try:
+        val = await _pick_from_livescore()
+    except Exception as e:
+        logger.debug(f"livescore day pick fail: {e}")
+    if val is None:
+        try:
+            val = await _pick_from_sporekrani()
+        except Exception as e:
+            logger.debug(f"sporekrani day pick fail: {e}")
+            val = None
+    _DAY_CACHE.update(at=now_ts, val=val)
+    return val
+
+
+_DAY_CACHE = {"at": 0.0, "val": None}
+
+
+async def _sporekrani_lookup(home: str, away: str):
+    """Takım adlarına göre maçı bugün+yarın programında ara.
+    Döner: (kanal_adı, app_channel, kesin_saat, gün_offset) — bulunamazsa ('', None, '', None)."""
+    nh, na = _norm(home), _norm(away)
+
+    def _sim(a: str, b: str) -> bool:
+        return bool(a and b and (a in b or b in a))
+
+    for off in (0, 1):
+        try:
+            matches = await _get_schedule(off)
+        except Exception:
+            continue
+        for m in matches:
+            if _sim(_norm(m["home"]), nh) and _sim(_norm(m["away"]), na):
+                real = [c for c in m["channels"]
+                        if "youtube" not in _norm(c) and "yayin yok" not in _norm(c)]
+                return (real[0] if real else ""), m["app_channel"], (m.get("time") or ""), off
+    return "", None, "", None
+
+
+async def correct_kickoff_labels(top_list) -> None:
+    """Skorboard NS maçlarının BUGÜN/YARIN saatlerini sporekrani'nin KESİN TR saatiyle düzeltir
+    (LiveScore bazen yanlış saat verir — örn. GS-Venezia 19:00 değil 21:00)."""
+    for it in (top_list or []):
+        st = it.get("status") or ""
+        if not re.match(r"^(BUGÜN|YARIN)\s+\d{1,2}:\d{2}$", st):
+            continue
+        try:
+            _ch, _app, sp_time, off = await _sporekrani_lookup(
+                it.get("team1_en") or it.get("team1") or "",
+                it.get("team2_en") or it.get("team2") or "")
+        except Exception:
+            continue
+        if sp_time and off is not None:
+            it["status"] = f"{'BUGÜN' if off == 0 else 'YARIN'} {sp_time}"
+
+
+async def _sporekrani_channel_for(home: str, away: str):
+    """Seçilen maçın TV kanalını sporekrani programından bul (yoksa boş döner)."""
+    ch, app_ch, _t, _o = await _sporekrani_lookup(home, away)
+    return ch, app_ch
+
+
+async def _pick_from_livescore():
+    """Skorboard'ın top-10 listesinden, kullanıcı pencere kurallarına uyan İLK maçı seç:
+    canlı (veya başlamasına ≤10 dk) → live; ≤12 saat → upcoming; MAÇ SONU/uzak tarih → atla."""
+    from app.services.livescore import fetch_live_scores
+    data = await fetch_live_scores(top_n=10)
+    if not data or not data.get("matches"):
+        return None
+    now = datetime.now(_TZ)
+    for c in data["matches"]:
+        st_label = c.get("status") or ""
+        is_live = bool(c.get("isLive"))
+        kick = None
+        status = None
+        if is_live:
+            status = "live"
+        else:
+            m2 = re.match(r"^(BUGÜN|YARIN)\s+(\d{1,2}):(\d{2})$", st_label)
+            if not m2:
+                continue  # MAÇ SONU / 12 saatten uzak tarih → kutuya girmez
+            d = now.date() if m2.group(1) == "BUGÜN" else (now + timedelta(days=1)).date()
+            kick = datetime(d.year, d.month, d.day, int(m2.group(2)), int(m2.group(3)), tzinfo=_TZ)
+            diff = kick - now
+            if diff <= timedelta(minutes=PRE_START_MIN):
+                status = "live"  # 10 dk kala canlı sayılır (kullanıcı kuralı)
+            elif diff <= timedelta(hours=UPCOMING_WINDOW_HOURS):
+                status = "upcoming"
+            else:
+                continue
+        home = c.get("team1") or c.get("team1_en") or ""
+        away = c.get("team2") or c.get("team2_en") or ""
+        ch_name, app_ch = await _sporekrani_channel_for(
+            c.get("team1_en") or home, c.get("team2_en") or away)
+        starts_in = (max(0, int((kick - now).total_seconds() // 60))
+                     if (kick and status == "upcoming") else 0)
+        return {
+            "home": home, "away": away, "league": c.get("league") or "",
+            "time": (kick.strftime("%H:%M") if kick else ""),
+            "kickoff_iso": (kick.isoformat() if kick else ""),
+            "starts_in_min": starts_in, "status": status,
+            "channel_name": ch_name, "app_channel": app_ch,
+            "watchable": bool(app_ch),
+            "score1": c.get("score1"), "score2": c.get("score2"),
+            "status_label": st_label if is_live else "",
+        }
+    return None
+
+
+async def _pick_from_sporekrani():
+    """YEDEK seçim — LiveScore zinciri çökerse sporekrani programından önem sıralı seçim."""
+    matches = await _get_schedule()
+    now = datetime.now(_TZ)
+    today = now.date()
+    best = None  # (score, start, match, status)
+    for m in matches:
+        try:
+            hh, mm = m["time"].split(":")
+            start = datetime(today.year, today.month, today.day,
+                             int(hh), int(mm), tzinfo=_TZ)
+        except Exception:
+            continue
+        active = (start - timedelta(minutes=PRE_START_MIN)) <= now <= (start + timedelta(minutes=MATCH_DURATION_MIN))
+        upcoming = now < start - timedelta(minutes=PRE_START_MIN) and (start - now) <= timedelta(hours=UPCOMING_WINDOW_HOURS)
+        if not (active or upcoming):
+            continue
+        lg = _norm(m["league"])
+        if _EXCLUDE_RE.search(lg):
+            continue  # gençlik/kadın/alt lig/championship → asla günün maçı değil
+        # YouTube-only / "Yayın Yok" maçlar günün maçı olamaz (izlenebilir TV kanalı şart)
+        real_chans = [c for c in m["channels"]
+                      if "youtube" not in _norm(c) and "yayin yok" not in _norm(c)]
+        if not real_chans and not m["app_channel"]:
+            continue
+        imp = _importance(m)
+        if imp < 100:
+            continue  # skorboard gibi: tanınmayan küçük ligler GÜNÜN MAÇI olamaz
+        sc = imp + (2000 if active else 0)
+        if best is None or sc > best[0] or (sc == best[0] and start < best[1]):
+            best = (sc, start, m, "live" if active else "upcoming", real_chans)
+    if not best:
+        return None
+    _sc, start, m, st, real_chans = best
+    return {
+        "home": m["home"], "away": m["away"], "league": m["league"], "time": m["time"],
+        "kickoff_iso": start.isoformat(),
+        "starts_in_min": max(0, int((start - now).total_seconds() // 60)),
+        "status": st,
+        "channel_name": (real_chans[0] if real_chans else (m["channels"][0] if m["channels"] else "")),
+        "app_channel": m["app_channel"],
+        "watchable": bool(m["app_channel"]),
+    }
 
 
 async def pick_featured(source_live: bool) -> dict:
@@ -183,7 +418,7 @@ async def pick_featured(source_live: bool) -> dict:
         is_active = active_from <= now <= active_to
         is_upcoming = now < active_from and (start - now) <= timedelta(hours=UPCOMING_WINDOW_HOURS)
 
-        if _is_gala(m):
+        if _is_gala(m) and m["app_channel"]:
             if is_active and (gala_live is None or start < gala_live[1]):
                 gala_live = (m, start)
             elif is_upcoming and (gala_upcoming is None or start < gala_upcoming[1]):
@@ -219,3 +454,4 @@ async def pick_featured(source_live: bool) -> dict:
         m, start = gala_live
         return _pack(m["app_channel"], "upcoming", _match_info(m, start))
     return {"channel": "", "name": "", "status": "none", "match": None}
+

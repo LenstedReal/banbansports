@@ -66,9 +66,11 @@ function MatchDetailInner({ home, away, date, initial }: { home: string; away: s
         </div>
       )}
 
+      {/* MAÇ OLAYLARI + İSTATİSTİK — geniş ekranda yan yana, darda alt alta */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 460px), 1fr))', gap: 20, alignItems: 'start' }}>
       {/* MAÇ OLAYLARI */}
       {!isPreMatch && data?.events && data.events.length > 0 && (
-        <div style={{ background: 'rgba(15,8,24,0.5)', border: '1px solid rgba(255,0,170,0.2)', borderRadius: 8, padding: 14, marginBottom: 20 }}>
+        <div style={{ background: 'rgba(15,8,24,0.5)', border: '1px solid rgba(255,0,170,0.2)', borderRadius: 8, padding: 14 }}>
           <div style={{ fontFamily: 'Orbitron', fontSize: 13, letterSpacing: 3, color: 'var(--pink)', marginBottom: 10 }}>{TR.EVENTS_TITLE}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {data.events.map((e: any, i: number) => (
@@ -88,7 +90,7 @@ function MatchDetailInner({ home, away, date, initial }: { home: string; away: s
 
       {/* İSTATİSTİK */}
       {!isPreMatch && data?.stats && Object.keys(data.stats).length > 0 && (
-        <div style={{ background: 'rgba(15,8,24,0.5)', border: '1px solid rgba(0,240,255,0.2)', borderRadius: 8, padding: 14 }} data-testid="match-page-stats">
+        <div style={{ background: 'rgba(15,8,24,0.5)', border: '1px solid rgba(0,240,255,0.2)', borderRadius: 8, padding: '14px 18px' }} data-testid="match-page-stats">
           {STAT_ORDER.map(({ key, always, icon }) => {
             const raw = data.stats[key];
             const has = raw && raw.home != null && raw.away != null;
@@ -116,6 +118,7 @@ function MatchDetailInner({ home, away, date, initial }: { home: string; away: s
           })}
         </div>
       )}
+      </div>
 
       {!data?.available && (
         <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-dim)', fontFamily: 'VT323', fontSize: 15 }} data-testid="match-page-empty">

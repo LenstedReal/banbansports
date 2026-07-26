@@ -193,6 +193,27 @@ Sorun: 4MB/10sn segment ev upload'ından ~7-15sn çekiliyordu → hls.js buffer 
   açılır; sadece beIN program yayını varken (match=null) GİZLİ. Kutuda kanal adı + takımlar +
   saat (mavi/cyan) gösterilir. Yapay test-always-show YOK.
 
+## 2026-07-26 (2. tur) — KUSURSUZLAŞTIRMA + SAAT DÜZELTME + UI
+- GÜNÜN MAÇI seçimi artık HİBRİT: fetch_live_scores (skorboard sistemi birebir) ana kaynak,
+  sporekrani sadece kanal zenginleştirme, çökerse sporekrani-only yedek. 60sn cache.
+- SAAT DÜZELTME SİSTEMİ: sporekrani sayfasına gömülü Nuxt JSON'undaki date_time TR YERELDİR
+  ("Z" yanıltıcı) ve LiveScore'dan DOĞRUDUR (GS-Venezia: LiveScore 19:00 ❌ → gerçek 21:00 ✓).
+  `_get_schedule(day_offset)` bugün+yarın destekli; `correct_kickoff_labels()` skorboard
+  BUGÜN/YARIN etiketlerini takım eşleştirmesiyle düzeltir (fetch_live_scores içinde çağrılır).
+- Skorboard/MatchCenter EKSİKLERİ kapatıldı: "Club Friendlies"(çoğul), "Summer Series",
+  pre-season artık tanınıyor; BIG_EU_CLUB_REGEX (Leeds, Real, Bayern... ~45 kulüp) ile ünlü
+  kulüp maçları tanınmayan ligde bile ASLA kaçmaz; büyük TR kulübü kuralı zaten vardı.
+  Etiketler TÜRKÇE ("HAZIRLIK MAÇI"). YouTube-only / "Yayın Yok" / U19 / kadın elenir.
+- GÜNÜN MAÇI kutusu: sadece gerçek maç varken; kanal bizde değilse (TV100) bilgi var İZLE yok;
+  canlı skoru (score1-score2) ve dakika gösterir; saat mavi.
+- TRT HABER (çalışan kanal) her zaman CANLI + yeşil neon (TRT 1 değil — düzeltildi).
+- Bakım kanalları: 5 sn sonra /maintenance_loop.mp4 SESLİ döngü (autoplay engellenirse
+  sessiz başlar, videoya DOKUNUNCA ses açılır). Video: frontend/public/maintenance_loop.mp4.
+- Maç detay sayfası: width %100 + maxWidth 1200, olaylar+istatistik geniş ekranda 2 sütun.
+- /app/termux/RESTART_GUIDE.md: tünel+stream server yeniden başlatma komutları (kullanıcıya verildi).
+- BİLİNEN TUZAK: search_replace bazen bloğu dosya SONUNA ekleyip çift tanım bırakıyor —
+  her büyük edit sonrası `ast.parse` + `grep "^def\|^async def"` ile çift tanım kontrolü yap!
+
 ### Bekleyen / Notlar
 - FEATURED_SOURCE_URL kalıcı adres zaten yüklü: `stream.lenstedreal.xyz/lenstedreal_stream/mono.m3u8`.
 - Kullanıcı Cloudflare tünel/alan adı başlatma kodlarını + 15sn'de güncellenen cfd script'ini sonra verecek.

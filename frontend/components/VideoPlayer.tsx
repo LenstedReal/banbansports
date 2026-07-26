@@ -120,6 +120,16 @@ export default function VideoPlayer() {
   const [awaitingResume, setAwaitingResume] = useState(false); // Reklam bitti → kullanıcı Play'e basana kadar yayın YOK
   const [adRemainingSec, setAdRemainingSec] = useState(0);
   const [streamError, setStreamError] = useState('');
+  // Bakım/aktif olmayan kanal: 5 sn sonra döngü videosu oynar (kullanıcı isteği)
+  const [maintLoop, setMaintLoop] = useState(false);
+  useEffect(() => {
+    if (hasStarted && !adActive && streamError) {
+      const t = setTimeout(() => setMaintLoop(true), 5000);
+      return () => clearTimeout(t);
+    }
+    setMaintLoop(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasStarted, adActive, streamError, selected.id]);
   const [muted, setMuted] = useState(true);
   const [levels, setLevels] = useState<Level[]>([]);
   const [currentLevel, setCurrentLevel] = useState(-1); // -1 = AUTO
@@ -1294,14 +1304,38 @@ export default function VideoPlayer() {
             </div>
           )}
 
-          {/* MAINTENANCE / ERROR */}
+          {/* MAINTENANCE / ERROR — 5 sn sonra döngü videosuna geçer */}
           {hasStarted && !adActive && streamError && (
             <div className="overlay maintenance-overlay" data-testid="stream-error">
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z" />
-              </svg>
-              <div className="maintenance-title">{selected.name}</div>
-              <div className="maintenance-subtitle">{streamError}</div>
+              {maintLoop ? (
+                <video
+                  className="maint-loop-video"
+                  src="/maintenance_loop.mp4"
+                  autoPlay
+                  loop
+                  playsInline
+                  data-testid="maintenance-loop-video"
+                  ref={(el) => {
+                    if (!el) return;
+                    // SESLİ oynat; tarayıcı engellerse sessize düşüp yine oynat
+                    el.muted = false;
+                    const p = el.play();
+                    if (p && p.catch) p.catch(() => { el.muted = true; el.play().catch(() => {}); });
+                  }}
+                  onClick={(e) => {
+                    // Dokun → sesi aç/kapat (autoplay ses engeline garanti çözüm)
+                    const v = e.currentTarget; v.muted = !v.muted; v.play().catch(() => {});
+                  }}
+                />
+              ) : (
+                <>
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z" />
+                  </svg>
+                  <div className="maintenance-title">{selected.name}</div>
+                  <div className="maintenance-subtitle">{streamError}</div>
+                </>
+              )}
             </div>
           )}
 
@@ -1733,10 +1767,11 @@ export default function VideoPlayer() {
             //  - Configured değil / kayıtsız → CHANNELS[]'daki hardcoded status (backward-compat)
             const live = liveStatus[c.id];
             // Öne çıkan yayının map'li olduğu kanal + canlı → özel "canlı geçiş" vurgusu
-            const isFeaturedLive = featured.live && featured.channel === c.id;
+            // TRT HABER (çalışan kanal) her zaman CANLI + yeşil neon (kullanıcı isteği)
+            const isFeaturedLive = (featured.live && featured.channel === c.id) || c.id === 'trthaber';
             // Öne çıkan yayın YAKINDA (12s içinde, henüz canlı değil) → turuncu "yakında" vurgusu
             const isFeaturedUpcoming = !isFeaturedLive && featured.status === 'upcoming' && featured.channel === c.id;
-            const featuredMatch = (isFeaturedLive || isFeaturedUpcoming) ? featured.match : null;
+            const featuredMatch = (featured.match && featured.match.app_channel === c.id) ? featured.match : null;
             const featuredTitle = featuredMatch
               ? `${featuredMatch.home} - ${featuredMatch.away} · ${featuredMatch.time}${featuredMatch.league ? ' · ' + featuredMatch.league : ''}`
               : c.name;
@@ -1815,11 +1850,11 @@ export default function VideoPlayer() {
           styled-jsx paketinin kaldırılmasıyla CSS global stylesheet'e taşındı. */}
     </main>
 
-      {/* ===== GÜNÜN MAÇI / ÖNE ÇIKAN YAYIN — SADECE gerçek maç varken açılır ===== */}
-      {featured.match && featured.channel && (() => {
-        const fch = CHANNELS.find((x) => x.id === featured.channel);
+      {/* ===== GÜNÜN MAÇI — günün en önemli maçı (kanal bizde olmasa da bilgi gösterir) ===== */}
+      {featured.match && (() => {
         const fm = featured.match;
-        const isUp = featured.status === 'upcoming';
+        const fch = fm.app_channel ? CHANNELS.find((x) => x.id === fm.app_channel) : null;
+        const isUp = fm.status === 'upcoming';
         const cd = (() => {
           const n = fm?.starts_in_min ?? 0;
           if (!isUp || n <= 0) return '';
@@ -1832,19 +1867,19 @@ export default function VideoPlayer() {
             <div className="feat-day-left">
               <span className="feat-day-kicker">GÜNÜN MAÇI</span>
               {fch?.logo
-                ? <img className="feat-day-logo" src={fch.logo} alt={featured.name} loading="lazy" />
-                : <span className="feat-day-chname">{featured.name}</span>}
+                ? <img className="feat-day-logo" src={fch.logo} alt={fch.name} loading="lazy" />
+                : (fm.channel_name ? <span className="feat-day-chname">{fm.channel_name}</span> : null)}
             </div>
             <div className="feat-day-mid">
               <div className="feat-day-teams">
                 <span className="fd-home">{fm.home}</span>
-                <span className="fd-vs">VS</span>
+                <span className="fd-vs">{(fm.score1 !== null && fm.score1 !== undefined && fm.score2 !== null && fm.score2 !== undefined) ? `${fm.score1} - ${fm.score2}` : 'VS'}</span>
                 <span className="fd-away">{fm.away}</span>
               </div>
               <div className="feat-day-meta">
-                <span className="fd-ch">{featured.name}</span>
+                {(fch || fm.channel_name) ? <span className="fd-ch">{fch ? fch.name : fm.channel_name}</span> : null}
                 {fm.league ? <> <span className="fd-sep">·</span> {fm.league}</> : null}
-                {' '}<span className="fd-sep">·</span> <span className="fd-time">{fm.time}</span>
+                {(fm.time || fm.status_label) ? <> <span className="fd-sep">·</span> <span className="fd-time">{fm.time || fm.status_label}</span></> : null}
               </div>
               {cd && <div className="feat-day-countdown">{cd}</div>}
             </div>
@@ -1852,13 +1887,15 @@ export default function VideoPlayer() {
               <span className={`feat-day-badge ${isUp ? 'upcoming' : 'live'}`}>
                 <span className="fd-badge-dot" />{isUp ? 'YAKINDA' : 'CANLI'}
               </span>
-              <button
-                className="feat-day-watch"
-                data-testid="featured-watch-btn"
-                onClick={() => { try { window.dispatchEvent(new CustomEvent('bb:select-channel', { detail: { id: featured.channel } })); } catch { /* noop */ } }}
-              >
-                ▶ İZLE
-              </button>
+              {fm.watchable && fm.app_channel && (
+                <button
+                  className="feat-day-watch"
+                  data-testid="featured-watch-btn"
+                  onClick={() => { try { window.dispatchEvent(new CustomEvent('bb:select-channel', { detail: { id: fm.app_channel } })); } catch { /* noop */ } }}
+                >
+                  ▶ İZLE
+                </button>
+              )}
             </div>
           </div>
         );

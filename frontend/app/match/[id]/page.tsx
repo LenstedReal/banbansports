@@ -83,7 +83,7 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
         </Link>
         <div style={{ fontFamily: 'VT323, monospace', color: 'var(--text-dim)', letterSpacing: 2, fontSize: 11 }}>MAÇ DETAYI</div>
       </header>
-      <main style={{ maxWidth: 1100, margin: '0 auto', padding: 'clamp(10px, 3vw, 20px)' }} data-testid="match-detail-page">
+      <main style={{ width: '100%', maxWidth: 1200, margin: '0 auto', padding: 'clamp(10px, 3vw, 20px)' }} data-testid="match-detail-page">
         {/* SSR header block — instant content, SEO ready */}
         <div style={{
           background: 'linear-gradient(180deg, rgba(255,0,170,0.08), rgba(0,240,255,0.04))',

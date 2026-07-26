@@ -22,7 +22,7 @@ from time import time
 from urllib.parse import urljoin, quote
 from fastapi import APIRouter, HTTPException, Response
 
-from app.services.tv_schedule import pick_featured, APP_CHANNEL_NAMES
+from app.services.tv_schedule import pick_featured, pick_day_match, APP_CHANNEL_NAMES
 
 logger = logging.getLogger("banbansports.featured")
 router = APIRouter(prefix="/api/featured", tags=["featured"])
@@ -187,17 +187,24 @@ async def status():
         logger.debug(f"featured pick fail, env fallback: {e}")
         pick = None
 
+    # GÜNÜN MAÇI kutusu — günün en önemli maçı (kanal bizde olmasa da bilgi döner)
+    try:
+        day_match = await pick_day_match()
+    except Exception as e:
+        logger.debug(f"day match fail: {e}")
+        day_match = None
+
     if pick is None:
         # Scraper patlarsa: env kanalına düş (yayın gizlenmesin — graceful degrade)
         env_ch = cfg["channel"] or "bein1"
         name = cfg["name"] or APP_CHANNEL_NAMES.get(env_ch, env_ch.upper())
         return {"configured": True, "source_live": source_live,
                 "live": source_live, "channel": env_ch, "name": name,
-                "status": "live" if source_live else "none", "match": None}
+                "status": "live" if source_live else "none", "match": day_match}
 
     return {"configured": True, "source_live": source_live,
             "live": pick["status"] == "live", "channel": pick["channel"],
-            "name": pick["name"], "status": pick["status"], "match": pick["match"]}
+            "name": pick["name"], "status": pick["status"], "match": day_match}
 
 
 @router.get("/stream.m3u8")

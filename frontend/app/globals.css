@@ -2017,6 +2017,12 @@ video {
 .feat-day-meta .fd-ch { color: #dfeefc; font-weight: 700; }
 .feat-day-meta .fd-sep { color: rgba(255,255,255,0.35); }
 .feat-day-meta .fd-time { color: var(--cyan, #00f0ff); font-weight: 700; text-shadow: 0 0 8px rgba(0,240,255,0.45); }
+
+/* Bakım döngü videosu — aktif olmayan kanalda 5 sn sonra tam ekran döngü */
+.maint-loop-video {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: 1; background: #000;
+}
 .feat-day-countdown {
   font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1.5px;
   color: #ffcf8a; text-shadow: 0 0 8px rgba(255,166,0,0.4);

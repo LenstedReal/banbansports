@@ -39,7 +39,7 @@ const isNations    = (s: Stage) => {
 };
 const isFriendly   = (s: Stage) => {
   const combined = `${s.Cnm || ''} ${s.Snm || ''}`;
-  return /(friendly|hazırlık|international friendly|club friendly)/i.test(combined) && !/women|u17|u19|u21/i.test(combined);
+  return /(friendl(y|ies)|hazırlık|summer series|pre-?season|yaz serisi|emirates cup)/i.test(combined) && !/women|u17|u19|u21/i.test(combined);
 };
 const isMilli      = (s: Stage) => {
   // National team matches — includes World Cup, Euro, Nations League, Friendly
@@ -211,9 +211,9 @@ export default function MatchCenter({ initialStages }: { initialStages: Stage[] 
         return t ? `${t} · ${stage}` : stage;
       }
       // "International" + boş → HAZIRLIK
-      if (/international/i.test(cnm) && (/friendly|club friendly|exhibition/i.test(snm) || !snm)) return 'HAZIRLIK';
-      // "Club Friendly" → HAZIRLIK
-      if (/friendly/i.test(snm)) return 'HAZIRLIK';
+      if (/international/i.test(cnm) && (/friendl(y|ies)|exhibition/i.test(snm) || !snm)) return 'HAZIRLIK';
+      // "Club Friendly / Club Friendlies" → HAZIRLIK
+      if (/friendl(y|ies)/i.test(snm)) return 'HAZIRLIK';
       // Standart liga adı — İngilizce aşama kalıplarını Türkçe'ye çevir
       return trLeagueName(snm || cnm) || 'FUTBOL';
     };
