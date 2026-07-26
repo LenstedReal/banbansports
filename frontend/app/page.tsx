@@ -73,7 +73,7 @@ export default function HomePage() {
 
         <SponsorBanner />
 
-        {/* Akan bilgi şeridi — alan adı duyurusu (etiket ikonu, yazı yok) */}
+        {/* Akan bilgi şeridi — güncel alan adı duyurusu */}
         <div className="access-notice" data-testid="access-notice">
           <div className="access-ticker">
             <span className="access-ticker-label" aria-label="Duyuru">

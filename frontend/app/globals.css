@@ -161,13 +161,23 @@
         .access-notice {
             max-width: 1280px; margin: 14px auto 4px; padding: 0 16px;
         }
+        .access-notice--top { margin: 8px auto 12px; }
         .access-ticker {
+            position: relative;
             display: flex; align-items: stretch; width: 100%;
-            border-radius: 10px; overflow: hidden;
-            background: linear-gradient(90deg, rgba(10,14,26,0.94), rgba(15,9,23,0.94));
-            border: 1px solid rgba(0,240,255,0.22);
-            box-shadow: 0 6px 22px rgba(0,0,0,0.45), inset 0 0 22px rgba(0,240,255,0.05);
+            border-radius: 12px; overflow: hidden;
+            background: linear-gradient(135deg, rgba(11,22,38,0.92) 0%, rgba(15,9,23,0.94) 100%);
+            border: 1px solid rgba(0,240,255,0.30);
+            box-shadow: 0 8px 26px rgba(0,0,0,0.5), inset 0 0 26px rgba(0,240,255,0.07), 0 0 20px rgba(0,240,255,0.12);
         }
+        .access-ticker::before {
+            content: ''; position: absolute; top: 0; left: -55%; width: 42%; height: 100%;
+            background: linear-gradient(105deg, transparent 0%, rgba(0,240,255,0.12) 45%, rgba(255,255,255,0.26) 50%, rgba(0,240,255,0.12) 55%, transparent 100%);
+            transform: skewX(-18deg); pointer-events: none; z-index: 2;
+            animation: access-shine 4.2s ease-in-out infinite; will-change: left;
+        }
+        @keyframes access-shine { 0% { left: -55%; } 55% { left: 130%; } 100% { left: 130%; } }
+        @media (prefers-reduced-motion: reduce) { .access-ticker::before { animation: none; } }
         .access-ticker-label {
             display: flex; align-items: center; justify-content: center; flex-shrink: 0; padding: 0 16px;
             color: #041014;
@@ -1030,15 +1040,19 @@
         .video-fps-counter small { display: block; font-size: 7px; opacity: 0.65; letter-spacing: 1.5px; margin-top: 0; }
         /* Kanal sidebar — DEFAULT (geniş masaüstü) görünüm: sağda dikey */
         .channel-sidebar {
-            width: 180px;
+            width: 248px;
             flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            align-content: start;
+            gap: 6px;
             overflow-y: auto;
-            max-height: calc((100vw - 220px) * 9 / 16);
+            max-height: calc((100vw - 300px) * 9 / 16);
             padding: 4px 0;
         }
+        /* YAKINDA DAHA FAZLASI + öne çıkan şerit → 2 sütunu birden kaplasın */
+        .channel-sidebar .ch-soon-banner,
+        .channel-sidebar .ch-featured-banner { grid-column: 1 / -1; }
         .sidebar-ch-btn {
             display: block; width: 100%; padding: 8px 10px;
             background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
@@ -1664,6 +1678,25 @@ video {
   font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 800; letter-spacing: 1.5px;
   color: #041007; background: var(--green); padding: 1px 7px; border-radius: 3px;
   box-shadow: 0 0 8px rgba(0,255,136,0.6); z-index: 3; line-height: 1.4;
+}
+/* ===== ÖNE ÇIKAN YAYIN — YAKINDA (12s içinde) turuncu vurgu ===== */
+.sidebar-ch-btn.ch-tile.featured-upcoming {
+  border-color: var(--orange, #ffa600) !important;
+  background: linear-gradient(90deg, rgba(255,166,0,0.12), rgba(255,120,0,0.04)) !important;
+}
+.sidebar-ch-btn.ch-tile.featured-upcoming::after {
+  content: ''; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none;
+  border: 1px solid rgba(255,166,0,0.45);
+  animation: ch-featured-sweep 2.6s linear infinite;
+}
+.ch-featured-flag.upcoming {
+  color: #1a0f00; background: var(--orange, #ffa600);
+  box-shadow: 0 0 8px rgba(255,166,0,0.6);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-ch-btn.ch-tile.featured-live,
+  .sidebar-ch-btn.ch-tile.featured-live::after,
+  .sidebar-ch-btn.ch-tile.featured-upcoming::after { animation: none; }
 }
 
 .sidebar-ch-btn.ch-tile .ch-logo-wrap {

@@ -109,7 +109,7 @@ export default function VideoPlayer() {
   const [selected, setSelected] = useState<Channel>(CHANNELS[2]); // TRT 1 default
   const [serverIndex, setServerIndex] = useState(0);
   // ===== Öne çıkan yayın (tünel kaynak) — hangi kanala map'li + canlı mı =====
-  const [featured, setFeatured] = useState<{ live: boolean; channel: string }>({ live: false, channel: '' });
+  const [featured, setFeatured] = useState<{ live: boolean; channel: string; status: string; match: any }>({ live: false, channel: '', status: 'none', match: null });
   // ===== Canlı kanal sağlığı — backend /api/stream/status polling (30sn) =====
   // Backend cache TTL 60sn — yani gerçek segment check maksimum 60sn'de bir çalışır,
   // aradaki isteklerde cache dönüyor. LED renkleri buna göre dinamik boyanır.
@@ -471,8 +471,8 @@ export default function VideoPlayer() {
         if (!r.ok || cancelled) return;
         const d = await r.json();
         if (cancelled) return;
-        setFeatured({ live: !!d.live, channel: d.channel || '' });
-        if (d.channel) {
+        setFeatured({ live: !!d.live, channel: d.channel || '', status: d.status || 'none', match: d.match || null });
+        if (d.channel && d.status === 'live') {
           setLiveStatus((prev) => ({
             ...prev,
             [d.channel]: { configured: true, ok: !!d.live },
@@ -1733,6 +1733,18 @@ export default function VideoPlayer() {
             const live = liveStatus[c.id];
             // Öne çıkan yayının map'li olduğu kanal + canlı → özel "canlı geçiş" vurgusu
             const isFeaturedLive = featured.live && featured.channel === c.id;
+            // Öne çıkan yayın YAKINDA (12s içinde, henüz canlı değil) → turuncu "yakında" vurgusu
+            const isFeaturedUpcoming = !isFeaturedLive && featured.status === 'upcoming' && featured.channel === c.id;
+            const featuredMatch = (isFeaturedLive || isFeaturedUpcoming) ? featured.match : null;
+            const featuredTitle = featuredMatch
+              ? `${featuredMatch.home} - ${featuredMatch.away} · ${featuredMatch.time}${featuredMatch.league ? ' · ' + featuredMatch.league : ''}`
+              : c.name;
+            const upcomingLabel = (() => {
+              const n = featuredMatch?.starts_in_min ?? 0;
+              if (n <= 0) return 'YAKINDA';
+              if (n < 60) return `${n} DK`;
+              return `${Math.floor(n / 60)} SA`;
+            })();
             const effectiveStatus: Channel['status'] = isFeaturedLive
               ? 'online'
               : (live
@@ -1760,12 +1772,13 @@ export default function VideoPlayer() {
                 }}
                 disabled={adActive || awaitingResume}
                 data-testid={`channel-${c.id}`}
-                className={`sidebar-ch-btn ch-tile ${selected.id === c.id ? 'active' : ''}${switchPendingRef.current?.id === c.id ? ' switching' : ''}${isFeaturedLive ? ' featured-live' : ''}`}
+                className={`sidebar-ch-btn ch-tile ${selected.id === c.id ? 'active' : ''}${switchPendingRef.current?.id === c.id ? ' switching' : ''}${isFeaturedLive ? ' featured-live' : ''}${isFeaturedUpcoming ? ' featured-upcoming' : ''}`}
                 data-status={effectiveStatus}
                 data-featured-live={isFeaturedLive ? '1' : undefined}
+                data-featured-upcoming={isFeaturedUpcoming ? '1' : undefined}
                 style={(adActive || awaitingResume) ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
                 aria-label={c.name}
-                title={c.name}
+                title={featuredTitle}
               >
                 {/* Status dot — sol-üst köşe (canlı backend verisine bağlı) */}
                 <span className="ch-status-dot" style={{
@@ -1783,6 +1796,7 @@ export default function VideoPlayer() {
                 {c.badge && <span className="new-badge">{c.badge}</span>}
                 {c.premium && <span className="ch-premium">HD</span>}
                 {isFeaturedLive && <span className="ch-featured-flag">CANLI</span>}
+                {isFeaturedUpcoming && <span className="ch-featured-flag upcoming">{upcomingLabel}</span>}
               </button>
             );
           })}

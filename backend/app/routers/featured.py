@@ -22,6 +22,8 @@ from time import time
 from urllib.parse import urljoin, quote
 from fastapi import APIRouter, HTTPException, Response
 
+from app.services.tv_schedule import pick_featured, APP_CHANNEL_NAMES
+
 logger = logging.getLogger("banbansports.featured")
 router = APIRouter(prefix="/api/featured", tags=["featured"])
 
@@ -145,28 +147,57 @@ def _ensure_prefetch():
             logger.debug(f"prefetch start fail: {e}")
 
 
-@router.get("/status")
-async def status():
-    cfg = _cfg()
-    default_name = {"bein1": "beIN SPORTS 1", "ssport": "S SPORT", "trt1": "TRT 1",
-                    "tv8": "TV 8", "trtspor": "TRT SPOR"}.get(cfg["channel"], cfg["channel"].upper())
-    base = {"channel": cfg["channel"], "name": cfg["name"] or default_name,
-            "configured": bool(cfg["source"])}
-    if not cfg["source"]:
-        return {**base, "live": False}
+async def _source_live() -> bool:
+    """mono.m3u8 kaynağı erişilebilir mi? (30sn cache — telefon/tünel yormasın)"""
     now = time()
     if (now - _STATUS_CACHE["at"]) < _STATUS_TTL:
-        return {**base, "live": _STATUS_CACHE["live"], "cached": True}
+        return _STATUS_CACHE["live"]
     live = False
     try:
-        r = await _fetch(cfg["source"])
+        r = await _fetch(_cfg()["source"])
         live = r.status_code == 200 and r.text.lstrip().startswith("#EXTM3U")
     except Exception as e:
-        logger.debug(f"featured status fail: {e}")
-        live = False
+        logger.debug(f"featured source check fail: {e}")
     _STATUS_CACHE["at"] = now
     _STATUS_CACHE["live"] = live
-    return {**base, "live": live, "cached": False}
+    return live
+
+
+@router.get("/status")
+async def status():
+    """Öne çıkan yayının DİNAMİK durumu:
+      * channel  → günün programına göre otomatik seçilen kanal kutusu (bein1/trt1/...)
+      * live     → kaynak ayakta VE şu an o kanalda canlı maç var
+      * status   → live | upcoming | none
+      * match    → seçilen maçın bilgisi (takımlar, lig, saat, başlangıca kalan dk)
+    """
+    cfg = _cfg()
+    if not cfg["source"]:
+        return {"configured": False, "live": False, "source_live": False,
+                "channel": "", "name": "", "status": "none", "match": None}
+
+    source_live = await _source_live()
+
+    # Günün TV programından öne çıkan kanalı bul (schedule 15dk cache'li).
+    # Yayın kaynağı fiziksel olarak beIN Sports 1 → varsayılan kutu beIN 1;
+    # yalnızca Galatasaray başka kanalda canlıysa o kanala geçer.
+    try:
+        pick = await pick_featured(source_live)
+    except Exception as e:
+        logger.debug(f"featured pick fail, env fallback: {e}")
+        pick = None
+
+    if pick is None:
+        # Scraper patlarsa: env kanalına düş (yayın gizlenmesin — graceful degrade)
+        env_ch = cfg["channel"] or "bein1"
+        name = cfg["name"] or APP_CHANNEL_NAMES.get(env_ch, env_ch.upper())
+        return {"configured": True, "source_live": source_live,
+                "live": source_live, "channel": env_ch, "name": name,
+                "status": "live" if source_live else "none", "match": None}
+
+    return {"configured": True, "source_live": source_live,
+            "live": pick["status"] == "live", "channel": pick["channel"],
+            "name": pick["name"], "status": pick["status"], "match": pick["match"]}
 
 
 @router.get("/stream.m3u8")
