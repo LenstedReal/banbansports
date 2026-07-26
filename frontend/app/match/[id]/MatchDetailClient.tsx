@@ -116,6 +116,17 @@ function MatchDetailInner({ home, away, date, initial }: { home: string; away: s
               </div>
             );
           })}
+          {(() => {
+            const DERIVED = ['goals', 'yellow_cards', 'red_cards', 'substitutions'];
+            const keys = Object.keys(data.stats || {});
+            const onlyDerived = keys.length > 0 && keys.every((k) => DERIVED.includes(k));
+            if (!onlyDerived) return null;
+            return (
+              <div style={{ marginTop: 12, padding: '8px 10px', borderRadius: 6, background: 'rgba(255,166,0,0.07)', border: '1px solid rgba(255,166,0,0.25)', fontFamily: 'VT323', fontSize: 14, color: 'var(--orange, #ffa600)', textAlign: 'center', letterSpacing: 0.5 }} data-testid="stats-limited-note">
+                Bu maç için kaynaklar detaylı istatistik sağlamıyor (hazırlık/alt seviye maçlarda olur) — yalnızca olay bazlı veriler gösteriliyor.
+              </div>
+            );
+          })()}
         </div>
       )}
       </div>
