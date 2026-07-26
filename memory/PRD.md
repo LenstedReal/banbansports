@@ -189,8 +189,9 @@ Sorun: 4MB/10sn segment ev upload'ından ~7-15sn çekiliyordu → hls.js buffer 
   içeriğe göre daralıp yanda küçük görünüyordu).
 - İçerik: sol=GÜNÜN MAÇI + kanal logosu, orta=takımlar(VS)+lig·saat (veya maç yoksa kanal adı),
   sağ=CANLI/YAKINDA rozeti + geri sayım + "İZLE" butonu (bb:select-channel → o kanalı açar).
-- Görünürlük TAMAMEN gerçek veriye bağlı (status live/upcoming). Yapay test-always-show YOK.
-  Gerçek beIN 1/GS maçı programda olunca takım isimleri otomatik dolar.
+- Görünürlük TAMAMEN gerçek veriye bağlı. Kutu YALNIZCA gerçek maç (featured.match dolu) varken
+  açılır; sadece beIN program yayını varken (match=null) GİZLİ. Kutuda kanal adı + takımlar +
+  saat (mavi/cyan) gösterilir. Yapay test-always-show YOK.
 
 ### Bekleyen / Notlar
 - FEATURED_SOURCE_URL kalıcı adres zaten yüklü: `stream.lenstedreal.xyz/lenstedreal_stream/mono.m3u8`.

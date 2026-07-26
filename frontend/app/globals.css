@@ -2014,6 +2014,9 @@ video {
   padding: 3px 10px; border: 1px solid rgba(0,240,255,0.4); border-radius: 6px; background: rgba(0,240,255,0.06);
 }
 .feat-day-meta { font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 0.6px; color: #9fb6c8; }
+.feat-day-meta .fd-ch { color: #dfeefc; font-weight: 700; }
+.feat-day-meta .fd-sep { color: rgba(255,255,255,0.35); }
+.feat-day-meta .fd-time { color: var(--cyan, #00f0ff); font-weight: 700; text-shadow: 0 0 8px rgba(0,240,255,0.45); }
 .feat-day-countdown {
   font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1.5px;
   color: #ffcf8a; text-shadow: 0 0 8px rgba(255,166,0,0.4);

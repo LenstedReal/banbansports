@@ -1815,8 +1815,8 @@ export default function VideoPlayer() {
           styled-jsx paketinin kaldırılmasıyla CSS global stylesheet'e taşındı. */}
     </main>
 
-      {/* ===== GÜNÜN MAÇI / ÖNE ÇIKAN YAYIN — video+kanalların ALTINDA, tam genişlik ===== */}
-      {featured.status !== 'none' && featured.channel && (() => {
+      {/* ===== GÜNÜN MAÇI / ÖNE ÇIKAN YAYIN — SADECE gerçek maç varken açılır ===== */}
+      {featured.match && featured.channel && (() => {
         const fch = CHANNELS.find((x) => x.id === featured.channel);
         const fm = featured.match;
         const isUp = featured.status === 'upcoming';
@@ -1836,18 +1836,16 @@ export default function VideoPlayer() {
                 : <span className="feat-day-chname">{featured.name}</span>}
             </div>
             <div className="feat-day-mid">
-              {fm ? (
-                <>
-                  <div className="feat-day-teams">
-                    <span className="fd-home">{fm.home}</span>
-                    <span className="fd-vs">VS</span>
-                    <span className="fd-away">{fm.away}</span>
-                  </div>
-                  <div className="feat-day-meta">{[fm.league, fm.time].filter(Boolean).join('  ·  ')}</div>
-                </>
-              ) : (
-                <div className="feat-day-teams solo">{featured.name}</div>
-              )}
+              <div className="feat-day-teams">
+                <span className="fd-home">{fm.home}</span>
+                <span className="fd-vs">VS</span>
+                <span className="fd-away">{fm.away}</span>
+              </div>
+              <div className="feat-day-meta">
+                <span className="fd-ch">{featured.name}</span>
+                {fm.league ? <> <span className="fd-sep">·</span> {fm.league}</> : null}
+                {' '}<span className="fd-sep">·</span> <span className="fd-time">{fm.time}</span>
+              </div>
               {cd && <div className="feat-day-countdown">{cd}</div>}
             </div>
             <div className="feat-day-right">
