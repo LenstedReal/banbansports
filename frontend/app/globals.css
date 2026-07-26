@@ -1980,8 +1980,8 @@ video {
   box-shadow: 0 12px 34px rgba(0,0,0,0.5), inset 0 0 30px rgba(0,255,136,0.06), 0 0 26px rgba(0,255,136,0.16);
 }
 .feat-day.upcoming {
-  border-color: rgba(255,166,0,0.4);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 26px rgba(255,166,0,0.06), 0 0 22px rgba(255,166,0,0.14);
+  border-color: rgba(0,255,136,0.45);
+  box-shadow: 0 12px 34px rgba(0,0,0,0.5), inset 0 0 30px rgba(0,240,255,0.07), 0 0 26px rgba(0,240,255,0.2), 0 0 14px rgba(0,255,136,0.18);
 }
 .feat-day::before {
   content: ''; position: absolute; top: 0; left: -55%; width: 40%; height: 100%;
@@ -1989,7 +1989,7 @@ video {
   transform: skewX(-18deg); pointer-events: none;
   animation: feat-day-shine 4.6s ease-in-out infinite; will-change: left;
 }
-.feat-day.upcoming::before { background: linear-gradient(105deg, transparent 0%, rgba(255,166,0,0.10) 45%, rgba(255,255,255,0.22) 50%, rgba(255,166,0,0.10) 55%, transparent 100%); }
+.feat-day.upcoming::before { background: linear-gradient(105deg, transparent 0%, rgba(0,255,136,0.10) 45%, rgba(255,255,255,0.22) 50%, rgba(0,240,255,0.12) 55%, transparent 100%); }
 @keyframes feat-day-shine { 0% { left: -55%; } 55% { left: 130%; } 100% { left: 130%; } }
 @media (prefers-reduced-motion: reduce) { .feat-day::before { animation: none; } }
 
@@ -1998,7 +1998,7 @@ video {
   font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 800; letter-spacing: 2.5px;
   color: #7ffcc0; text-shadow: 0 0 8px rgba(0,255,136,0.4);
 }
-.feat-day.upcoming .feat-day-kicker { color: #ffcf8a; text-shadow: 0 0 8px rgba(255,166,0,0.4); }
+.feat-day.upcoming .feat-day-kicker { color: #7ffcc0; text-shadow: 0 0 8px rgba(0,240,255,0.45); }
 .feat-day-logo { max-width: 108px; max-height: 54px; width: auto; height: auto; object-fit: contain; }
 .feat-day-chname { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 800; color: #fff; letter-spacing: 1px; }
 
