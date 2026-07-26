@@ -183,6 +183,15 @@ Sorun: 4MB/10sn segment ev upload'ından ~7-15sn çekiliyordu → hls.js buffer 
 - `.access-ticker` kalitesi yükseltildi (glassy gradient, glow border, shine sweep — YAKINDA DAHA
   FAZLASI kalitesinde). Tüm animasyonlar transform/opacity + prefers-reduced-motion (hafif).
 
+### GÜNÜN MAÇI kartı (`.feat-day`, VideoPlayer + globals.css)
+- Video+kanalların ALTINDA, TAM GENİŞLİK (min(100%-40px, 1400px)), büyük premium kart.
+- `<main>` fragment'in DIŞINA alındı (aksi halde main-content flex/align-items:center yüzünden
+  içeriğe göre daralıp yanda küçük görünüyordu).
+- İçerik: sol=GÜNÜN MAÇI + kanal logosu, orta=takımlar(VS)+lig·saat (veya maç yoksa kanal adı),
+  sağ=CANLI/YAKINDA rozeti + geri sayım + "İZLE" butonu (bb:select-channel → o kanalı açar).
+- Görünürlük TAMAMEN gerçek veriye bağlı (status live/upcoming). Yapay test-always-show YOK.
+  Gerçek beIN 1/GS maçı programda olunca takım isimleri otomatik dolar.
+
 ### Bekleyen / Notlar
 - FEATURED_SOURCE_URL kalıcı adres zaten yüklü: `stream.lenstedreal.xyz/lenstedreal_stream/mono.m3u8`.
 - Kullanıcı Cloudflare tünel/alan adı başlatma kodlarını + 15sn'de güncellenen cfd script'ini sonra verecek.
