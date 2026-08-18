@@ -35,18 +35,15 @@ const POLL_MS = 60_000; // backend zaten 15/20/30dk aralıkla scrape eder; bu sa
 type Vals = { w: number; i: number; l: number; wv: number; iv: number; lv: number };
 const ZERO: Vals = { w: 0, i: 0, l: 0, wv: 0, iv: 0, lv: 0 };
 
-export default function BoxOfficeCounter({ onPlot, onImdb, onMeta, badge, backdrop }: {
+export default function BoxOfficeCounter({ onPlot, onImdb, onMeta }: {
   onPlot?: (plot: string, credits?: string) => void;
   onImdb?: (rating: number, votes: string) => void;
   onMeta?: (meta: string) => void;
-  badge?: string;
-  backdrop?: string;
 }) {
   const [data, setData] = useState<BoxOfficeData | null>(null);
   const [currency, setCurrency] = useState('TRY'); // varsayılan yerel: Türkiye
   const [scope, setScope] = useState<'intl' | 'local'>('intl'); // iki sistem: uluslararası / yerel
   const [disp, setDisp] = useState<Vals>(ZERO);
-  const [plotOpen, setPlotOpen] = useState(false);
   const dataRef = useRef<BoxOfficeData | null>(null);
   const dispRef = useRef<Vals>(ZERO);
   const fxRef = useRef(1);
@@ -154,37 +151,6 @@ export default function BoxOfficeCounter({ onPlot, onImdb, onMeta, badge, backdr
 
   return (
     <div className="bo2" data-testid="boxoffice-card">
-      <div className="bo2-title-row">
-        <div className="bo2-title-col">
-          <div className="bo2-title">{data.movie.title}</div>
-          <div className="bo2-subtitle">{data.movie.title_en} · VİZYONDA{data.movie.release_date ? ` · ${data.movie.release_date}` : ''}</div>
-          <div className="bo2-badges" data-testid="boxoffice-badges">
-            <span className="bo2-live-badge" data-testid="boxoffice-live-badge"><span className="bo2-live-dot" />CANLI GİŞE</span>
-            {badge && <span className="bo2-new-badge" data-testid="boxoffice-new-badge">{badge} FİLM</span>}
-          </div>
-        </div>
-      </div>
-
-      {/* SİNEMATİK HERO — TEK BLOK: görsel + üstünde cam KONU paneli */}
-      {backdrop && (
-        <div className={`bo2-hero${plotOpen ? ' expanded' : ''}`} data-testid="boxoffice-hero">
-          <img src={backdrop} alt="" loading="lazy" decoding="async" draggable={false} />
-          <div className="bo2-hero-fade" aria-hidden="true" />
-          {data.plot && (
-            <div className="bo2-hero-plot" data-testid="boxoffice-plot">
-              <div className="bo2-hero-plot-head">
-                <span className="bo2-plot-kicker">KONU</span>
-                <button className="bo2-plot-toggle" data-testid="plot-toggle-btn" onClick={() => setPlotOpen((s) => !s)}>
-                  {plotOpen ? 'GİZLE ▲' : 'DEVAMI ▼'}
-                </button>
-              </div>
-              <p className={plotOpen ? 'open' : ''} data-testid="boxoffice-plot-text">{data.plot}</p>
-              {plotOpen && data.credits && <div className="bo2-credits" data-testid="boxoffice-plot-credits">{data.credits}</div>}
-            </div>
-          )}
-        </div>
-      )}
-
       <div className="bo2-tabs-row">
         <div className="bo2-cur-tabs" role="tablist" aria-label="Para birimi">
           {CURRENCIES.map((c) => (

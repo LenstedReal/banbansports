@@ -1,0 +1,20 @@
+{
+  "summary": "Frontend-only verification at 980x1200 for the new Netflix-style single-composition movie card (cin2-hero). All primary acceptance criteria pass. boxoffice-hero present with height=240px; .cin2-hero-img naturalWidth=1280; .cin2-poster naturalWidth=780. Inside the hero: boxoffice-badges (CANLI GİŞE + YENİ FİLM), boxoffice-imdb-rating, movie-title ('ÖRÜMCEK-ADAM: YEPYENİ BİR GÜN', 2-line clamp, scrollHeight=clientHeight=36 so no truncation), movie-tag-dub, movie-tag-sub, movie-shelf-watch — all confirmed inside hero boundingBox. plot-toggle-btn (KONU ▼) opens boxoffice-plot glass panel inside hero, boxoffice-plot-text length=1005, boxoffice-plot-credits shows 'Yönetmen: Destin Daniel Cretton · Tom Holland, Zendaya...'; clicking panel closes it. All box-office data-testids render with meaningful values and no overflow (scrollWidth<=clientWidth): gross ₺94.5B, viewers 258.7M, local ₺449M, international ₺57.8B, rate ~$38,128/dk, local-viewers 1.87M, intl-viewers 185.6M, sources 'Box Office Mojo · IMDb · TradingView FX · Son güncelleme 09:...'. Currency tab TRY→USD changes gross from ₺94.595.079.251 to $2.022.943.881. movie-tile total height=604px (<700). sponsor-banner=1, footer-bottom + legal-body render. movie-shelf-watch opens movie-lock-panel (regression OK). 0 console errors, 0 page errors.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_11.json"],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a", "frontend": "100%"},
+  "test_credentials": "lenstedreal_marka / zirvedeyiz (lock panel not exercised beyond open)",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "New design: single 240px cinematic hero (boxoffice-hero / .cin2-hero) contains badges (top-left), imdb chip (top-right), KONU ▼ chip that opens boxoffice-plot glass overlay inside the hero, and bottom row (poster thumb + movie-title 2-line clamp + dub/sub tags + pink İZLE / movie-shelf-watch). Old bo2-hero and separate cin-plot section are gone. Below hero: BoxOfficeCounter with tabs + compact stats blocks (gross/viewers/local/international/rate/local-viewers/intl-viewers/sources). Total movie-tile height ~604px. Viewport 980x1200 required. Note: 'YEREL SİSTEM' scope button interaction returned no visibility change but boxoffice-local is already rendered by default — considered non-blocking.",
+  "rca of the issue": "No issue found — redesign meets all acceptance criteria in the review request."
+}
