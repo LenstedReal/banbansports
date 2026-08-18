@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 const SPONSORS = [
   { id: 'redbull',    href: 'https://www.redbull.com/tr-tr/',                klass: 'sp-redbull',     img: '/logos/redbull_ref.png?v=20260810w',         alt: 'Red Bull' },
   { id: 'samsung',    href: 'https://v3.account.samsung.com/dashboard/intro', klass: 'sp-samsung',     img: '/logos/samsung_galaxy.png?v=20260810hd',     alt: 'Samsung Galaxy' },
-  { id: 'meritking',  href: 'https://www.mrtkng22xclusive.vip/',                   klass: 'sp-meritking',   img: '/logos/meritking.png?v=20260620c',          alt: 'MeritKing' },
+  { id: 'meritking',  href: 'https://www.mrtkng22xclusive.vip/',                   klass: 'sp-meritking',   img: '/logos/meritking_news.png?v=20260818',          alt: 'MeritKing.news' },
   { id: 'heineken',   href: 'https://www.heineken.com/tr/',                  klass: 'sp-heineken',    img: '/logos/heineken_ref.png?v=20260620c',       alt: 'Heineken' },
   { id: 'vodafone',   href: 'https://www.vodafone.com.tr/freezone',          klass: 'sp-vodafone',    img: '/logos/vodafone_freezone.png?v=20260810trans',        alt: 'Vodafone FreeZone' },
   { id: 'papara',     href: 'https://www.papara.com/personal/auth/login/email-phone',                       klass: 'sp-papara',      img: '/logos/papara.png?v=20260620c',             alt: 'Papara' },

@@ -7,7 +7,6 @@ import BoxOfficeCounter from './BoxOfficeCounter';
 
 export default function CinemaSection() {
   const [movie, setMovie] = useState<Movie | null>(null);
-  const [plot, setPlot] = useState<{ text: string; credits?: string } | null>(null);
   const [imdb, setImdb] = useState<{ rating: number; votes: string } | null>(null);
   const [meta, setMeta] = useState<string | null>(null);
 
@@ -66,19 +65,12 @@ export default function CinemaSection() {
           <div className="cin-main">
             <BoxOfficeCounter
               badge={movie?.badge}
-              onPlot={(text, credits) => setPlot({ text, credits })}
+              backdrop={movie?.backdrop || '/spiderman_backdrop.jpg'}
               onImdb={(rating, votes) => setImdb({ rating, votes })}
               onMeta={setMeta}
             />
           </div>
         </div>
-        {plot && (
-          <div className="cin-plot" data-testid="boxoffice-plot">
-            <span className="bo2-plot-kicker">KONU</span>
-            <p data-testid="boxoffice-plot-text">{plot.text}</p>
-            {plot.credits && <div className="bo2-credits" data-testid="boxoffice-plot-credits">{plot.credits}</div>}
-          </div>
-        )}
       </div>
     </div>
   );

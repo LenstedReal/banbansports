@@ -1256,11 +1256,11 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 .bo2-label { font-size: 10px !important; color: var(--ink-high) !important; opacity: 0.85; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9); }
 .bo2-block {
   padding: 11px 12px 12px !important;
-  background: rgba(9, 6, 16, 0.38) !important;
-  backdrop-filter: blur(14px) saturate(1.35); -webkit-backdrop-filter: blur(14px) saturate(1.35);
-  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  background: rgba(9, 6, 16, 0.22) !important;
+  backdrop-filter: blur(9px) saturate(1.3); -webkit-backdrop-filter: blur(9px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
   border-radius: 10px !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 6px 18px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
 .bo2-breakdown {
   display: flex !important; flex-direction: column; gap: 7px;
@@ -1272,11 +1272,11 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
   grid-template-areas: "label value" "sub value";
   align-items: center; column-gap: 12px; row-gap: 3px;
   padding: 10px 13px !important;
-  background: rgba(9, 6, 16, 0.38) !important;
-  backdrop-filter: blur(14px) saturate(1.35); -webkit-backdrop-filter: blur(14px) saturate(1.35);
-  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  background: rgba(9, 6, 16, 0.22) !important;
+  backdrop-filter: blur(9px) saturate(1.3); -webkit-backdrop-filter: blur(9px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
   border-radius: 10px !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 6px 18px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
 .bo2-bd-label { grid-area: label; margin: 0 !important; font-size: 10px !important; color: var(--ink-high) !important; opacity: 0.85; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9); }
 .bo2-bd-value { grid-area: value; font-size: 16px !important; letter-spacing: 0 !important; white-space: nowrap !important; overflow: visible !important; text-overflow: clip !important; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85); }
@@ -1307,48 +1307,82 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
   overflow: visible; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
 }
 
-/* 6) Spider-Man backdrop görünürlüğü MAKSİMUM — veil çok hafif, okunurluk cam kartlarda */
-.cin-backdrop { opacity: 1 !important; }
-.cin-veil { background: linear-gradient(105deg, rgba(7, 5, 12, 0.16) 26%, rgba(7, 5, 12, 0.09) 55%, rgba(20, 8, 30, 0.05)) !important; }
+/* 6) TEK BLOK SİNEMATİK HERO — görsel + üstünde cam KONU paneli (şeffaflık estetiği geri döndü) */
+.cin-backdrop, .cin-veil { display: none !important; }
+.bo2-hero {
+  position: relative; height: 330px; margin: 9px 0;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  border-radius: 11px; overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 22px rgba(255, 0, 64, 0.07);
+}
+.bo2-hero.expanded { height: auto; min-height: 330px; }
+.bo2-hero img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: center 12%;
+  filter: saturate(1.15) brightness(1.1);
+}
+.bo2-hero-fade {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(7, 5, 12, 0.28), transparent 24%, transparent 55%, rgba(7, 5, 12, 0.62));
+}
+.bo2-hero-plot {
+  position: relative; z-index: 2; margin: 10px;
+  padding: 9px 12px 10px; border-radius: 10px;
+  background: rgba(9, 6, 16, 0.42);
+  backdrop-filter: blur(12px) saturate(1.3); -webkit-backdrop-filter: blur(12px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+.bo2-hero-plot-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.bo2-hero-plot p {
+  margin: 5px 0 0; font-size: 10.5px; line-height: 1.6; color: var(--ink-high); opacity: 0.92;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.bo2-hero-plot p.open { -webkit-line-clamp: 60; }
+.bo2-plot-toggle {
+  flex: 0 0 auto; cursor: pointer;
+  padding: 3px 10px; border-radius: 999px;
+  border: 1px solid rgba(0, 240, 255, 0.4); background: rgba(0, 240, 255, 0.07);
+  color: var(--cyan); font-family: var(--font-mono); font-size: 8.5px; font-weight: 700; letter-spacing: 1.8px;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.bo2-plot-toggle:hover { background: rgba(0, 240, 255, 0.14); box-shadow: 0 0 12px rgba(0, 240, 255, 0.2); }
+.bo2-hero-plot .bo2-credits { margin-top: 7px; }
 .cin-plot {
-  background: rgba(9, 6, 16, 0.45) !important;
-  backdrop-filter: blur(14px) saturate(1.35) !important; -webkit-backdrop-filter: blur(14px) saturate(1.35) !important;
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  background: rgba(9, 6, 16, 0.3) !important;
+  backdrop-filter: blur(9px) saturate(1.3) !important; -webkit-backdrop-filter: blur(9px) saturate(1.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 .cin-plot p { text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85); }
 .bo2-credits { font-size: 9.5px !important; color: var(--ink-high) !important; opacity: 0.65; }
 .bo2-plot-kicker { text-shadow: 0 0 10px rgba(0, 229, 255, 0.5), 0 1px 3px rgba(0, 0, 0, 0.9) !important; }
 
-/* 6b) Parlak backdrop üzerinde okunabilirlik — GERÇEK CAM üst bölge (görüntü görünür, yazı okunur) */
+/* 6b) Parlak backdrop üzerinde okunabilirlik — hafif cam, arka plan net görünür */
 .cin-card .pnl-head {
-  background: rgba(9, 6, 16, 0.42) !important;
-  backdrop-filter: blur(14px) saturate(1.3); -webkit-backdrop-filter: blur(14px) saturate(1.3);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(9, 6, 16, 0.3) !important;
+  backdrop-filter: blur(9px) saturate(1.25); -webkit-backdrop-filter: blur(9px) saturate(1.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
 }
 .bo2-title-row, .bo2-tabs-row {
-  background: rgba(9, 6, 16, 0.38);
-  backdrop-filter: blur(14px) saturate(1.35); -webkit-backdrop-filter: blur(14px) saturate(1.35);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(9, 6, 16, 0.22);
+  backdrop-filter: blur(9px) saturate(1.3); -webkit-backdrop-filter: blur(9px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
   padding: 8px 10px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 .bo2-tabs-row { margin: 8px 0 !important; }
 .bo2-title { text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9); }
 .bo2-subtitle { color: var(--ink-high) !important; opacity: 0.85; font-size: 10px !important; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9); }
-.bo2-live-badge, .bo2-new-badge { background-color: rgba(9, 6, 16, 0.55) !important; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9); font-size: 9.5px !important; }
-.bo2-cur-tab, .bo2-scope-tab { background-color: rgba(9, 6, 16, 0.55) !important; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.bo2-live-badge, .bo2-new-badge { background-color: rgba(9, 6, 16, 0.4) !important; backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px); text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9); font-size: 9.5px !important; }
+.bo2-cur-tab, .bo2-scope-tab { background-color: rgba(9, 6, 16, 0.42) !important; backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px); }
 .bo2-cur-tab { color: var(--ink-high); }
 .bo2-cur-tab.active { background-color: rgba(0, 229, 255, 0.18) !important; }
 .bo2-scope-tab.active { background-color: rgba(255, 0, 170, 0.18) !important; }
 
-/* 7) Player 5G notu + kontrol barı çakışma koruması */
-.player-5g-note {
-  display: flex; align-items: center; justify-content: flex-end; gap: 6px;
-  padding: 5px 10px 4px; opacity: 0.85;
-  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.8px; color: var(--ink-mid);
-}
-.player-5g-note img { height: 14px; width: auto; }
+/* 7) Video player kontrol barı çakışma koruması */
 .video-controls { row-gap: 8px !important; }
 .video-controls .controls-left, .video-controls .controls-right { row-gap: 6px !important; min-width: 0; }
 
@@ -1367,7 +1401,7 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 }
 .fs-card:hover { border-color: var(--line-cyan); box-shadow: 0 0 14px rgba(0, 240, 255, 0.12); }
 .fs-card.fs-brands { flex: 1.6 1 0; }
-.fs-card.fs-brands img { height: 24px; width: auto; max-width: 100%; object-fit: contain; }
+.fs-card.fs-brands img { height: 34px; width: auto; max-width: 100%; object-fit: contain; }
 .fs-card.fs-team { flex-direction: column; gap: 6px; padding: 8px 6px; }
 .fs-card.fs-team img { height: 30px; width: auto; }
 .fs-team-name {
@@ -1395,11 +1429,114 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 }
 .ft2-infra-line strong { color: var(--cyan); font-weight: 500; }
 
-/* 10) Player başlat ekranı — buton/yazı çakışması kesin fix: alıntı ÜSTTE, CTA butonun altında */
+/* 10) Player başlat ekranı — play ortada, CTA butonun altında, ALINTI CTA'nın altında,
+      imza (— T. SHELBY) sağ altta hafif kalın ve zarif */
 .shelby-play-btn { width: clamp(70px, 7.5vw, 94px) !important; height: clamp(70px, 7.5vw, 94px) !important; }
 .shelby-cta { top: calc(50% + 58px) !important; bottom: auto !important; font-size: 11.5px !important; letter-spacing: 3px !important; }
-.shelby-quote { top: 12px !important; bottom: auto !important; font-size: 13px !important; }
-.shelby-credit { top: 44px !important; bottom: auto !important; font-size: 9.5px !important; }
+.shelby-quote { top: calc(50% + 82px) !important; bottom: auto !important; font-size: 12.5px !important; width: 80% !important; }
+.shelby-credit {
+  top: auto !important; bottom: 7px !important;
+  left: auto !important; right: 14px !important; transform: none !important;
+  text-align: right; font-size: 9.5px !important; font-weight: 700 !important;
+  letter-spacing: 2.4px !important; opacity: 0.95;
+}
+
+/* 10b) Film kilit paneli — SİTE TASARIMIYLA TAM ENTEGRE yeniden tasarım */
+.mp-lock {
+  background:
+    radial-gradient(ellipse at 50% 18%, rgba(255, 0, 170, 0.09), transparent 55%),
+    radial-gradient(ellipse at 50% 85%, rgba(0, 240, 255, 0.07), transparent 55%),
+    radial-gradient(ellipse at center, rgba(13, 7, 24, 0.95), #05030a 82%) !important;
+}
+.mp-lock-bg {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-size: cover; background-position: center 18%;
+  filter: blur(20px) brightness(0.45) saturate(1.25);
+  opacity: 0.55;
+}
+.mp-lock::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 3px);
+  opacity: 0.6;
+}
+.mp-lock-card {
+  gap: 12px !important; padding: 26px 28px 22px !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(0, 240, 255, 0.32) !important;
+  background: linear-gradient(165deg, rgba(15, 9, 28, 0.82), rgba(8, 4, 16, 0.9)) !important;
+  backdrop-filter: blur(16px) saturate(1.3); -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.7), 0 0 32px rgba(0, 240, 255, 0.12), 0 0 70px rgba(255, 0, 170, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  position: relative; z-index: 1;
+}
+.mp-lock-card::before {
+  content: ''; position: absolute; top: -1px; left: 14%; right: 14%; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--cyan, #00f0ff) 30%, var(--pink, #ff00aa) 70%, transparent);
+  opacity: 0.85;
+}
+.mp-lock-icon {
+  width: 46px; height: 46px; margin: 0 auto 2px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--cyan, #00f0ff);
+  border: 1px solid rgba(0, 240, 255, 0.45);
+  background: radial-gradient(circle at 50% 35%, rgba(0, 240, 255, 0.14), rgba(0, 240, 255, 0.03));
+  box-shadow: 0 0 18px rgba(0, 240, 255, 0.25), inset 0 0 12px rgba(0, 240, 255, 0.1);
+}
+.mp-lock-sub {
+  font-family: var(--font-mono, 'Share Tech Mono'), monospace; font-size: 9.5px;
+  letter-spacing: 1.2px; color: rgba(255, 255, 255, 0.55); text-align: center;
+  margin-bottom: 4px;
+}
+.mp-creds-head {
+  font-family: 'Orbitron', sans-serif; font-size: 8.5px; font-weight: 700;
+  letter-spacing: 2.8px; color: var(--pink, #ff00aa);
+  padding-bottom: 6px; margin-bottom: 3px;
+  border-bottom: 1px solid rgba(255, 0, 170, 0.25);
+  text-shadow: 0 0 8px rgba(255, 0, 170, 0.4);
+}
+.mp-lock-kicker {
+  font-family: var(--font-mono, 'Share Tech Mono'), monospace; font-size: 8.5px; font-weight: 600;
+  letter-spacing: 3.4px; color: var(--pink, #ff00aa); text-align: center;
+  text-shadow: 0 0 10px rgba(255, 0, 170, 0.5);
+}
+.mp-lock-title { font-size: 13px !important; letter-spacing: 3px !important; margin-bottom: 2px !important; }
+.mp-lock-input {
+  border-radius: 9px !important; padding: 12px 14px !important;
+  background: rgba(0, 240, 255, 0.045) !important;
+  border: 1px solid rgba(0, 240, 255, 0.22) !important;
+}
+.mp-lock-input:focus { border-color: var(--cyan, #00f0ff) !important; box-shadow: 0 0 14px rgba(0, 240, 255, 0.18); }
+.mp-lock-input::placeholder { color: rgba(255, 255, 255, 0.35); letter-spacing: 1.2px; }
+.mp-lock-btn { border-radius: 999px !important; padding: 11px !important; letter-spacing: 2.4px !important; }
+.mp-lock-primary {
+  background: linear-gradient(90deg, rgba(0, 255, 136, 0.14), rgba(0, 240, 255, 0.1)) !important;
+  box-shadow: 0 0 14px rgba(0, 255, 136, 0.12);
+}
+.mp-lock-note { font-size: 8.5px !important; letter-spacing: 0.8px !important; color: rgba(255, 255, 255, 0.4) !important; }
+.mp-lock-err { text-align: center; }
+.mp-getpass-btn { border-radius: 999px !important; letter-spacing: 2.4px !important; }
+.mp-lock-creds {
+  border: 1px solid rgba(0, 240, 255, 0.32) !important;
+  background: linear-gradient(160deg, rgba(10, 6, 20, 0.92), rgba(6, 4, 14, 0.94)) !important;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-radius: 11px !important; padding: 12px 14px !important;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.55), 0 0 20px rgba(0, 240, 255, 0.12);
+  position: relative;
+}
+.mp-copy { transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease; border-radius: 6px; }
+.mp-copy.copied { background: rgba(0, 255, 136, 0.15) !important; border-color: var(--green, #00ff88) !important; color: var(--green, #00ff88) !important; }
+.mp-copied-toast {
+  position: absolute; top: -34px; left: 50%; transform: translateX(-50%);
+  padding: 5px 13px; border-radius: 999px; white-space: nowrap;
+  font-family: 'Orbitron', sans-serif; font-size: 9.5px; font-weight: 700; letter-spacing: 2px;
+  color: var(--green, #00ff88); background: rgba(5, 20, 12, 0.92);
+  border: 1px solid rgba(0, 255, 136, 0.5); box-shadow: 0 0 16px rgba(0, 255, 136, 0.25);
+  animation: copiedPop 0.22s ease-out;
+  pointer-events: none; z-index: 5;
+}
+@keyframes copiedPop {
+  from { opacity: 0; transform: translateX(-50%) translateY(6px) scale(0.9); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
 
 /* 11) Betzula şeridi — video yüklenmezse boş kutu gibi görünmesin */
 .shelby-strip {

@@ -1,0 +1,20 @@
+{
+  "summary": "Frontend-only verification at 980x1200 for the new single-block hero + glass plot overlay design. All requested assertions passed: boxoffice-hero present with height=330px and image loaded (naturalWidth=1280); boxoffice-plot is a DOM child of the hero; the separate .cin-plot section is fully removed (count=0); boxoffice-plot-text is clamped to 3 lines (computed webkitLineClamp='3', clientHeight=50px), DEVAMI ▼ toggles to full text (clientHeight=319px), button label switches to GİZLE ▲, boxoffice-plot-credits (Yönetmen) becomes visible; toggle back restores clamp (50px, DEVAMI ▼). All box office data-testids render with meaningful values (gross ₺83.6B, viewers 228.8M, local/intl split, rate, sources). CANLI GİŞE and YENİ FİLM rozetleri present. Regression clean: sponsor-banner=1, footer-bottom=1, legal-body=1, movie-shelf-watch click opens movie-lock-panel, 0 console errors, 0 page errors.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_10.json"],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a", "frontend": "100%"},
+  "test_credentials": "lenstedreal_marka / zirvedeyiz (lock panel; not exercised — not required)",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "New design: KONU/plot is a glass overlay inside boxoffice-hero (330px). The old assertion about a separate cin-plot / boxoffice-plot section is obsolete. Plot text clamps to 3 lines by default; toggle via [data-testid=plot-toggle-btn] (DEVAMI ▼ / GİZLE ▲) also reveals boxoffice-plot-credits. Movie unlock flow: click [data-testid=movie-shelf-watch] (poster column) to open [data-testid=movie-lock-panel]. Viewport 980x1200 required.",
+  "rca of the issue": "No issue found — redesign meets all acceptance criteria."
+}

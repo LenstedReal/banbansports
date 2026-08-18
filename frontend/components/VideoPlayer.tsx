@@ -2,7 +2,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { TR } from '@/lib/i18n';
 import MoviePlayer, { type Movie } from './MoviePlayer';
-import SponsorBanner from './SponsorBanner';
 import { smoothFps, measureRefreshHz, getRefreshHz, fpsClass } from '@/lib/fps';
 import { CHANNELS, CHANNEL_SOURCES, type Channel } from '@/lib/channels';
 
@@ -1328,9 +1327,9 @@ export default function VideoPlayer() {
                     <path d="M8 5v14l11-7z" />
                   </svg>
                 </button>
-                <div className="shelby-cta">BAŞLATMAK İÇİN TIKLA · PRESS PLAY</div>
-                <div className="shelby-quote">&ldquo;VEFA BİLMEYENE VEDA YAKIŞIR&rdquo;</div>
-                <div className="shelby-credit">— T. SHELBY</div>
+                <div className="shelby-cta" data-testid="shelby-cta">BAŞLATMAK İÇİN TIKLA · PRESS PLAY</div>
+                <div className="shelby-quote" data-testid="shelby-quote">&ldquo;VEFA BİLMEYENE VEDA YAKIŞIR&rdquo;</div>
+                <div className="shelby-credit" data-testid="shelby-credit">— T. SHELBY</div>
               </div>
             </div>
           )}
@@ -1618,7 +1617,14 @@ export default function VideoPlayer() {
                     <path d="M2 22h2v-4H2v4zm4 0h2v-8H6v8zm4 0h2v-12h-2v12zm4 0h2V6h-2v16zm4 0h2V2h-2v20z" />
                   )}
                 </svg>
-                {netType}
+                {netType === '5G' ? (
+                  <span data-testid="net-5g-glyph" style={{
+                    fontFamily: 'Georgia, "Times New Roman", serif', fontStyle: 'italic', fontWeight: 800, fontSize: 13, lineHeight: 1,
+                    background: 'linear-gradient(180deg, #ffe9a8 0%, #f5c542 45%, #c98f12 100%)',
+                    WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                    filter: 'drop-shadow(0 0 6px rgba(245,197,66,0.45))',
+                  }}>5G</span>
+                ) : netType}
               </div>
 
               <div className="controls-right" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -1801,11 +1807,6 @@ export default function VideoPlayer() {
       {/* HOVER-SHOW kontrolleri ve kanal kutusu (.sidebar-ch-btn.ch-tile, .ch-soon-banner) stilleri
           globals.css'in sonunda yer alıyor. Daha önce burada <style jsx> bloğu vardı;
           styled-jsx paketinin kaldırılmasıyla CSS global stylesheet'e taşındı. */}
-      {/* Turkcell 5G desteği — küçük not (footer'dan taşındı) */}
-      <div className="player-5g-note" data-testid="player-5g-note">
-        <img src="/logos/turkcell5g.png?v=20260810g" alt="Turkcell 5G" loading="lazy" decoding="async" draggable={false} />
-        <span>tarafından desteklenmektedir</span>
-      </div>
     </section>
 
       {/* ===== BETZULA SHELBY BANNER — tıklayınca yönlendirir ===== */}
@@ -1819,9 +1820,6 @@ export default function VideoPlayer() {
       >
         <video src="/shelby_banner.mp4" autoPlay muted loop playsInline aria-hidden="true" />
       </a>
-
-      {/* ===== RESMİ YAYIN SPONSORU — GrandpashaBet ===== */}
-      <SponsorBanner />
 
       {/* ===== FİLM PLAYER MODAL — neon çerçeveli ayrı player ===== */}
       {movieOpen && movie && (

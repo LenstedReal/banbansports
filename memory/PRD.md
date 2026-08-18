@@ -1,5 +1,12 @@
 # banbansports — PRD
 
+## ✅ TUR 5 (2026-08-18, devam): Film kartı TEK BLOK yeniden tasarım + kilit paneli + son rötuşlar
+- Film kartı: kart arkası backdrop/veil tamamen kapatıldı; Spider-Man kendi 330px sinematik hero bloğunda (bo2-hero), KONU metni hero ÜZERİNDE cam panel (3 satır clamp + DEVAMI/GİZLE toggle, credits açılınca görünür); ayrı cin-plot bölümü kaldırıldı — veri kaybı yok (iteration_10: hepsi PASS).
+- Kilit paneli yeniden tasarım: neon kilit ikonu halkası, BANBANSPORTS kicker, film adı alt başlığı, ERİŞİM BİLGİLERİ başlıklı cam creds kutusu, bulanık poster bg, pill butonlar; kopyala → ✓ + KOPYALANDI toast + titreşim.
+- Alt GPB banner silindi (tek banner, player üstünde); 5G notu silindi → bağlantı göstergesi 5G'de altın italik glif; alıntı CTA altında, — T. SHELBY sağ altta; meritking_news.png (kullanıcı görseli) sponsor şeridinde; fs-brands logosu 34px.
+- Vercel env: YENİ ZORUNLU DEĞİŞKEN YOK; opsiyonel STREAM_ACCESS_USER/PASS. stream-auth Vercel 404'ünün kök nedeni api/index.py mount eksiğiydi (düzeltildi, push+redeploy gerek).
+- Testler: iteration_6 (backend 9/9 + frontend tam akış), iteration_7/9/10 frontend %100 PASS.
+
 ## ✅ TUR 4 (2026-08-18, bu oturum): Kullanıcı hata listesi + Vercel sync
 - **Vercel sync KÖK NEDEN fix**: `_backend_app/routers/boxoffice.py` eski bilet modelindeydi → `backend/app` ile eşitlendi (TR 240TL ağırlıklı model, seyirci ~1.9M). `movies.py` de eşitlendi. `stream_auth` + `sponsors` router'ları `api/index.py`'ye eklendi. `stream_auth` creds env'e taşındı (STREAM_ACCESS_USER/PASS, default eski değerler). sw.js → v8-sync. **Kullanıcı GitHub push + Vercel redeploy yapmalı.**
 - Yasal panel: CSS marquee → JS marquee (rAF, 34px/sn, hover pause). KÖK NEDEN: `column-count:1` bile multicol container yaratıp metni görünmez yan kolonlara akıtıyordu → `column-count:auto !important`. Artık 14 maddenin tamamı akıyor.

@@ -61,6 +61,7 @@ export default function MoviePlayer({ movie, onClose }: { movie: Movie; onClose:
   const [authErr, setAuthErr] = useState('');
   const [authBusy, setAuthBusy] = useState(false);
   const [credsOpen, setCredsOpen] = useState(false);
+  const [copied, setCopied] = useState<'user' | 'pass' | null>(null);
   const [adElapsed, setAdElapsed] = useState(0);
   const [adVideoDur, setAdVideoDur] = useState(20);
   const [adVideoLeft, setAdVideoLeft] = useState(20);
@@ -83,6 +84,21 @@ export default function MoviePlayer({ movie, onClose }: { movie: Movie; onClose:
   const setPhase = (p: Phase) => { phaseRef.current = p; setPhaseState(p); };
 
   const withTok = (base: string, t?: string) => (t ? `${base}?token=${t}` : base);
+
+  // Kopyalama geri bildirimi — görsel çip + titreşim
+  const doCopy = (what: 'user' | 'pass', text: string) => {
+    try {
+      if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text);
+      else {
+        const ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+      }
+    } catch { /* noop */ }
+    try { navigator.vibrate?.(60); } catch { /* noop */ }
+    setCopied(what);
+    window.setTimeout(() => setCopied(null), 1600);
+  };
 
   // Korumalı içerik doğrulaması — üyelik DEĞİLDİR, yayın erişim izni + 30 dk signed token
   const handleLogin = async () => {
@@ -499,8 +515,16 @@ export default function MoviePlayer({ movie, onClose }: { movie: Movie; onClose:
           {/* 🔒 KORUMALI / ŞİFRELİ İÇERİK — üyelik değil, yayın erişim doğrulaması */}
           {phase === 'lock' && (
             <div className="mp-lock" data-testid="movie-lock-panel" onClick={(e) => e.stopPropagation()}>
+              <div className="mp-lock-bg" aria-hidden="true" style={{ backgroundImage: `url('${movie.backdrop || movie.poster || '/spiderman_backdrop.jpg'}')` }} />
               <div className="mp-lock-card">
-                <div className="mp-lock-title">🔒 KORUMALI / ŞİFRELİ İÇERİK</div>
+                <div className="mp-lock-icon" aria-hidden="true">
+                  <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+                  </svg>
+                </div>
+                <div className="mp-lock-kicker" data-testid="lock-kicker">BANBANSPORTS · ORİJİNAL YAYIN</div>
+                <div className="mp-lock-title">KORUMALI / ŞİFRELİ İÇERİK</div>
+                <div className="mp-lock-sub" data-testid="lock-subtitle">{movie.title} · erişim için yayın şifresi gereklidir</div>
                 <input className="mp-lock-input" data-testid="lock-user-input" placeholder="Kullanıcı Adı / ID" value={authU} onChange={(e) => setAuthU(e.target.value)} autoComplete="off" />
                 <input className="mp-lock-input" data-testid="lock-pass-input" type="password" placeholder="Şifre" value={authP} onChange={(e) => setAuthP(e.target.value)} autoComplete="off" />
                 {authErr && <div className="mp-lock-err" data-testid="lock-error">{authErr}</div>}
@@ -520,8 +544,10 @@ export default function MoviePlayer({ movie, onClose }: { movie: Movie; onClose:
               </button>
               {credsOpen && (
                 <div className="mp-lock-creds mp-creds-float" data-testid="lock-creds">
-                  <div>Kullanıcı Adı / ID: <b>lenstedreal_marka</b> <button className="mp-copy" data-testid="copy-user-btn" onClick={() => { try { navigator.clipboard.writeText('lenstedreal_marka'); } catch { /* noop */ } }}>⧉</button></div>
-                  <div>Şifre: <b>zirvedeyiz</b> <button className="mp-copy" data-testid="copy-pass-btn" onClick={() => { try { navigator.clipboard.writeText('zirvedeyiz'); } catch { /* noop */ } }}>⧉</button></div>
+                  <div className="mp-creds-head">ERİŞİM BİLGİLERİ</div>
+                  <div>Kullanıcı Adı / ID: <b>lenstedreal_marka</b> <button className={`mp-copy${copied === 'user' ? ' copied' : ''}`} data-testid="copy-user-btn" onClick={() => doCopy('user', 'lenstedreal_marka')}>{copied === 'user' ? '✓' : '⧉'}</button></div>
+                  <div>Şifre: <b>zirvedeyiz</b> <button className={`mp-copy${copied === 'pass' ? ' copied' : ''}`} data-testid="copy-pass-btn" onClick={() => doCopy('pass', 'zirvedeyiz')}>{copied === 'pass' ? '✓' : '⧉'}</button></div>
+                  {copied && <div className="mp-copied-toast" data-testid="copied-toast">KOPYALANDI ✓</div>}
                 </div>
               )}
             </div>
