@@ -1,0 +1,114 @@
+{
+  "theme_strategy": {
+    "name": "dark_underground_broadcast",
+    "description": "Deep black and near-black purple surfaces, neon semantic hierarchy, cinematic film presentation, controlled glows, dense but highly composed bento-style information architecture."
+  },
+  "colors": {
+    "background": {
+      "void": "#030205",
+      "surface_base": "#0A0710",
+      "surface_elevated": "#140F20",
+      "surface_glass": "rgba(10, 7, 16, 0.75)"
+    },
+    "neon_semantic": {
+      "cyan_info": "#00E5FF",
+      "magenta_primary": "#F100FF",
+      "green_online": "#00FF66",
+      "red_live": "#FF003C",
+      "yellow_attention": "#FFC000"
+    },
+    "text": {
+      "primary": "#FFFFFF",
+      "secondary": "#A19BAD",
+      "muted": "#565165",
+      "inverse": "#000000"
+    },
+    "border": {
+      "subtle": "rgba(255, 255, 255, 0.08)",
+      "neon_cyan": "rgba(0, 229, 255, 0.4)",
+      "neon_magenta": "rgba(241, 0, 255, 0.4)"
+    }
+  },
+  "typography": {
+    "display": "Bebas Neue, Teko, sans-serif",
+    "body": "IBM Plex Sans, Manrope, sans-serif",
+    "mono": "JetBrains Mono, Space Mono, monospace",
+    "rules": [
+      "Headings & Section Labels: MUST be uppercase, heavily condensed display font, tightly tracked.",
+      "Body: Highly readable Sans-Serif. Never use 'Inter' for headings. Essential for movie plots and legal texts.",
+      "Metadata/Numbers/Tags: Monospace digital typography."
+    ]
+  },
+  "visual_enhancers": {
+    "glassmorphism": "backdrop-blur-xl bg-black/60 border border-white/5",
+    "textures": "Subtle CRT grain/scanlines on hero components and video player edges. Avoid heavy performance-draining filters.",
+    "glows": "Semantic glows only. Do not random-glow. Example: shadow-[0_0_15px_rgba(0,255,102,0.3)] for online status.",
+    "borders": "Thin 1px luminous borders. No thick borders."
+  },
+  "grid_layouts": {
+    "desktop": "12-column grid layout with gap-6. Left sidebar (col-span-3), Center Main (col-span-6), Right sidebar (col-span-3).",
+    "mobile": "Mobile is a separate information architecture. Stack logically: Navbar -> Live Scoreboard -> Main Video/Hero -> Left Sidebar Content (Leagues) -> Right Sidebar Content (Channels) -> Footer.",
+    "spacing": "Dense but padded. Containers MUST have generous internal padding (p-4 or p-6) to prevent text collision."
+  },
+  "component_guidelines": {
+    "navbar": {
+      "structure": "Logo 'banbansports UNDERGROUND HD' + CANLI badge -> Center Nav Links (MAÇ MERKEZİ, TV KANALLARI, FİLMLER, vb.) -> Notification toggle + FPS counter.",
+      "style": "Sticky top, glassmorphism surface, NEVER fully transparent."
+    },
+    "left_sidebar": {
+      "structure": "MAÇ MERKEZİ league filters (vertical list) -> YAKLAŞAN MAÇLAR (compact match list) -> Ad banner.",
+      "style": "Dark elevated surface cards. Active state gets Cyan neon border and text."
+    },
+    "center_main": {
+      "structure": "Big hero scoreboard (TRENDYOL SÜPER LİG carousel) -> GÜNÜN MAÇI with countdown & İZLE CTA -> Large cinematic video player with quote & PRESS PLAY -> Ad banners -> BOX OFFICE cinematic card.",
+      "style": "Cinematic presentation. Maximize negative space inside the bounding box. Box office card requires IMDb badge, currency tabs, and revenue stats in Monospace.",
+      "hero_overlay": "Gradient overlay from bottom up to ensure text visibility."
+    },
+    "right_sidebar": {
+      "structure": "CANLI YAYINDA channel logo grid -> TV KANALLARI list with CANLI status -> SUNUCULAR server list with latency (ms) -> ÖZET summary text.",
+      "style": "Dense data view. Use Green for AKTİF/CANLI, Red for DEVRE DIŞI. Numbers in Monospace."
+    },
+    "bottom_sections": {
+      "structure": "League logo strip (all leagues) -> Scrolling announcement ticker -> SPONSORLARIMIZ (large featured + dense grid) -> Footer.",
+      "style": "Ticker must use react-fast-marquee, dark background, cyan text. Sponsor logos must have hover glows."
+    },
+    "footer": {
+      "structure": "Social cards (@lenstedreal), TELEGRAM DESTEK, YASAL BİLGİLENDİRME buttons, FOOTBALL SUPPLIERS (Adidas/Nike/Puma), DMCA, 5G badge.",
+      "style": "High detail, technical broadcast styling. Footer links should be muted but readable."
+    }
+  },
+  "motion": {
+    "rules": [
+      "Micro-interactions only. No heavy constant animations.",
+      "Hover states: Slight lift (-translate-y-0.5), glow expansion, and text color shift.",
+      "Strictly avoid 'transition: all'. Use specific 'transition-colors', 'transition-transform'.",
+      "Neon pulse: Only for critical 'LIVE' or 'RECORDING' indicators."
+    ]
+  },
+  "accessibility": {
+    "rules": [
+      "Ensure min 4.5:1 contrast for body text. Dark background requires pure white or light gray text.",
+      "Interactive elements must have distinct focus rings (focus:ring-2 focus:ring-cyan-500).",
+      "Always include data-testid on all interactive and key informational elements."
+    ]
+  },
+  "media": {
+    "images": "Reuse existing assets (/footy/leagues/*.svg, /logos/channels/*.png, movie posters, ads). Do not replace with placeholders."
+  },
+  "instructions_to_main_agent": [
+    "This is a Next.js 15 App Router app using Tailwind CSS 3.4. Use JavaScript (.js, .jsx), NOT TypeScript (.tsx).",
+    "Update tailwind.config.js to include the custom colors and fonts defined in this JSON.",
+    "Do NOT use shadcn/ui. This project uses pure Tailwind utility classes and custom components.",
+    "Implement the 3-column desktop layout strictly.",
+    "Use 'lucide-react' for icons if needed, but prioritize existing SVGs.",
+    "Use 'react-fast-marquee' for the scrolling announcement ticker.",
+    "Preserve existing application logic, API calls, and data structures. REBUILD THE EXPERIENCE, DO NOT BREAK THE SYSTEM."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "DO NOT output generic 'AI slop' layouts. Follow the dense, dark, cyberpunk/underground cinematic theme strictly.",
+    "NEVER use complete transparent backgrounds for overlays, dropdowns, or headers.",
+    "Use distinct z-index layering for glassmorphism effects.",
+    "Create depth with shadows and subtle 1px luminous borders.",
+    "All interactive elements must include a 'data-testid' attribute in kebab-case."
+  ]
+}

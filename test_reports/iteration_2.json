@@ -1,0 +1,27 @@
+{
+  "summary": "Iteration 2 frontend regression on redesigned dashboard @ 980x1100. All 10 targeted checks executed via Playwright + curl. Team logo fallback verified (7/7 match rows and hero banner all have img OR .team-logo-fallback). Footer (socials, telegram, legal tabs, suppliers) fully functional; legal-tab-tumu=14 paragraphs, legal-tab-kvkk=3 paragraphs. Sponsors panel has no empty slot and sponsor-adidas renders; POST /api/sponsors/click returns 200. BoxOffice gross '₺88.764.304.726' has no ellipsis and no client overflow; boxoffice-plot removed from center card and ozet-plot present in right panel. Filters TR/FR work (HAZIRLIK returns only 2 friendly badges, no LaLiga leak). Channel select and ozet-toggle work. Match detail navigation from match-row-0 works and back link returns to home. One minor gap: match-detail page does not expose data-testid='md2-hero' (other md2-* neon markup still rendered based on visible layout; match-back-link, match-home, match-away, match-score all present).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "MatchDetailClient / app/match/[id]/page.tsx", "issue": "data-testid='md2-hero' not present on the hero panel; test spec explicitly checks for it. Other md2-* elements likely render correctly but the automation hook is missing.", "selector": "[data-testid=\"md2-hero\"]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_2.json", "/app/backend/tests/test_redesign_iteration.py"],
+  "action_items": [
+    "Add data-testid=\"md2-hero\" to the hero wrapper in app/match/[id]/page.tsx (or MatchDetailClient) so redesign hero panel is testable. All other md2-* checks pass."
+  ],
+  "critical_code_review_comments": [
+    "Console has a non-blocking Next.js smooth-scroll warning: add data-scroll-behavior=\"smooth\" to <html> per Next.js 15+ guidance.",
+    "Sponsors click endpoint schema uses 'sponsor_id' — frontend sendBeacon must send that exact key (verified working via curl)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (skipped per request)", "frontend": "95%"},
+  "test_credentials": "Not required for these public flows.",
+  "seed_data_creation": "None.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Viewport locked to 980x1100. Live scores load in ~6-8s — always sleep 8s post-navigation. Match detail hero missing md2-hero testid (only cosmetic gap). Everything else in iteration_2 review request verified green.",
+  "rca of the issue": "md2-hero missing: likely the hero <section> in match detail page was styled with md2-* classes but the automation testid attribute was not added when redesign classes were introduced. Fix: add data-testid=\"md2-hero\" to the wrapper element enclosing match-home/match-score/match-away in app/match/[id]/page.tsx (or the client component if hero is client-rendered)."
+}

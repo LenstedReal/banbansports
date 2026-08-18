@@ -1,0 +1,121 @@
+<analysis>**original_problem_statement**: Mevcut projemde Büyük olcekli güncelleme bir degisiklige gidicez (https://github.com/LenstedReal/banbansports). The user wants a massive UI/UX redesign inspired by a prototype image (to be provided in the next session), maintaining absolute data integrity and existing backend logic. The user also wants to integrate Cloudflare Turnstile & Workers security features, which were planned in a previous lost session.
+
+**User's preferred language**: **Turkish** (You MUST respond in Turkish only).
+
+**what currently exists?**: A full-stack application with Next.js 15 + React 19 for the frontend, and FastAPI + MongoDB for the backend. The UI relies on a monolithic . Data fetching and streaming logic (scores, box office, HLS streams) are functional. The current workspace was just a planning environment; the agent cloned the repo, analyzed the codebase, and created 3 comprehensive planning and documentation files (, , and ) for the next fork to execute the code changes.
+
+**Last working item**:
+    - Last item agent was working: Codebase analysis and generating execution plans (, , ) for the upcoming fork. The user explicitly requested NO code changes in this session, only planning.
+    - Status: NOT STARTED (Planning completed, coding execution is pending)
+    - Agent Testing Done: N
+    - Which testing method agent to use: testing agent (after significant feature development).
+    - User Testing Done: N
+
+**All Pending/In progress Issue list**:
+  Issue 1: Backend Router Sync Bug (P0)
+  
+  Issues Detail:
+  - Issue 1: 
+     - Attempted fixes: Identified during planning but not fixed.
+     - Next debug checklist: Check , , and  (Vercel slim entry).  returns 404 in preview because it's not mounted in the Vercel slim entry. Also,  contains hardcoded credentials (, ) that need to be moved to .
+     - Why fix this issue and what will be achieved with the fix? Will fix the broken şifre al (get password) feature in the preview environment and secure hardcoded credentials.
+     - Status: NOT STARTED
+     - Is recurring issue? N
+     - Should Test frontend/backend/both after fix? backend
+     - Blocked on other issue: None
+
+**In progress Task List**:
+*(No coding tasks were started in this session. See Upcoming Tasks for execution plan).*
+
+**Upcoming and Future Tasks**:
+  - Task 1: Setup & Initialization (P0) - Create  with  and  (otherwise backend crashes). Ask user for the prototype image and Turnstile keys if not provided in the first message.
+  - Task 2: Core Design System & Tailwind Configuration (P0) - Refactor the monolithic  into proper Tailwind configurations () and Shadcn UI tokens. Implement the neon/cinematic aesthetic requested in .
+  - Task 3: Section-by-Section Redesign (P0) - Apply new UI to Header, MatchCenter, Movie Player, Sponsors, Channels, and Footer. **CRITICAL:** Do NOT break existing API data fetching or backend logic. Do not rewrite real text (movie descriptions, etc.) using AI.
+  - Task 4: Responsive UI overhaul (P1) - Remove desktop width constraints (e.g., ). Create a dedicated mobile layout (horizontal scroll tabs, flexible grid) rather than just shrinking the desktop view.
+  - Task 5: Cloudflare Security Integration (P0) - Implement Cloudflare Turnstile bot protection and Cloudflare Workers HLS stream token validation based EXACTLY on the steps outlined in . Turnstile requires frontend widget and backend .
+  - Task 6: Final QA & Testing Agent (P0) - Test full responsive layout and invoke  for full end-to-end regression validation.
+
+**Completed work in this session**
+- Repository architecture and synchronization analysis (DONE)
+- Generated UI/UX implementation plan:  (DONE)
+- Generated codebase vulnerability and feature roadmap:  (DONE)
+- Recovered and injected user's Cloudflare security instructions into:  (DONE)
+
+**Earlier issues found/mentioned but not fixed**
+   - Issue 1: Missing  backend variables.
+   - Debug checklist:  needs  and  populated manually to ensure FastAPI starts successfully in the fork.
+   - Why to solve this issue and what will be achieved with this? Prevents backend RuntimeError on startup.
+   - Should Test frontend/backend/both after fix: backend
+   - Is recurring issue? N
+
+**Known issue recurrence from previous fork**
+  - Issue recurrence in previous fork: N/A
+  - Recurrence count: 0
+  - Status: NOT STARTED
+
+**Code Architecture**
+Next.js 15 (React 19) frontend and FastAPI backend.
+
+
+**Key Technical Concepts**
+Next.js 15, React 19, FastAPI, MongoDB, Tailwind CSS, Shadcn UI, HLS Proxy Streaming, Cloudflare Turnstile, Cloudflare Workers, JWT Auth.
+
+**key DB schema**
+Not fully documented in the planning phase, but involves , , , . Uses MongoDB via Motor async client.
+
+**changes in tech stack**
+Adding Cloudflare Turnstile for frontend/backend bot validation and Cloudflare Workers for edge token validation.
+
+**All files of reference**
+-  (Contains mandatory Cloudflare Turnstile & Workers instructions)
+-  (Contains the 25-point UI/UX redesign rules)
+-  (Contains exact details on broken routers and backend discrepancies)
+-  (Current monolithic CSS file)
+-  (Vercel entry point causing the 404 router bug)
+
+**Areas that need refactoring**
+ is massive (3400+ lines) and contains hardcoded styles. Needs to be refactored into modular Tailwind CSS classes and reusable design tokens.
+ vs  vs  routing setups need to be synchronized to prevent 404s in production/preview.
+
+**key api endpoints**
+- 
+- 
+- 
+-  (Broken in Vercel slim build)
+
+**Critical Info for New Agent**
+- **STRICT UI/UX RULE:** The user wants a visual overhaul (neon, cinematic, modern, dark UI) but you **MUST NOT** modify existing API responses, mock actual data, rewrite existing texts with AI, or break backend logic. The data layer and UI layer must be treated separately.
+- **WAIT FOR ASSETS:** The user will provide the prototype image (visual north star) and Cloudflare Turnstile keys in the first message of your fork. Acknowledge them.
+- **STARTUP FIX:** You must create  containing at least  and  before starting the services, or the FastAPI backend will fail to boot.
+- **CLOUDFLARE SECURITY:** The exact steps for Turnstile and Workers are documented in  under the ⛔ ASLA SİLME section. Follow it exactly.
+
+**documents and test reports created in this job**
+- 
+- 
+- 
+
+**Last 10 User Messages and any pending HUMAN messages**
+- *User provided Turnstile/Workers configuration text manually because it was missing from the repo, and requested the agent to add it to the plan and prepare for the fork.* (COMPLETED)
+- *User asked if the agent searched the repo thoroughly for the missing config.* (COMPLETED)
+- *User asked to find the missing Turnstile files from a previous session.* (COMPLETED - Agent informed user it wasn't pushed to git).
+- *User complained about Cloudflare Turnstile settings missing from the repo.* (COMPLETED)
+- *User mentioned sync bug, şifre al preview bug, and requested the step plan.* (COMPLETED - Added to plan).
+
+**Project Health Check:**
+- Broken:  endpoint is broken in the Next.js Vercel proxy () due to sync mismatch.
+
+**3rd Party Integrations**
+- Cloudflare Turnstile (Bot protection) - requires User API Keys (Site Key & Secret Key)
+- Cloudflare Workers (Edge token validation) - configured via user dashboard, integrates with JWT.
+
+**Testing status**
+- Testing agent used after significant changes: NO (Planning phase only)
+- Troubleshoot agent used after agent stuck in loop: NO
+- Test files created: None
+- Known regressions: stream-auth 404 bug in preview environment.
+
+**Credentials to test flow:**
+None generated yet.
+
+**What agent forgot to execute**
+N/A - Agent correctly identified that the user only wanted a plan generated in this session.</analysis>
