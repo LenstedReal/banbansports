@@ -1,5 +1,11 @@
 # banbansports — PRD
 
+## ✅ TUR 6 (2026-08-18): Film kartı NETFLIX TARZI TEK KOMPOZİSYON (final)
+- CinemaSection.tsx SIFIRDAN yazıldı: 240px cin2-hero (Spider-Man tam görünür) — görsel ÜZERİNDE: rozetler+IMDb (üst), poster küçük resmi + başlık(2 satır clamp) + dublaj/altyazı etiketleri + İZLE (alt), KONU ▼ çipi → hero içi cam panel.
+- KONU kapanma: document click listener — metne/dışarı/çipe tıklayınca kapanır (iteration_12 PASS).
+- BoxOfficeCounter: sadece tabs+stats (başlık/hero çıkarıldı); YEREL/ULUSLARARASI yan yana, ARTIŞ HIZI şerit. Kart ~640px. Eski cin-backdrop/cin-veil display:none.
+- Testler: iteration_11 (kart tam), iteration_12 (KONU kapanma) %100 PASS.
+
 ## ✅ TUR 5 (2026-08-18, devam): Film kartı TEK BLOK yeniden tasarım + kilit paneli + son rötuşlar
 - Film kartı: kart arkası backdrop/veil tamamen kapatıldı; Spider-Man kendi 330px sinematik hero bloğunda (bo2-hero), KONU metni hero ÜZERİNDE cam panel (3 satır clamp + DEVAMI/GİZLE toggle, credits açılınca görünür); ayrı cin-plot bölümü kaldırıldı — veri kaybı yok (iteration_10: hepsi PASS).
 - Kilit paneli yeniden tasarım: neon kilit ikonu halkası, BANBANSPORTS kicker, film adı alt başlığı, ERİŞİM BİLGİLERİ başlıklı cam creds kutusu, bulanık poster bg, pill butonlar; kopyala → ✓ + KOPYALANDI toast + titreşim.

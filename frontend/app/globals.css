@@ -1377,7 +1377,7 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
   box-shadow: 0 0 18px rgba(255, 0, 170, 0.35), 0 8px 20px rgba(0, 0, 0, 0.5);
 }
 .cin2-plot-chip {
-  position: absolute; top: 42px; right: 10px; z-index: 4; cursor: pointer;
+  position: absolute; top: 42px; right: 10px; z-index: 6; cursor: pointer;
   padding: 4px 11px; border-radius: 999px;
   border: 1px solid rgba(0, 240, 255, 0.45); background: rgba(9, 6, 16, 0.6);
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);

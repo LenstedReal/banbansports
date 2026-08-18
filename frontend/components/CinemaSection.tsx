@@ -26,6 +26,17 @@ export default function CinemaSection() {
     try { window.dispatchEvent(new CustomEvent('bb:open-movie')); } catch { /* noop */ }
   };
 
+  // KONU açıkken: metne veya sayfada herhangi bir yere tıklayınca kapanır (çip toggle olarak kalır)
+  useEffect(() => {
+    if (!plotOpen) return;
+    const close = (e: MouseEvent) => {
+      if ((e.target as HTMLElement)?.closest?.('[data-testid="plot-toggle-btn"]')) return;
+      setPlotOpen(false);
+    };
+    document.addEventListener('click', close);
+    return () => document.removeEventListener('click', close);
+  }, [plotOpen]);
+
   return (
     <div className="pnl cin-card" id="filmler" data-testid="movie-tile">
       <div className="pnl-head">
@@ -66,7 +77,7 @@ export default function CinemaSection() {
             </button>
           )}
           {plot && plotOpen && (
-            <div className="cin2-plot" data-testid="boxoffice-plot" onClick={() => setPlotOpen(false)}>
+            <div className="cin2-plot" data-testid="boxoffice-plot">
               <p data-testid="boxoffice-plot-text">{plot.text}</p>
               {plot.credits && <div className="bo2-credits" data-testid="boxoffice-plot-credits">{plot.credits}</div>}
             </div>
