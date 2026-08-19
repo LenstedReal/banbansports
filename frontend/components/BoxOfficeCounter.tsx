@@ -23,7 +23,7 @@ type BoxOfficeData = {
 };
 
 const CURRENCIES: { code: string; symbol: string; flag: string }[] = [
-  { code: 'USD', symbol: '$', flag: '🇺🇸' },
+  { code: 'USD', symbol: '$', flag: '🇺🇸/🇨🇦' },
   { code: 'TRY', symbol: '₺', flag: '🇹🇷' },
   { code: 'EUR', symbol: '€', flag: '🇪🇺' },
   { code: 'GBP', symbol: '£', flag: '🇬🇧' },
