@@ -828,7 +828,7 @@ export default function MoviePlayer({ movie, onClose }: { movie: Movie; onClose:
                   </svg>
                 </span>
                 <span className="mp-notice-kicker"><i aria-hidden="true" />UYARI<i aria-hidden="true" /></span>
-                <span className="mp-notice-text">Türkçe dublaj olarak izlemek reklama tabidir</span>
+                <span className="mp-notice-text">Türkçe dublaj olarak izlemek reklama tabiidir</span>
               </div>
             </div>
           )}
