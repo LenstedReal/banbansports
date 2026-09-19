@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="7" skipped="0" tests="29" time="10.539" timestamp="2026-09-19T11:49:53.126840" hostname="agent-env-b84645e7-879e-453d-a36a-4e152b5105c0"><testcase classname="tests.test_stream_auth_v2" name="test_config_public_shape" time="0.324" /><testcase classname="tests.test_stream_auth_v2" name="test_login_wrong_creds_401" time="0.148" /><testcase classname="tests.test_stream_auth_v2" name="test_login_empty_turnstile_400" time="0.150" /><testcase classname="tests.test_stream_auth_v2" name="test_login_success_sets_cookie_and_returns_bearer" time="0.249" /><testcase classname="tests.test_stream_auth_v2" name="test_refresh_rotates_and_grace_allows_old_cookie" time="0.383" /><testcase classname="tests.test_stream_auth_v2" name="test_refresh_no_cookie_401" time="0.129" /><testcase classname="tests.test_stream_auth_v2" name="test_refresh_garbage_cookie_401" time="0.175" /><testcase classname="tests.test_stream_auth_v2" name="test_status_bearer_ok" time="0.348" /><testcase classname="tests.test_stream_auth_v2" name="test_status_no_bearer_401" time="0.110" /><testcase classname="tests.test_stream_auth_v2" name="test_status_garbage_bearer_401" time="0.118" /><testcase classname="tests.test_stream_auth_v2" name="test_url_dub_js" time="0.349" /><testcase classname="tests.test_stream_auth_v2" name="test_url_sub_host_switch" time="0.321" /><testcase classname="tests.test_stream_auth_v2" name="test_url_native_ttl" time="0.294" /><testcase classname="tests.test_stream_auth_v2" name="test_url_unknown_stream_404" time="0.361" /><testcase classname="tests.test_stream_auth_v2" name="test_url_bad_source_400" time="0.316" /><testcase classname="tests.test_stream_auth_v2" name="test_url_bad_mode_400" time="0.303" /><testcase classname="tests.test_stream_auth_v2" name="test_validate_ok_and_tamper_and_wrong_src" time="0.648" /><testcase classname="tests.test_stream_auth_v2" name="test_cast_token_and_validate" time="0.168"><failure message="AssertionError: login failed: 429 {&quot;detail&quot;:&quot;Çok fazla deneme — birkaç dakika sonra tekrar deneyin&quot;}&#10;assert 429 == 200&#10; +  where 429 = &lt;Response [429]&gt;.status_code">backend/tests/test_stream_auth_v2.py:211: in test_cast_token_and_validate
+    _s, d = _login_session()
+backend/tests/test_stream_auth_v2.py:31: in _login_session
+    assert r.status_code == 200, f"login failed: {r.status_code} {r.text}"
+E   AssertionError: login failed: 429 {"detail":"Çok fazla deneme — birkaç dakika sonra tekrar deneyin"}
+E   assert 429 == 200
+E    +  where 429 = &lt;Response [429]&gt;.status_code</failure></testcase><testcase classname="tests.test_stream_auth_v2" name="test_lease_start_heartbeat_stop_flow" time="0.122"><failure message="AssertionError: login failed: 429 {&quot;detail&quot;:&quot;Çok fazla deneme — birkaç dakika sonra tekrar deneyin&quot;}&#10;assert 429 == 200&#10; +  where 429 = &lt;Response [429]&gt;.status_code">backend/tests/test_stream_auth_v2.py:230: in test_lease_start_heartbeat_stop_flow
+    s, d = _login_session()
+backend/tests/test_stream_auth_v2.py:31: in _login_session
+    assert r.status_code == 200, f"login failed: {r.status_code} {r.text}"
+E   AssertionError: login failed: 429 {"detail":"Çok fazla deneme — birkaç dakika sonra tekrar deneyin"}
+E   assert 429 == 200
+E    +  where 429 = &lt;Response [429]&gt;.status_code</failure></testcase><testcase classname="tests.test_stream_auth_v2" name="test_stop_beacon_without_bearer" time="0.157"><failure message="AssertionError: login failed: 429 {&quot;detail&quot;:&quot;Çok fazla deneme — birkaç dakika sonra tekrar deneyin&quot;}&#10;assert 429 == 200&#10; +  where 429 = &lt;Response [429]&gt;.status_code">backend/tests/test_stream_auth_v2.py:252: in test_stop_beacon_without_bearer
+    _s, d = _login_session()
+backend/tests/test_stream_auth_v2.py:31: in _login_session
+    assert r.status_code == 200, f"login failed: {r.status_code} {r.text}"
+E   AssertionError: login failed: 429 {"detail":"Çok fazla deneme — birkaç dakika sonra tekrar deneyin"}
+E   assert 429 == 200
+E    +  where 429 = &lt;Response [429]&gt;.status_code</failure></testcase><testcase classname="tests.test_stream_auth_v2" name="test_same_session_start_twice_replaces_lease" time="0.129"><failure message="AssertionError: login failed: 429 {&quot;detail&quot;:&quot;Çok fazla deneme — birkaç dakika sonra tekrar deneyin&quot;}&#10;assert 429 == 200&#10; +  where 429 = &lt;Response [429]&gt;.status_code">backend/tests/test_stream_auth_v2.py:262: in test_same_session_start_twice_replaces_lease
+    _s, d = _login_session()
+backend/tests/test_stream_auth_v2.py:31: in _login_session
+    assert r.status_code == 200, f"login failed: {r.status_code} {r.text}"
+E   AssertionError: login failed: 429 {"detail":"Çok fazla deneme — birkaç dakika sonra tekrar deneyin"}
+E   assert 429 == 200
+E    +  where 429 = &lt;Response [429]&gt;.status_code</failure></testcase><testcase classname="tests.test_stream_auth_v2" name="test_two_families_can_both_start" time="0.131"><failure message="AssertionError: login failed: 429 {&quot;detail&quot;:&quot;Çok fazla deneme — birkaç dakika sonra tekrar deneyin&quot;}&#10;assert 429 == 200&#10; +  where 429 = &lt;Response [429]&gt;.status_code">backend/tests/test_stream_auth_v2.py:274: in test_two_families_can_both_start
+    _sA, dA = _login_session()
+backend/tests/test_stream_auth_v2.py:31: in _login_session
+    assert r.status_code == 200, f"login failed: {r.status_code} {r.text}"
+E   AssertionError: login failed: 429 {"detail":"Çok fazla deneme — birkaç dakika sonra tekrar deneyin"}
+E   assert 429 == 200
+E    +  where 429 = &lt;Response [429]&gt;.status_code</failure></testcase><testcase classname="tests.test_stream_auth_v2" name="test_logout_revokes_and_clears" time="0.117"><failure message="AssertionError: login failed: 429 {&quot;detail&quot;:&quot;Çok fazla deneme — birkaç dakika sonra tekrar deneyin&quot;}&#10;assert 429 == 200&#10; +  where 429 = &lt;Response [429]&gt;.status_code">backend/tests/test_stream_auth_v2.py:283: in test_logout_revokes_and_clears
+    s, d = _login_session()
+backend/tests/test_stream_auth_v2.py:31: in _login_session
+    assert r.status_code == 200, f"login failed: {r.status_code} {r.text}"
+E   AssertionError: login failed: 429 {"detail":"Çok fazla deneme — birkaç dakika sonra tekrar deneyin"}
+E   assert 429 == 200
+E    +  where 429 = &lt;Response [429]&gt;.status_code</failure></testcase><testcase classname="tests.test_stream_auth_v2" name="test_rate_limit_login_eventually_429" time="1.543" /><testcase classname="tests.test_stream_auth_v2" name="test_regression_health" time="0.111" /><testcase classname="tests.test_stream_auth_v2" name="test_regression_movies_has_spiderman_streams" time="0.143"><failure message="AttributeError: 'str' object has no attribute 'get'">backend/tests/test_stream_auth_v2.py:317: in test_regression_movies_has_spiderman_streams
+    m = next((x for x in movies if x.get("id") == STREAM_ID), None)
+backend/tests/test_stream_auth_v2.py:317: in &lt;genexpr&gt;
+    m = next((x for x in movies if x.get("id") == STREAM_ID), None)
+E   AttributeError: 'str' object has no attribute 'get'</failure></testcase><testcase classname="tests.test_stream_auth_v2" name="test_regression_featured_status" time="2.767" /><testcase classname="tests.test_stream_auth_v2" name="test_regression_featured_seg_evil_host_blocked_403" time="0.166" /><testcase classname="tests.test_stream_auth_v2" name="test_regression_featured_seg_missing_u" time="0.120" /></testsuite></testsuites>

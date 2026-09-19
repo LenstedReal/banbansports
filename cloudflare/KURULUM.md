@@ -238,3 +238,45 @@ Sonuç: Ziyaretçi siteye ilk girişte Cloudflare'in "Bağlantınız kontrol edi
 - **Turnstile "Doğrulama yükleniyor…" kalıyor:** `/api/stream-auth/config` boş site key dönüyor → Vercel env eksik. Ya da Turnstile widget hostname listesinde site yok.
 - **Öne çıkan (beIN) yayını kesildi:** `FEATURED_SOURCE_URL` `stream.lenstedreal.xyz` üzerinde; backend artık kendi Bearer JWT'siyle çekiyor → Vercel'de `STREAM_JWT_SECRET` set olmalı.
 - **Worker log:** `wrangler tail`.
+
+---
+
+## V2.1 — Stream Token (HMAC) geçişi
+
+### Vercel → Environment Variables (EKLENECEK 3 yeni değer; mevcutlar aynen kalır)
+| Değişken | Değer | Not |
+|---|---|---|
+| `STREAM_TOKEN_SECRET` | `b7f2c9d4e1a84f3b9c6d2e7a1f5b8c3d4e9a6f1b2c7d8e3f4a5b6c7d8e9f0a1b` | HLS m3u8/segment imzası — Worker ile AYNI |
+| `STREAM_CAST_SECRET` | `c3e8a1f6b2d94c7e5a0f3b8d1c6e9a2f7b4d0c5e8a1f3b6d9c2e7a4f0b5d8c1e` | Chromecast media_url imzası — Worker ile AYNI |
+| `STREAM_MAX_CONCURRENT` | `2` | Aynı tarayıcı (refresh family) başına eşzamanlı izleme |
+
+`STREAM_VALIDATE_ENABLED` prod'a GİRİLMEZ (yalnızca dev; `/validate` prod'da 404).
+
+### Worker → Settings → Variables and Secrets
+| Tür | Ad | Değer |
+|---|---|---|
+| Secret | `STREAM_TOKEN_SECRET` | Vercel'deki ile aynı |
+| Secret | `STREAM_CAST_SECRET` | Vercel'deki ile aynı |
+| Secret | `STREAM_JWT_SECRET` | (mevcut, dokunulmaz) |
+| Secret | `BASIC_USER` / `BASIC_PASS` | (mevcut, dokunulmaz) |
+| Var | `WORKER_ENFORCE` | `false` → shadow (logla, servis et) · doğrulama sonrası `true` |
+| Var | `ALLOW_LEGACY_JWT` | `true` → eski `?token=` yolu açık · V2.1 player yayında + 24 saat sorunsuzsa `false` |
+
+```bash
+cd cloudflare/worker
+wrangler secret put STREAM_TOKEN_SECRET
+wrangler secret put STREAM_CAST_SECRET
+wrangler deploy
+node test/worker.test.mjs   # lokal mantık testi (32 senaryo)
+```
+
+### Geçiş planı
+1. Vercel env + Worker secret gir → `wrangler deploy` (shadow: `WORKER_ENFORCE=false`).
+2. `wrangler tail` ile `{"ev":"hmac_fail"...}` logu izle (24 saat). Loglarda yalnızca sid parmak izi vardır.
+3. Hata yoksa `WORKER_ENFORCE="true"` → deploy.
+4. Bir 24 saat daha sonra `ALLOW_LEGACY_JWT="false"` → eski `?token=` yolu kapanır (Basic Auth kalır).
+
+### Sorun giderme
+- **Film 401 veriyor (preview/prod):** Yeni Worker deploy edilmemiş → `?sig=` tanınmıyor, Basic Auth'a düşüyor.
+- **Enforce sonrası 403:** Vercel `STREAM_TOKEN_SECRET` ≠ Worker secret; ya da saat farkı (`exp`).
+- **Chromecast oynatmıyor:** `STREAM_CAST_SECRET` Worker'da eksik/farklı (cs'li istekler bu secret ile doğrulanır).

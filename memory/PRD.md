@@ -1,28 +1,22 @@
-# banbansports — PRD / Durum
+# BanbanSports — Stream Token V2.1 (PRD)
 
 ## Problem
-Mevcut Next.js + FastAPI spor yayın sitesine (banbansports) güvenlik katmanı eklemek: Cloudflare Turnstile, 30 dk HS256 JWT, Cloudflare Worker ile HLS (m3u8 + segment) koruması, Basic Auth harici istemci bariyeri, site giriş kapısı; efekt-odaklı tasarım dokunuşu; kanal listesini genişletme; takım logosu eşleşme düzeltmeleri.
+`?token=` JWT tabanlı m3u8/segment koruması → Access JWT / Refresh cookie / HLS HMAC / Cast token ayrımı. WAF, Turnstile, Basic Auth, site gate aynen kalır.
 
 ## Mimari
-- Frontend: Next.js 15 (`/app/frontend`), HLS.js, MoviePlayer (ikincil player), SiteGate, TurnstileWidget
-- Backend: FastAPI (`/app/backend/app`, Vercel için `/app/frontend/_backend_app` kopyası — her değişiklikte senkron)
-- CDN: Cloudflare Worker `banbansports-hls-guard` (deploy edildi) → R2 binding `banban-stream` / `banban-stream1`
-- Sırlar: `STREAM_JWT_SECRET` (backend + Worker aynı), `TURNSTILE_SECRET_KEY`
+- Backend FastAPI (`backend/app`, Vercel'de `frontend/_backend_app` aynası — rsync ile senkron tutulur)
+- `app/core/stream_tokens.py`: Access JWT (30 dk), HLS HMAC (js 30 dk / native 3 s / srv 5 dk), Cast imzası
+- `app/routers/stream_auth.py`: /config /login /refresh /logout /status /url /start /heartbeat /stop /cast-token /validate(dev)
+- DB: stream_sessions (TTL 6h), stream_refresh_tokens (sha256, rotation 45 sn grace, replay→family revoke), stream_activity (lease TTL 90 sn)
+- Worker `cloudflare/worker/src/index.js`: sig→HMAC | token→legacy JWT (ALLOW_LEGACY_JWT) | Basic; m3u8 rewrite; caches.default segment cache; WORKER_ENFORCE shadow/enforce
+- Frontend `lib/streamAuth.ts` + `components/MoviePlayer.tsx`: sessiz refresh, /url, lease heartbeat 45 sn, native mode, Cast loadMedia
+- featured.py: HMAC (m=srv) ile korumalı kaynak, seg host allowlist, cache TTL/anahtar düzeltmesi
 
-## Yapılanlar (2026-09-18)
-- stream_auth: Turnstile siteverify (fail-closed), rate limit, `/config`, `/refresh`, `/validate`, ayrı STREAM_JWT_SECRET
-- site_gate: site açılışında Turnstile kapısı (12 sa HttpOnly çerez)
-- MoviePlayer: Turnstile widget, xhrSetup ile her segment isteğine token, sessiz yenileme, sınırlı preload (20 s / 40 MB)
-- Worker: HS256 doğrulama, m3u8 rewrite, 401 Basic → 403 sıralaması, host↔kaynak eşleşmesi, CORS; 13/13 lokal test + 8/8 canlı test geçti
-- featured proxy: korumalı hosta Bearer JWT ile erişim
-- Tasarım: neon-touch.css, cinema-v3.css (kompakt gişe/film), gate.css, yasal metin tek akış, FPS cam
-- Kanallar: 21 doğrudan HLS kanalı eklendi (DirectStreamManager) → toplam 27
-- Logo eşleşme: alias + ön-ek/son-ek fallback (footy.ts)
-- Canlı veri uçlarında `Cache-Control: no-store`
-- Doküman: `/app/cloudflare/KURULUM.md`
+## Yapılanlar (2026-06)
+- Faz 1–5 kodu tamam; Worker lokal testleri (32) geçti; backend akışı curl ile doğrulandı.
+- Prod'da aktif olması için: Vercel env (STREAM_TOKEN_SECRET, STREAM_CAST_SECRET, STREAM_MAX_CONCURRENT) + Worker secret + deploy (bkz. cloudflare/KURULUM.md V2.1).
 
 ## Backlog
-- P1: Gerçek Turnstile anahtarlarıyla canlı doğrulama (Vercel env sonrası)
-- P1: Kanal logoları (yeni 21 kanal için PNG)
-- P2: Kalan eşleşmeyen alt lig takım logoları (veri seti yok)
-- P2: nowtv kaynağı aralıklı 502 (yedek URL gerekiyor)
+- P0: Yeni Worker deploy → shadow izleme → enforce → legacy kapatma
+- P1: testing_agent ile tarayıcı e2e (kullanıcı isteğiyle ertelendi)
+- P2: `index.nocomment.js` yeniden üretimi; ikinci içerik için host/bucket eşlemesi
