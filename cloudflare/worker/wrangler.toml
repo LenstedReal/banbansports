@@ -1,0 +1,36 @@
+name = "banbansports-hls-guard"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+workers_dev = false
+
+# Route'lar — her iki yayın hostu Worker'dan geçer (DNS: Proxied / turuncu bulut ZORUNLU)
+routes = [
+  { pattern = "stream.lenstedreal.xyz/*",  zone_name = "lenstedreal.xyz" },
+  { pattern = "stream1.lenstedreal.xyz/*", zone_name = "lenstedreal.xyz" },
+]
+
+[vars]
+# host → token kaynağı eşlemesi (dub token'ı stream1'de, sub token'ı stream'de ÇALIŞMAZ)
+HOST_SRC_MAP = '{"stream.lenstedreal.xyz":"dub","stream1.lenstedreal.xyz":"sub"}'
+# Player'ın çalıştığı site origin'leri (virgülle ayır). Vercel preview URL'lerini de ekleyin.
+ALLOWED_ORIGINS = "https://banban.lenstedreal.xyz,https://banbansports.vercel.app"
+# V2.1 HMAC katmanı: false → SHADOW (geçersiz imza loglanır ama servis edilir) · true → 403
+WORKER_ENFORCE = "false"
+# Eski ?token= / Bearer JWT yolu (geçiş süresince açık; V2.1 player yayına alındıktan sonra "false")
+ALLOW_LEGACY_JWT = "true"
+
+# --- R2 binding: bucket'lar public olmadan da yayın yapılır ---
+[[r2_buckets]]
+binding = "R2_DUB"
+bucket_name = "banban-stream"
+
+[[r2_buckets]]
+binding = "R2_SUB"
+bucket_name = "banban-stream1"
+
+# --- SECRETS (toml'a YAZMAYIN; terminalden girin) ---
+#   wrangler secret put STREAM_JWT_SECRET   → backend .env'deki STREAM_JWT_SECRET ile AYNI (legacy yol)
+#   wrangler secret put STREAM_TOKEN_SECRET → backend .env'deki STREAM_TOKEN_SECRET ile AYNI (HLS HMAC)
+#   wrangler secret put STREAM_CAST_SECRET  → backend .env'deki STREAM_CAST_SECRET ile AYNI (Cast media_url)
+#   wrangler secret put BASIC_USER          → lenstedreal_marka
+#   wrangler secret put BASIC_PASS          → zirvedeyiz

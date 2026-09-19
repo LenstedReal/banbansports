@@ -1,0 +1,38 @@
+{
+  "summary": "Tested BanbanSports at 980px viewport for the layout/legal-panel changes. Backend (health, boxoffice, movies) all 200 OK. Movie card right-edge now aligns exactly with .bb-center right edge (0.00px diff) — no overflow into right column. Legal panel correctly moved to right column under Sunucular, removed from footer. Credits-roll animation IS animating (transform translateY changes over time). All 4 legal tabs (TÜMÜ/YASAL/KVKK/TELİF) toggle and become .active. Footer no longer contains legal-credits and shows SOSYAL MEDYA & DESTEK. BoxOffice regression sanity OK (CANLI GİŞE title, IMDb badge, KONU present, currency tabs render). No horizontal scroll (docWidth=980==winWidth). HOWEVER a critical vertical-layout regression was found: the rolling legal body expands to full credits text height (~7243px), inflating the whole right column to ~7953px and via flex:1 stretching .cin-card to ~7341px — creating a massive empty dark region under the movie player.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "LegalPanel (.ft2-legal / .ft2-legal-body.rolling)",
+        "issue": "Legal panel height explodes to ~7378px at 980px viewport. .bb-right .ft2-legal-body has flex:1 + max-height:none (globals.css line 1205) and its parent .ft2-legal has min-height:260px but NO bounded height, so the body grows to fit the entire (very long) .ft2-legal-scroll content (~7243px) instead of clipping. This inflates .bb-right to ~7953px and, through .bb-center > .pnl.cin-card { flex:1 } (line 937), stretches the movie card (.cin-card) to ~7341px, producing a huge empty dark area under the video player. Overflow:hidden on .ft2-legal is set but never triggers because the container itself grew to content size.",
+        "selector": ".bb-right [data-testid=\"legal-credits\"] .ft2-legal-body.rolling",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Home @ 980px",
+        "issues": ["Movie player card visually correct at top but followed by 6000+px of empty dark background because cin-card flex-stretches to match inflated right column."]
+      }
+    ]
+  },
+  "test_report_links": ["/app/test_reports/iteration_4.json"],
+  "action_items": [
+    "Constrain legal panel height in right column. Suggested fix: give .bb-right .ft2-legal a bounded height (e.g. height:100% inside a right-column with row-based grid, OR set an explicit max-height on .ft2-legal-body such as `max-height: min(70vh, 520px)`), so its overflow:hidden actually clips the credits-roll. Alternatively remove `flex:1` from .bb-right > .pnl:last-child (line 930) and instead set a fixed/max height on .ft2-legal-body so rolling text is clipped and scrolls in-place.",
+    "Confirm .cin-card should NOT flex:1 grow to match right-column height when right-column contains a rolling credits panel; consider capping .cin-card min/max height or removing flex:1 stretch from .cin-card if only used to fill right side."
+  ],
+  "critical_code_review_comments": [
+    "globals.css line 1205 sets `.bb-right .ft2-legal-body { flex:1; max-height:none !important; }` while the parent .ft2-legal has only min-height:260px (line 1204) — no ancestor pins a finite height, so flex:1 becomes flex-basis:content and grows unbounded. The overflow:hidden on .ft2-legal never engages.",
+    "globals.css line 937 `.bb-center > .pnl.cin-card { flex:1 }` couples cin-card height to whatever the tallest sibling column produces — dangerous when the right column contains dynamic content."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "80%"},
+  "test_credentials": "not required (public homepage)",
+  "seed_data_creation": "none",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend /api/health, /api/boxoffice, /api/movies all 200 OK. Frontend at 980px: card right-edge alignment fixed (0px diff), legal panel is in .bb-right (not footer), credits-roll animation running (transform translateY changes), all 4 legal tabs work. Remaining bug: right column height explodes because .ft2-legal-body has flex:1 max-height:none with unbounded parent — causing cin-card via flex:1 to stretch to ~7300px leaving huge empty space under movie player. After main agent fixes, re-verify legal panel height stays reasonable (<800px) and cin-card height matches its natural content.",
+  "rca of the issue": "Root cause: In globals.css @980px overrides, `.bb-right .ft2-legal-body { flex:1; max-height:none !important; }` (line 1205) is set on a container (.ft2-legal, line 1204) that has only min-height:260px and no max-height. Because no ancestor establishes a bounded height, the flex:1 child grows to accommodate its intrinsic content (the entire ~7243px credits-roll block). The overflow:hidden on .ft2-legal therefore never has anything to clip. This inflates .bb-right, and since .cin-card has flex:1 in .bb-center (line 937), the movie card matches that height, leaving 6000+px of empty background. Reproduction: open URL at width=980, inspect .bb-right height >7000px and .cin-card height >7000px. Mitigation: cap .bb-right .ft2-legal-body with an explicit max-height (e.g. max-height:520px) OR give .bb-right a fixed row layout so .ft2-legal has finite height for flex:1 to work with, then the existing overflow:hidden will clip the animated scroll as intended."
+}

@@ -1,0 +1,12 @@
+# Vercel build optimization — exclude unnecessary files from upload
+# (reduces upload size = faster deploys)
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+**/.next/
+**/node_modules/
+.env
+.env.local
+*.log
+test-results/
+playwright-report/

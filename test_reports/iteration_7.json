@@ -1,0 +1,20 @@
+{
+  "summary": "Iteration 7 (frontend-only, 980x1100) redesign + regression verification. All 6 targeted checks PASSED: (1) Lock panel opens on movie-shelf-watch click with lock-kicker='BANBANSPORTS · ORİJİNAL YAYIN'. (2) lock-login-btn and lock-getpass-btn both computed borderRadius=999px (pill). (3) ŞİFRE AL opens lock-creds; copy-user-btn shows toast 'KOPYALANDI ✓'. (4) Valid creds (lenstedreal_marka/zirvedeyiz) close the panel with no lock-error. (5) .bo2-block backgroundColor rgba(9,6,16,0.22) alpha=0.22 (≤0.3); .cin-backdrop backgroundPosition '50% 50%'; .cin-veil first stop rgba(7,5,12,0.16) alpha=0.16 (≤0.2). (6) All 5 boxoffice values scrollWidth==clientWidth (no truncation). (7) sponsor-banner count=1, player-5g-note absent, footer-bottom and legal-body rendered, no console errors.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_7.json", "/app/test_reports/iter7_state.png"],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {"backend": "skipped", "frontend": "100%"},
+  "test_credentials": "Kilit paneli: lenstedreal_marka / zirvedeyiz (worked)",
+  "seed_data_creation": "",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "iteration_7: yeniden tasarlanan mp-lock paneli (pill butonlar, kicker, gradient), hafifletilmiş box-office camları (alpha 0.22 / veil 0.16) ve backdrop center center DOĞRULANDI. Tüm regresyonlar (sponsor tekil, player-5g-note yok, footer, box office overflow yok, copy toast, login regression) geçti. Viewport 980x1100 zorunlu. Not: /app/test_reports altında iteration_5 ve iteration_6 dosyaları bulunmuyor (agent-to-agent context'te bahsedilse de mevcut değil); mevcut dosyalar 1-4 idi.",
+  "rca of the issue": "N/A - no issues found"
+}

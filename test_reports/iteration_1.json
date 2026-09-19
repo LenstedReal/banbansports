@@ -1,0 +1,33 @@
+{
+  "summary": "Full backend + frontend regression test for banbansports UI redesign (3-column dashboard). Backend: 9/9 scoped endpoints healthy. Frontend: all 15 required data-testids render, filter/banner-dot/channel/league-strip/movie-modal/box-office counter/currency-tab interactions all work; match card navigates to /match/[slug] and match detail page renders full stats correctly. No critical console errors found.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/auth/login", "issue": "Invalid credentials return HTTP 200 with {ok:false, error:'Geçersiz e-posta veya parola'} instead of 401. Pre-existing API design; frontend appears to handle it via the ok flag. Not a redesign regression."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_redesign_iteration.py",
+    "/app/test_reports/pytest/redesign_iter.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "/api/auth/login returns 200 for invalid credentials instead of 401 — cosmetically ok because response has ok:false, but violates HTTP semantics and complicates client-side error handling / auditing.",
+    "MatchCenter initial visibleCount=8 while flatMatches often <= 8, so 'TÜM MAÇLARI GÖR' (matches-show-more) is hidden by design — expected, but comment in code says 'başlangıçta 8' (matches PRD)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_redesign_iteration.py (new)"
+  ],
+  "success_rate": {"backend": "100% (9/9 scoped endpoints; 1 semantic quirk on invalid-login status code)", "frontend": "100% (all required testids present, all interactions verified)"},
+  "test_credentials": "admin@banbansports.com / 200cf39563dc85abb595c284 — verified working; stream-auth: lenstedreal_marka/zirvedeyiz (modal renders password input as expected)",
+  "seed_data_creation": "None — used existing seeded admin and live external APIs.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Livescore endpoint depends on external API and can be slow — use networkidle + 6-8s wait before asserting match-row count. Viewport is intentionally locked to 980px width in-app; don't test responsive. matches-show-more only appears when flatMatches.length > 8 (was hidden with 7 rows during test — not a bug). Movie modal password credentials in test_credentials.md.",
+  "rca_of_the_issue": "N/A — no bugs found in redesign scope."
+}

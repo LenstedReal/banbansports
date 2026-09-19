@@ -1,0 +1,25 @@
+{
+  "summary": "Frontend-only regression at 980x1150 for banbansports neon dashboard redesign. 18/19 checks pass. All requested removals verified (live-now-grid absent, league-strip absent, ozet-details-btn absent, footer duplicate copyright removed). Sponsor rows scroll works, GRANDPASHA banner fully visible, MILLI filter now correctly hides Club Friendlies (Heidenheim/Bayern/Barcelona/Al Ahly not present; matches-empty shown), HAZIRLIK filter shows 2 club friendly matches, show-more expands past 6, match-row-0 navigates to /match/[slug] and md2-hero + match-home/away/score render. ONE regression found: BOX OFFICE 'CANLI GİŞE' badge still contains '· BOX OFFICE' duplicate text (not removed as claimed).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "BoxOfficeCounter", "issue": "boxoffice-live-badge still renders 'CANLI GİŞE · BOX OFFICE' — the '· BOX OFFICE' duplicate suffix was NOT removed as stated in the change list. Source: /app/frontend/components/BoxOfficeCounter.tsx line 144 still concatenates '· BOX OFFICE' after 'CANLI GİŞE'.", "selector": "[data-testid=boxoffice-live-badge]", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Fix BoxOfficeCounter.tsx line 144: change 'CANLI GİŞE · BOX OFFICE' to just 'CANLI GİŞE' (and similarly consider simplifying offline label) so no duplicate 'BOX OFFICE' text appears next to the section title."
+  ],
+  "critical_code_review_comments": [
+    "BoxOfficeCounter.tsx line 144 still contains the duplicated 'BOX OFFICE' text inside the live badge that the task claimed to remove."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "not tested (skipped per request)", "frontend": "95% (18/19)"},
+  "seed_data_creation": "none",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "All other redesign items verified passing at viewport 980x1150. Only failing check is boxoffice-live-badge text duplicate. Match detail route uses slug format /match/Home__Away__YYYYMMDD; row0 is anchor with href, md2-hero testid confirmed present.",
+  "rca of the issue": "BoxOfficeCounter.tsx line 144: `{data.source === 'live' ? 'CANLI GİŞE · BOX OFFICE' : 'GİŞE · SON VERİ (ÇEVRİMDIŞI)'}` — the live branch string was not shortened. Reproduction: load home, inspect [data-testid=boxoffice-live-badge].innerText. Mitigation: replace 'CANLI GİŞE · BOX OFFICE' with 'CANLI GİŞE'."
+}

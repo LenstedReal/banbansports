@@ -1,0 +1,25 @@
+{
+  "summary": "Verified KONU plot panel close behavior on BanbanSports cinema card at 980x1200. All 5 scenarios PASSED with force=False (real event bubbling). Panel opens via plot-toggle-btn; closes via click on plot text, outside area (boxoffice-gross), or toggle button itself. Regression: watch button still opens lock panel. 0 console errors, 0 page errors.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100%"},
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "KONU plot toggle behavior (document-level click listener fix) verified working. Selectors used: [data-testid=plot-toggle-btn], [data-testid=boxoffice-plot], [data-testid=boxoffice-plot-text], [data-testid=boxoffice-gross], [data-testid=movie-shelf-watch], [data-testid=movie-lock-panel]. All PASS.",
+  "test_results": {
+    "test1_open_panel": "PASS (panel opens, btn=KONU ▲)",
+    "test2_click_plot_text_closes": "PASS (panel removed, btn=KONU ▼)",
+    "test3_click_outside_closes": "PASS (clicked boxoffice-gross, panel removed)",
+    "test4_toggle_btn_closes": "PASS (single-click toggle works)",
+    "test5_regression_watch_lock": "PASS (movie-lock-panel appears)"
+  }
+}
