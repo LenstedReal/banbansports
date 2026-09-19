@@ -280,3 +280,9 @@ node test/worker.test.mjs   # lokal mantık testi (32 senaryo)
 - **Film 401 veriyor (preview/prod):** Yeni Worker deploy edilmemiş → `?sig=` tanınmıyor, Basic Auth'a düşüyor.
 - **Enforce sonrası 403:** Vercel `STREAM_TOKEN_SECRET` ≠ Worker secret; ya da saat farkı (`exp`).
 - **Chromecast oynatmıyor:** `STREAM_CAST_SECRET` Worker'da eksik/farklı (cs'li istekler bu secret ile doğrulanır).
+
+### Durum (2026-09-19)
+- Yeni Worker **canlıya yüklendi** (API ile; eski kod yedeği: `cloudflare/worker/backup/index.live.2026-09-19.js`).
+- Binding'ler korunuyor: R2_DUB/R2_SUB, HOST_SRC_MAP, ALLOWED_ORIGINS, STREAM_JWT_SECRET, BASIC_USER, BASIC_PASS + yeni STREAM_TOKEN_SECRET, STREAM_CAST_SECRET, WORKER_ENFORCE=false, ALLOW_LEGACY_JWT=true.
+- Canlı doğrulama: imzalı m3u8 → 200 + rewrite + CORS *, segment → 200 (2. istek edge cache HIT), tokensız → 401, Basic → 200, bozuk imza (shadow) → 200 + log.
+- Not: Turnstile widget'ında kırmızı "Sadece test için" satırı yalnızca TEST anahtarlarıyla (dev ortamı) görünür; prod'da gerçek anahtarlarla çıkmaz.

@@ -249,11 +249,12 @@ export default function MoviePlayer({ movie, onClose }: { movie: Movie; onClose:
       });
       hls.loadSource(url);
       hls.attachMedia(video);
+      let mediaRecoveries = 0;
       hls.on(Hls.Events.ERROR, (_e, data) => {
         if (!data.fatal) return;
         if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
-        else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
-        else setErrorMsg('YAYIN YÜKLENEMEDİ — TEKRAR DENEYİN');
+        else if (data.type === Hls.ErrorTypes.MEDIA_ERROR && mediaRecoveries < 3) { mediaRecoveries += 1; hls.recoverMediaError(); }
+        else { try { hls.stopLoad(); } catch { /* noop */ } setErrorMsg('YAYIN YÜKLENEMEDİ — TEKRAR DENEYİN'); } // sonsuz recover döngüsü = boşa segment isteği (R2 maliyeti)
       });
       return hls;
     }

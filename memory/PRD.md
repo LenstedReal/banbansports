@@ -17,6 +17,8 @@
 - Prod'da aktif olması için: Vercel env (STREAM_TOKEN_SECRET, STREAM_CAST_SECRET, STREAM_MAX_CONCURRENT) + Worker secret + deploy (bkz. cloudflare/KURULUM.md V2.1).
 
 ## Backlog
-- P0: Yeni Worker deploy → shadow izleme → enforce → legacy kapatma
+- P0 TAMAM: Yeni Worker canlıda (shadow). Sıradaki: 24 s izleme → WORKER_ENFORCE=true → ALLOW_LEGACY_JWT=false
 - P1: testing_agent ile tarayıcı e2e (kullanıcı isteğiyle ertelendi)
 - P2: `index.nocomment.js` yeniden üretimi; ikinci içerik için host/bucket eşlemesi
+
+- 2026-09-19: Worker canlıya yüklendi (yedek backup/index.live.2026-09-19.js); canlı imzalı m3u8/segment 200 doğrulandı. hls.js media-error recover döngüsüne 3 deneme sınırı eklendi.
